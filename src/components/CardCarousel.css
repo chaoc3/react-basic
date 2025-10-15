@@ -1,0 +1,72 @@
+.carousel-container {
+    width: 100%;
+    max-width: 1500px; /* 限制最大宽度，让区域看起来更紧凑 */
+    margin: auto;
+    position: relative; /* 设置为相对定位，作为箭头定位的基准 */
+  }
+  
+  /* 2. 针对轮播组件的整体样式 */
+  .center .slick-slide {
+    padding: 0 10px; /* 给卡片之间一些视觉间距 */
+    
+    /* 默认状态：所有卡片都缩小、半透明 */
+    transform: scale(0.8);
+    opacity: 0.6;
+    transition: all 0.4s ease-in-out; /* 让变化有平滑的动画效果 */
+  }
+  
+  /* 3. 当前被选中的卡片的样式 */
+  .center .slick-center {
+    /* 恢复原始大小、完全不透明，并提高层级 */
+    transform: scale(1);
+    opacity: 1;
+    z-index: 10; /* 让中间的卡片显示在最上面 */
+  }
+  
+  .card-slide img {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* 4. 【关键】固定箭头位置 */
+  .slick-arrow {
+    width: 50px; /* 增大箭头的点击区域 */
+    height: 50px;
+    z-index: 20; /* 确保箭头在所有卡片之上 */
+  }
+  .slick-arrow::before {
+    /* react-slick 默认会有一个字体图标箭头，我们把它去掉 */
+    content: none; 
+  }
+  
+  /* 绝对定位，并垂直居中 */
+  .slick-prev, .slick-next {
+    top: 50%; /* 从顶部 50% 的位置开始 */
+    transform: translateY(-50%); /* 再向上移动自身高度的 50%，实现完美垂直居中 */
+  }
+  
+  /* 分别定位左右箭头，把它们放在卡片区域的外面 */
+  .slick-prev {
+    left: -80px; /* 调整此数值以控制左箭头与卡片的距离 */
+  }
+  .slick-next {
+    right: -80px; /* 调整此数值以控制右箭头与卡片的距离 */
+  }
+  
+  /* 5. 确认按钮样式 (保持不变或微调) */
+  .confirm-button {
+    display: block;
+    margin: 40px auto 0;
+    padding: 12px 40px;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  .confirm-button:hover {
+    background-color: #f0f0f0;
+  }

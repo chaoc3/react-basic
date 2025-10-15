@@ -1,17 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './index.css'; // 全局样式
+import App from './App'; // 导入我们组装好的 App 组件
 
+// 1. 找到 public/index.html 中的 <div id="root"></div>
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// 2. 将我们的 App 组件渲染到那个 div 中
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
