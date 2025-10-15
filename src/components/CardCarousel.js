@@ -20,7 +20,7 @@ function NextArrow(props) {
       className={className}
       onClick={onClick}
     >
-      <img src={NextArrowImg} alt="next" style={{ width: '140px', height: '140px' }} />
+      <img src={NextArrowImg} alt="next" style={{ width: '40px', height: '40px' }} />
     </div>
   );
 }
@@ -33,7 +33,7 @@ function PrevArrow(props) {
       className={className}
       onClick={onClick}
     >
-      <img src={PrevArrowImg} alt="previous" style={{ width: '140px', height: '140px' }} />
+      <img src={PrevArrowImg} alt="previous" style={{ width: '40px', height: '40px' }} />
     </div>
   );
 }

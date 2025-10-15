@@ -1,6 +1,6 @@
 .carousel-container {
     width: 100%;
-    max-width: 1500px; /* 限制最大宽度，让区域看起来更紧凑 */
+    max-width: 300px; /* 限制最大宽度，让区域看起来更紧凑 */
     margin: auto;
     position: relative; /* 设置为相对定位，作为箭头定位的基准 */
   }
@@ -31,8 +31,8 @@
   
   /* 4. 【关键】固定箭头位置 */
   .slick-arrow {
-    width: 50px; /* 增大箭头的点击区域 */
-    height: 50px;
+    width: 30px; /* 增大箭头的点击区域 */
+    height: 30px;
     z-index: 20; /* 确保箭头在所有卡片之上 */
   }
   .slick-arrow::before {

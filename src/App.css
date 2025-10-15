@@ -1,31 +1,49 @@
+/* src/App.css */
+
 .app-container {
   min-height: 100vh;
-  width: 100vw;
-  background-image: url('.\\assets\\底面.png');
+  width: 100%;
+  background-image: url('.//assets//底面.png');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   
-  /* 使用 Flexbox 来垂直居中内容 */
-  display: flex;
-  flex-direction: column; /* 垂直排列 */
-  justify-content: center; /* 垂直居中 */
-  align-items: center; /* 水平居中 */
+  /* --- 关键布局代码 --- */
+  display: flex;                  /* 1. 声明为 Flex 容器，让子元素横向排列 */
+  align-items: center;            /* 2. 垂直居中所有子元素（三列）*/
+  justify-content: space-between; /* 3. 在子元素之间平均分配空间，将它们推向两边 */
+  
+  padding: 0 50px; /* 给整个页面左右留一些边距 */
+  box-sizing: border-box; /* 让 padding 不会影响总宽度 */
 }
 
+/* 中间栏的容器 */
+.center-column {
+  flex-basis: 50%; /* 占据 50% 的基础宽度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 顶部信息框的样式 */
 .info-box {
-  background-color: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
+  background-color: rgba(230, 247, 255, 0.9);
   border-radius: 12px;
   padding: 20px 30px;
-  width: 50%; /* 宽度占 50% */
-  max-width: 700px; /* 最大宽度 */
-  margin-bottom: 40px; /* 与下方轮播的间距 */
+  width: 100%;
+  max-width: 70px;
+  margin-bottom: 40px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   color: #333;
+  border: 1px solid #91d5ff;
 }
 
+/* 左右两栏的样式 */
+.left-panel, .right-panel {
+  flex-basis: 25%;    /* 左右各占 25% 的基础宽度 */
+  height: 80vh;       /* 设置一个统一的高度 */
+}
+
+/* 专门为右侧对话框面板设置最大宽度，防止被拉伸得太宽 */
 .right-panel {
-  flex-basis: 25%;
-  height: 80vh;
-  max-width: 400px; /* 可以给对话框一个最大宽度，防止被过度拉伸 */
+  max-width: 400px; 
 }
