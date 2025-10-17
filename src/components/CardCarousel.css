@@ -58,11 +58,11 @@
   .confirm-button {
     display: block;
     margin: 40px auto 0;
-    padding: 12px 40px;
-    border-radius: 30px;
+    padding: 14px 90px;
+    border-radius: 60px;
     border: 1px solid #ccc;
     background-color: white;
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;

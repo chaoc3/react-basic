@@ -17,12 +17,7 @@
 }
 
 /* 中间栏的容器 */
-.center-column {
-  flex-basis: 50%; /* 占据 50% 的基础宽度 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+
 
 /* 顶部信息框的样式 */
 .info-box {
@@ -36,13 +31,26 @@
   color: #333;
   border: 1px solid #91d5ff;
 }
-
-/* 左右两栏的样式 */
-.left-panel, .right-panel {
-  flex-basis: 25%;    /* 左右各占 25% 的基础宽度 */
-  height: 80vh;       /* 设置一个统一的高度 */
+.center-column {
+  flex-basis: 50%; /* 占据 50% 的基础宽度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 50vh;
+  
 }
 
+/* 左右两栏的样式 */
+.left-panel{
+  flex-basis: 30%;    /* 左右各占 25% 的基础宽度 */
+  height: 90vh;
+  max-width: 50vh;      /* 设置一个统一的高度 */
+}
+.right-panel {
+  flex-basis: 25%;    /* 左右各占 25% 的基础宽度 */
+  height: 90vh;   
+  width: 60vh ; /* 设置一个统一的高度 */
+}
 /* 专门为右侧对话框面板设置最大宽度，防止被拉伸得太宽 */
 .right-panel {
   max-width: 400px; 

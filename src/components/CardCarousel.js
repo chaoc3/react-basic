@@ -43,14 +43,15 @@ function CardCarousel() {
   const settings = {
     dots: false,       // 不显示下方的点
     infinite: true,    // 无限循环
-    centerPadding: "140px",
+    centerPadding: "100px",
     speed: 500,        // 切换速度
     slidesToShow: 1,   // 一次显示一张卡片
     slidesToScroll: 1, // 一次滚动一张卡片
     centerMode: true,  // 居中模式
-    centerPadding: "20%", // 居中模式下，两边卡片露出的部分
+    centerPadding: "10%", // 居中模式下，两边卡片露出的部分
     nextArrow: <NextArrow />, // 使用我们自定义的右箭头
-    prevArrow: <PrevArrow />  // 使用我们自定义的左箭头
+    prevArrow: <PrevArrow />
+     // 使用我们自定义的左箭头
   };
 
   return (
