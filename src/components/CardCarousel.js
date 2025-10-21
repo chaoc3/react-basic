@@ -7,10 +7,10 @@ import "slick-carousel/slick/slick-theme.css";
 
 // 2. 导入我们自己的样式文件和图片
 import './CardCarousel.css';
-import card1 from 'D:\\react\\react-basic\\src\\assets\\卡片\\卡片反面-细化页\\User-1-2.png'; // 导入卡片1
-import card2 from 'D:\\react\\react-basic\\src\\assets\\卡片\\卡片反面-细化页\\User-2-2.png'; // 导入卡片2
-import NextArrowImg from 'D:\\react\\react-basic\\src\\assets\\向右.png'; // 导入右箭头
-import PrevArrowImg from 'D:\\react\\react-basic\\src\\assets\\向左.png'; // 导入左箭头
+import card1 from '..//assets//卡片 - svg//卡片正面-选择页//User-1-1.svg'; // 导入卡片1
+import card2 from '..//assets//卡片 - svg//卡片正面-选择页//User-2-1.svg'; // 导入卡片2
+import NextArrowImg from '..//assets//页面剩余素材-251019//向右.svg'; // 导入右箭头
+import PrevArrowImg from '..//assets//页面剩余素材-251019//向左.svg'; // 导入左箭头
 
 // 自定义 "下一张" 箭头组件
 function NextArrow(props) {

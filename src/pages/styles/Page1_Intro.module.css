@@ -1,0 +1,42 @@
+/* 让页面容器铺满整个屏幕 */
+.pageContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* 防止SVG过大时出现滚动条 */
+  }
+  
+  /* 让背景SVG完全填充容器 */
+  .backgroundImage {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; /* 保持SVG的宽高比，同时填满容器 */
+  }
+  
+  /* “Next”按钮的样式 */
+  .nextButton {
+    /* 使用绝对定位，相对于 .pageContainer */
+    position: absolute; 
+    
+    /* 
+      【关键步骤】
+      请在这里调整按钮的位置和大小。
+      您可以使用 top, bottom, left, right 属性来定位。
+      例如: 
+      bottom: 10%;  // 距离底部10%
+      left: 50%;    // 水平居中
+      transform: translateX(-50%); // 配合 left: 50% 实现精确水平居中
+    */
+    bottom: 150px; /* 示例：距离底部150px */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* 调整为您按钮的实际尺寸 */
+    width: 200px;  /* 示例宽度 */
+    height: 60px; /* 示例高度 */
+    
+    cursor: pointer; /* 鼠标悬浮时显示为小手图标 */
+    
+    /* (可选) 添加一个半透明背景色，方便调试位置 */
+    /* background-color: rgba(255, 0, 0, 0.3); */
+  }

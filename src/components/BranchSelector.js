@@ -4,39 +4,39 @@ import React, { useState } from 'react';
 import './BranchSelector.css';
 
 // 1. 【已修正】使用正确的默认导入方式导入所有 PNG 图片
-import {ReactComponent as NodeWhite} from '../assets/网页素材 - svg/左侧时间轴素材/时间轴icon0-0.svg';
 
 
-import { ReactComponent as NodeWhite } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon0-0.png';
-import { ReactComponent as NodeRed } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon1-0.png';
-import { ReactComponent as NodeGreen } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-0.png';
-import { ReactComponent as NodePurple } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-0.png';
-import { ReactComponent as NodeBlue } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon4-0.png';
-import { ReactComponent as NodeGray } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon8-0.png';
-import { ReactComponent as Node1_1 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon1-1.png';
-import { ReactComponent as Node1_2 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon1-2.png';
-import { ReactComponent as Node1_3 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon1-3.png';
-import { ReactComponent as Node2_1 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-1.png';
-import { ReactComponent as Node2_2 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-2.png';
-import { ReactComponent as Node2_3 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-3.png';
-import { ReactComponent as Node2_4 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-4.png';
-import { ReactComponent as Node2_5 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-5.png';
-import { ReactComponent as Node2_6 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon2-6.png';
-import { ReactComponent as Node3_1 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-1.png';
-import { ReactComponent as Node3_2 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-2.png';
-import { ReactComponent as Node3_3 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-3.png';
-import { ReactComponent as Node3_4 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-4.png';
-import { ReactComponent as Node3_5 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-5.png';
-import { ReactComponent as Node3_6 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-6.png';
-import { ReactComponent as Node3_7 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-7.png';
-import { ReactComponent as Node3_8 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon3-8.png';
-import { ReactComponent as Node4_1 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon4-1.png';
-import { ReactComponent as Node4_2 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon4-2.png';
-import { ReactComponent as Node4_3 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon4-3.png';
-import { ReactComponent as Node5_1 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon5-1.png';
-import { ReactComponent as Node5_2 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon5-2.png';
-import { ReactComponent as Node5_3 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon5-3.png';
-import { ReactComponent as Node5_4 } from 'D:\\react\\react-basic\\src\\assets\\左侧时间轴素材\\时间轴icon5-4.png';
+
+import { ReactComponent as NodeWhite } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as NodeRed } from '..//assets/网页素材//左侧时间轴素材//时间轴icon1-0.svg';
+import { ReactComponent as NodeGreen } from '..//assets/网页素材//左侧时间轴素材//时间轴icon2-0.svg';
+import { ReactComponent as NodePurple } from '..//assets//网页素材//左侧时间轴素材//时间轴icon3-0.svg';
+import { ReactComponent as NodeBlue } from '../assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as NodeGray } from '../assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node1_1 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node1_2 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node1_3 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node2_1 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node2_2 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node2_3 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node2_4 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node2_5 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node2_6 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_1 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_2 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_3 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_4 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_5 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_6 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_7 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node3_8 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node4_1 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node4_2 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node4_3 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node5_1 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node5_2 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node5_3 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
+import { ReactComponent as Node5_4 } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
 
 
 // 2. 定义树状结构的数据 (数据结构本身是正确的，无需修改)
