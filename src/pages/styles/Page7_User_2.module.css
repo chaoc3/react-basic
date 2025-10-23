@@ -1,0 +1,61 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    padding: 2rem;
+    box-sizing: border-box;
+    background-color: #f0f2f5;
+  }
+  
+  .leftPanel, .rightPanel {
+    width: 25%;
+    height: 100%;
+  }
+  
+  .leftPanel {
+      position: relative;
+      /* 其他样式 */
+  }
+  
+  .userAvatarContainer {
+      position: relative;
+      width: 60px; /* 根据您的头像大小调整 */
+      height: 60px; /* 根据您的头像大小调整 */
+      margin: 10px auto; /* 举例，具体位置需要您微调 */
+  }
+  
+  .avatar {
+      width: 100%;
+      height: 100%;
+  }
+  
+  .avatarOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.1); /* 添加一层叠加效果 */
+      border-radius: 50%;
+  }
+  
+  .mainContent {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nextButton {
+    margin-top: 2rem;
+    padding: 0.8rem 2.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+  }

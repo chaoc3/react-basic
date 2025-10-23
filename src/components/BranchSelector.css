@@ -1,63 +1,58 @@
-/* src/components/BranchSelector.css */
-
 .branch-selector-container {
-    display: flex;
-    flex-direction: column; /* 垂直排列所有阶段 */
-    align-items: center; /* 水平居中 */
-    height: 100%;
-    justify-content: center; /* 垂直方向上尽量居中所有内容 */
-  }
-  
-  .stage-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: opacity 0.4s ease; /* 添加状态切换动画 */
-  }
-  
-  /* 默认锁定状态的样式 */
-  .stage-container.locked {
-    opacity: 0.4;
-  }
-  
-  .main-node {
-    width: 50px; /* 主节点大小 */
-    height: 50px;
-    margin: 10px 0;
-  }
-  .main-node svg {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .sub-nodes-container {
-    display: flex;
-    justify-content: center;
-    gap: 8px; /* 子节点之间的间距 */
-    max-width: 180px; /* 限制最大宽度，使其可以换行 */
-    flex-wrap: wrap; /* 允许子节点换行 */
-  }
-  
-  .sub-node {
-    width: 24px; /* 子节点大小 */
-    height: 24px;
-  }
-  .sub-node svg {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: #f0f0f0; /* 给个背景色以防 SVG 是透明的 */
-  }
-  
-  /* 连接线的样式 */
-  .connector {
-    width: 2px;
-    height: 40px; /* 连接线长度 */
-    background-color: #bc2c2c; /* 默认锁定状态的颜色 */
-    transition: background-color 0.4s ease;
-  }
-  
-  /* 已完成状态的连接线 */
-  .connector.completed {
-    background-color: #b0b0b0; /* 已完成的线颜色更深 */
-  }
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
+  height: 100%;
+  justify-content: center;
+  padding: 20px 0; /* 添加一些内边距，避免贴边 */
+}
+
+.stage-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 0.4s ease;
+}
+
+.stage-container.locked {
+  opacity: 0.4;
+}
+
+.main-node {
+  width: 50px;
+  height: 50px;
+  margin: 10px 0;
+}
+.main-node svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sub-nodes-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  max-width: 180px;
+  flex-wrap: wrap;
+  margin-bottom: 10px; /* 为子节点和连接线之间添加一些空间 */
+}
+
+.sub-node {
+  width: 24px;
+  height: 24px;
+}
+.sub-node svg {
+  width: 100%;
+  height: 100%;
+}
+
+.connector {
+  width: 2px;
+  height: 40px;
+  background-color: #dcdcdc; /* 锁定状态的颜色调浅一些 */
+  transition: background-color 0.4s ease;
+}
+
+.connector.completed {
+  background-color: #6E7478; /* 已完成的线颜色 */
+}

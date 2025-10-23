@@ -7,8 +7,8 @@ import './BranchSelector.css';
 
 
 
-import { ReactComponent as NodeWhite } from '..//assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
-import { ReactComponent as NodeRed } from '..//assets/网页素材//左侧时间轴素材//时间轴icon1-0.svg';
+import { ReactComponent as NodeWhite } from '../assets/网页素材/左侧时间轴素材/时间轴icon0-0.svg';
+import { ReactComponent as NodeRed } from '../assets/网页素材/左侧时间轴素材//时间轴icon1-0.svg';
 import { ReactComponent as NodeGreen } from '..//assets/网页素材//左侧时间轴素材//时间轴icon2-0.svg';
 import { ReactComponent as NodePurple } from '..//assets//网页素材//左侧时间轴素材//时间轴icon3-0.svg';
 import { ReactComponent as NodeBlue } from '../assets//网页素材//左侧时间轴素材//时间轴icon0-0.svg';
@@ -50,41 +50,44 @@ const treeData = [
   { id: 7, MainNode: NodeWhite, subNodes: [] },
 ];
 
-function BranchSelector() {
-    const [activeStageId, setActiveStageId] = useState(4);
-  
-    return (
-      <div className="branch-selector-container">
-        {treeData.map((stage, index) => {
-          let status = 'locked';
-          if (stage.id < activeStageId) status = 'completed';
-          if (stage.id === activeStageId) status = 'active';
-  
-          return (
-            <React.Fragment key={stage.id}>
-              <div className={`stage-container ${status}`}>
-                <div className="main-node">
-                 
-                  <img src={stage.MainNode} alt={`Stage ${stage.id}`} />
-                </div>
-                <div className="sub-nodes-container">
-                  {stage.subNodes.map((SubNodeIconPath, subIndex) => (
-                    <div className="sub-node" key={subIndex}>
-                      
-                      <img src={SubNodeIconPath} alt={`Sub-node ${subIndex + 1}`} />
-                    </div>
-                  ))}
-                </div>
+
+  // 您可以随时更改这个ID来查看不同阶段的激活状态
+function BranchSelector({ activeStageId }) {
+  // REMOVED: const [activeStageId, setActiveStageId] = useState(3);
+
+  return (
+    <div className="branch-selector-container">
+      {treeData.map((stage, index) => {
+        let status = 'locked';
+        if (stage.id < activeStageId) status = 'completed';
+        if (stage.id === activeStageId) status = 'active';
+
+        // ... (the rest of your component's JSX remains exactly the same)
+        const MainNode = stage.MainNode;
+
+        return (
+          <React.Fragment key={stage.id}>
+            <div className={`stage-container ${status}`}>
+              <div className="main-node">
+                <MainNode />
               </div>
-  
-              {index < treeData.length - 1 && (
-                <div className={`connector ${stage.id < activeStageId ? 'completed' : 'locked'}`} />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
-    );
-  }
-  
-  export default BranchSelector;
+              <div className="sub-nodes-container">
+                {stage.subNodes.map((SubNode, subIndex) => (
+                  <div className="sub-node" key={subIndex}>
+                    <SubNode />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {index < treeData.length - 1 && (
+              <div className={`connector ${stage.id < activeStageId ? 'completed' : 'locked'}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+export default BranchSelector;

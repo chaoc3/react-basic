@@ -1,71 +1,99 @@
 /* src/components/ChatDialog.css */
 
 .chat-dialog-container {
-    height: 100%; /* 关键：让容器高度占满其父元素 (.right-panel) */
-    width: 100%;
-    background-color: rgba(245, 247, 250, 0.677); /* 半透明的浅灰色背景 */
-    border-radius: 16px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    padding: 20px;
-    box-sizing: border-box;
-    max-width: 50hv;
-    /* 使用 Flexbox 来把消息列表和输入框分开 */
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .messages-list {
-    flex-grow: 1; /* 让消息列表占据所有可用空间，把输入框推到底部 */
-    overflow-y: auto; /* 如果消息过多，则显示滚动条 */
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* 消息之间的间距 */
-  }
-  
-  /* 所有消息气泡的通用样式 */
-  .chat-message {
-    max-width: 80%;
-    padding: 12px 18px;
-    border-radius: 20px;
-    line-height: 1.5;
-  }
-  
-  /* 机器人的消息气泡 (居左) */
-  .bot-message {
-    background-color: #ffffff;
-    border: 1px solid #e8e8e8;
-    align-self: flex-start; /* 关键：左对齐 */
-    border-bottom-left-radius: 4px; /* 增加对话气泡感 */
-  }
-  
-  /* 用户的消息气泡 (居右) */
-  .user-message {
-    background-color: #e6f7ff;
-    align-self: flex-end; /* 关键：右对齐 */
-    border-bottom-right-radius: 4px;
-  }
-  
-  /* 底部输入区域 */
-  .chat-input-area {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e8e8e8;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .fake-input {
-    flex-grow: 1;
-    height: 40px;
-    background-color: #ffffff;
-    border: 1px solid #d9d9d9;
-    border-radius: 8px;
-  }
-  
-  .fake-button {
-    width: 40px;
-    height: 40px;
-    background-color: #d9d9d9;
-    border-radius: 8px;
-  }
+  width: 100%;
+  height: 400px; /* 您可以根据需要调整高度 */
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* 消息列表 */
+.messages-list {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto; /* 允许垂直滚动 */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-message {
+  padding: 10px 15px;
+  border-radius: 18px;
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+/* 机器人消息样式 */
+.bot-message {
+  background-color: #f0f2f5;
+  color: #333;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+/* 用户消息样式 */
+.user-message {
+  background-color: #007bff;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+/* 输入区域 */
+.chat-input-area {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.chat-input {
+  flex-grow: 1;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f0f2f5;
+  outline: none; /* 移除焦点时的边框 */
+}
+.chat-input:disabled {
+  background-color: #e9ecef;
+}
+
+.send-button {
+  border: none;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.send-button:hover {
+  background-color: #0056b3;
+}
+.send-button:disabled {
+  background-color: #a0c7ff;
+  cursor: not-allowed;
+}
+
+/* "正在输入" 的动画效果 */
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  background-color: #a0a0a0;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 2px;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.typing-indicator span:nth-of-type(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-of-type(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}

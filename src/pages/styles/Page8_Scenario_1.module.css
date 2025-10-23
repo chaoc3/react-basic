@@ -1,0 +1,96 @@
+/*
+   由于 Page8 和 Page6 的布局和交互基本一致,
+   您可以直接复用 Page6_User_1.module.css 的样式。
+   为了代码的独立性，这里我们创建一个新文件，但内容是相同的。
+   您也可以在 Page8_Scenario_1.jsx 中直接 import Page6_User_1.module.css。
+*/
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    padding: 2rem;
+    box-sizing: border-box;
+    background-color: #f0f2f5; /* 假设的背景色 */
+  }
+  
+  .leftPanel, .rightPanel {
+    width: 25%;
+  }
+  
+  .mainContent {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .cardCarousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+  }
+  
+  .cardContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 300px; /* 根据卡片实际宽度调整 */
+    height: 500px; /* 根据卡片实际高度调整 */
+    position: relative;
+  }
+  
+  .card {
+    position: absolute;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    transform: scale(0.8);
+    opacity: 0.5;
+    cursor: pointer;
+  }
+  
+  .card.active {
+    transform: scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+  
+  .card.selected::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #6E7478;
+      opacity: 0.7;
+      z-index: 11;
+  }
+  
+  .arrowButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 1rem;
+    z-index: 20;
+  }
+  
+  .selectButton {
+    margin-top: 2rem;
+    padding: 0.8rem 2.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+  }
+  
+  .selectButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
