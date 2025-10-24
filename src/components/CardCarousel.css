@@ -1,6 +1,6 @@
 .carousel-container {
     width: 100%;
-    max-width: 300px; /* 限制最大宽度，让区域看起来更紧凑 */
+    max-width: 100%; /* 限制最大宽度，让区域看起来更紧凑 */
     margin: auto;
     position: relative; /* 设置为相对定位，作为箭头定位的基准 */
   }

@@ -6,7 +6,7 @@ import styles from './styles/Page1_Intro.module.css';
 // 请将下面的路径替换为您项目中实际的SVG文件路径
 import pageBackground from '../assets/页面剩余素材/Page1-Intro.svg'; 
 // 如果按钮是独立的SVG，请取消下面这行的注释
-import nextButton from '../assets/页面剩余素材/Next按钮.svg';
+import nextButton from '../assets/页面剩余素材/Page1-2 按钮.svg';
 
 function Page1Intro() {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ function Page1Intro() {
         className={styles.nextButton}
         onClick={handleNextPage}
       />
-
+    
       {/* --- 如果您的按钮是独立的SVG文件，请使用下面的代码替换上面的div ---
       <img 
         src={nextButton} 

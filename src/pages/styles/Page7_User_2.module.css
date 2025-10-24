@@ -1,23 +1,29 @@
 .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
-    padding: 2rem;
-    box-sizing: border-box;
-    background-color: #f0f2f5;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  background-color: #f0f2f5;
+  overflow: hidden;
+  background-image: url('../../assets/页面剩余素材/Page68101112131415页面.svg');
+  background-size: cover;
+  /* 将背景图片居中显示 */
+  background-position: center center;
+  /* 防止背景图片平铺重复 */
+  background-repeat: no-repeat;
+}
   
-  .leftPanel, .rightPanel {
-    width: 25%;
-    height: 100%;
-  }
-  
-  .leftPanel {
-      position: relative;
-      /* 其他样式 */
-  }
+.leftPanel{
+  width: 15%;
+  height: 90%;
+}
+.rightPanel {
+  width: 32%;
+  height: 90%;
+}
   
   .userAvatarContainer {
       position: relative;
@@ -42,7 +48,7 @@
   }
   
   .mainContent {
-    width: 50%;
+    width: 80%;
     display: flex;
     flex-direction: column;
     align-items: center;

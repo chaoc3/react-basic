@@ -2,7 +2,7 @@ import React from 'react';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page7_User_2.module.css';
-import backgroundForPage from '../assets/页面剩余素材/Page68101112131415页面.svg'; 
+
 
 // 假设这是从上一页选择的用户卡片
 import { ReactComponent as SelectedUserCard } from '../assets/卡片 - svg/卡片反面-细化页/User-1-2.svg';
@@ -12,7 +12,7 @@ import { ReactComponent as UserAvatar } from '../assets/网页素材/左侧时�
 const Page7_User_2 = () => {
   return (
     <div className={styles.container}
-    style={{ backgroundImage: `url(${backgroundForPage})` }}>
+    >
       <div className={styles.leftPanel}>
           <div className={styles.userAvatarContainer}>
               <div className={styles.avatarOverlay}></div>

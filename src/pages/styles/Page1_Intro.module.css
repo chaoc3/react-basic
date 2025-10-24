@@ -27,7 +27,7 @@
       left: 50%;    // 水平居中
       transform: translateX(-50%); // 配合 left: 50% 实现精确水平居中
     */
-    bottom: 150px; /* 示例：距离底部150px */
+    bottom: 100px; /* 示例：距离底部150px */
     left: 50%;
     transform: translateX(-50%);
     
