@@ -1,17 +1,14 @@
-
-
 import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
 import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
 import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
 import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
 import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import React, { useState,useEffect  } from 'react';
+import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-import styles from './styles/Page8_Scenario_1.module.css';
-
-
+import styles from './styles/Page6_User_1.module.css';
 
 const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
@@ -19,24 +16,37 @@ const cards = [
   { id: 3, component: <CardUser3 />, name: '心理健康群体' },
 ];
 
-const Page8_Scenario_1 = () => {
-  
+const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控制最大选择数，并设置默认值
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedCardId, setSelectedCardId] = useState(cards[0].id); 
-  useEffect(() => {
-    // 当 currentIndex 变化时，自动更新 selectedCardId 为当前居中卡片的 ID
-    const newSelectedId = cards[currentIndex].id;
-    setSelectedCardId(newSelectedId);
-  }, [currentIndex]); // 这个 effect 的依赖是 currentIndex
+  // --- 关键改动：使用一个数组来存储所有被选中卡片的 ID ---
+  const [selectedCardIds, setSelectedCardIds] = useState([]);
 
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
 
+  // --- 关键改动：处理卡片点击事件的逻辑 ---
+  const handleCardClick = (cardId) => {
+    setSelectedCardIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(cardId)) {
+        // 取消选择
+        return prevSelectedIds.filter((id) => id !== cardId);
+      } else {
+        // 如果未达到上限则添加
+        if (prevSelectedIds.length < maxSelections) {
+          return [...prevSelectedIds, cardId];
+        } else {
+          // 已达到上限，不允许选择更多
+          console.log(`You can only select exactly ${maxSelections} cards.`);
+          return prevSelectedIds;
+        }
+      }
+    });
+  };
 
-
-  // --- 关键改动：添加一个函数来动态计算类名 ---
+  // --- 关键改动：根据 selectedCardIds 数组来判断是否添加 .selected 类 ---
   const getCardClass = (index) => {
+    const cardId = cards[index].id;
     const classes = [styles.card];
 
     const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
@@ -51,15 +61,19 @@ const Page8_Scenario_1 = () => {
     } else {
       classes.push(styles.hidden);
     }
-    
-    // 3. 移除在这里添加 .selected 类的逻辑
+
+    // 如果当前卡片的 id 在已选择的数组中，则添加 selected 类
+    if (selectedCardIds.includes(cardId)) {
+      classes.push(styles.selected);
+    }
     return classes.join(' ');
   };
 
   const handleNextPage = () => {
-    // 因为总有一个卡片是选中的，所以这里不需要检查
-    console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
-    navigate('/page7');
+    // 传递被选中的卡片ID数组到下一页
+    console.log(`Navigating to Page 7 with selected card IDs: ${selectedCardIds}`);
+    // 你可以在这里通过 navigate state 或者其他方式将 selectedCardIds 传递给下一个路由
+    navigate('/page7', { state: { selectedCardIds } });
   };
 
   // ... (dummy functions for ChatDialog can remain the same)
@@ -70,11 +84,9 @@ const Page8_Scenario_1 = () => {
   const dummyOnDataExtracted = (data) => {
     console.log("Data extraction (disabled). Received:", data);
   };
-  
 
   return (
     <div className={styles.container}>
-      
       <div className={styles.leftPanel}>
         <BranchSelector activeStageId={2} />
       </div>
@@ -85,9 +97,8 @@ const Page8_Scenario_1 = () => {
             {cards.map((card, index) => (
               <div
                 key={card.id}
-                // --- 关键改动：使用新函数来设置类名 ---
                 className={getCardClass(index)}
-                
+                onClick={() => handleCardClick(card.id)} // 使用新的点击处理函数
               >
                 {card.component}
               </div>
@@ -98,9 +109,9 @@ const Page8_Scenario_1 = () => {
         <button
           className={styles.selectButton}
           onClick={handleNextPage}
-          
+          disabled={selectedCardIds.length !== maxSelections} // 当没有卡片被选中时禁用按钮
         >
-          Select
+          <SelectButtonSVG />
         </button>
       </div>
       <div className={styles.rightPanel}>
@@ -115,4 +126,3 @@ const Page8_Scenario_1 = () => {
 };
 
 export default Page8_Scenario_1;
-

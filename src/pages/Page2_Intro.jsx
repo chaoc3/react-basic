@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/Page2_Intro.module.css';
-import nextButton from '../assets/页面剩余素材/Next按钮.svg';
+import nextButton from '../assets/页面剩余素材/Page1-2 按钮.svg';
 // 请将下面的路径替换为您项目中实际的SVG文件路径
-import pageBackground from '../assets/页面剩余素材/Page1-2 按钮.svg';
+import pageBackground from '../assets/页面剩余素材/Page2-Intro.svg';
 
 function Page2Intro() {
   const navigate = useNavigate();

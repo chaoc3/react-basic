@@ -7,7 +7,7 @@ import styles from './styles/Page3_Target-User.module.css';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton'; 
-import backgroundForPage from '../assets/页面剩余素材/Page6-展开页面.svg'; // <-- IMPORT your new component
+import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg'; // <-- IMPORT your new component
 
 // (The mockLlmApi function remains the same...)
 const mockLlmApi = async (userInput) => {

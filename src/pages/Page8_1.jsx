@@ -1,8 +1,12 @@
 
 
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+import { ReactComponent as CardScenario1 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-1-1.svg';
+import { ReactComponent as CardScenario2 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-2-1.svg';
+import { ReactComponent as CardScenario3 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-3-1.svg';
+import { ReactComponent as CardScenario4 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-4-1.svg';
+import { ReactComponent as CardScenario5 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-5-1.svg';
+import { ReactComponent as CardScenario6 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
+
 import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
 import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
 import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
@@ -15,12 +19,15 @@ import styles from './styles/Page6_User_1.module.css';
 
 
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 1, component: <CardScenario1 />, name: '慢病患者' },
+  { id: 2, component: <CardScenario2 />, name: '' },
+  { id: 3, component: <CardScenario3 />, name: '' },
+  { id: 4, component: <CardScenario4 />, name: '' },
+  { id: 5, component: <CardScenario5 />, name: '' },
+  { id: 6, component: <CardScenario6 />, name: '' }
 ];
 
-const Page6_User_1 = () => {
+const Page8_Scenario_1 = () => {
   
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -109,5 +116,5 @@ const Page6_User_1 = () => {
   );
 };
 
-export default Page6_User_1;
+export default Page8_Scenario_1;
 

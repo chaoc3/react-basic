@@ -1,8 +1,9 @@
 
 
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-1-1.svg';
+import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-2-1.svg';
+import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-3-1.svg';
+import { ReactComponent as CardUser4 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-4-1.svg';
 import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
 import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
 import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
@@ -18,9 +19,10 @@ const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
   { id: 2, component: <CardUser2 />, name: '健康风险人群' },
   { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 4, component: <CardUser4 />, name: '心理健康群体'}
 ];
 
-const Page6_User_1 = () => {
+const Page14_User_1 = () => {
   
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -109,5 +111,5 @@ const Page6_User_1 = () => {
   );
 };
 
-export default Page6_User_1;
+export default Page14_User_1;
 

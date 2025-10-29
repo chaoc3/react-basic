@@ -15,11 +15,7 @@
   /* 防止背景图片平铺重复 */
   background-repeat: no-repeat;
 }
-.backgroundImage {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-}
+
 
 .leftPanel{
   width: 15%;
@@ -59,8 +55,8 @@
 
 .card {
   position: absolute;
-  /* 注意：这里移除了 cursor: pointer，因为卡片不再可点击 */
-  transition: transform 0.5s ease, opacity 0.4s ease;
+  cursor: pointer; /* 恢复手型光标，提示用户可以点击 */
+  transition: transform 0.5s ease, opacity 0.4s ease, box-shadow 0.3s ease; /* 添加 box-shadow 过渡 */
 }
 
 .card svg {
@@ -86,6 +82,25 @@
   opacity: 1;
   z-index: 5;
 }
+
+.card.selected {
+
+  box-shadow: 0 0 0 4px rgba(128, 128, 128, 0.5);
+}
+
+.card.selected.active {
+  transform: scale(1.03); /* 比普通 active 状态再大一点点 */
+}
+
+.selectButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 2rem;
+  transition: transform 0.2s ease-in-out, opacity 0.3s ease;
+}
+
 
 .hidden {
   transform: scale(0.5);
@@ -128,9 +143,23 @@
   padding: 0.8rem 2.5rem;
   font-size: 1rem;
   cursor: pointer;
-  background-color: #fff;
+  background-color: #ffffff00;
   color: #333;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border: 1px solid #dddddd00;
+  border-radius: 0px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0);
+}
+.selectButton:hover {
+  transform: scale(1.05);
+}
+
+/* 当按钮被禁用时，降低其不透明度 */
+.selectButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: scale(1); /* 禁用时移除悬停效果 */
+}
+
+.selectButton svg {
+  display: block;
 }

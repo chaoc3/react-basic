@@ -1,8 +1,8 @@
 
 
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-1-1.svg';
+import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-2-1.svg';
+import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-3-1.svg';
 import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
 import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
 import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
