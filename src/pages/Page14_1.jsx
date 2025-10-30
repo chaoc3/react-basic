@@ -26,7 +26,7 @@ const Page14_User_1 = () => {
   
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedCardId, setSelectedCardId] = useState(null); 
+  const [selectedCardId, setSelectedCardId] = useState([]); 
 
 
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
@@ -60,7 +60,7 @@ const Page14_User_1 = () => {
   const handleNextPage = () => {
     // 因为总有一个卡片是选中的，所以这里不需要检查
     console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
-    navigate('/page7');
+    navigate('/page15', { state: { selectedCardId } });
   };
 
   // ... (dummy functions for ChatDialog can remain the same)

@@ -1,8 +1,9 @@
 // src/pages/Page7_User_2.jsx
 
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-1-1.svg';
+import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-2-1.svg';
+import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-3-1.svg';
+import { ReactComponent as CardUser4 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-4-1.svg';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -15,15 +16,16 @@ const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
   { id: 2, component: <CardUser2 />, name: '健康风险人群' },
   { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 4, component: <CardUser4 />, name: '心理健康群体'}
 ];
 
-const Page7_User_2 = () => {
+const Page15_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // 1. 从 location.state 中获取传递过来的卡片 ID
   // 使用可选链操作符 `?.` 以防止 state 为 null 时出错
-  const selectedId = location.state?.selectedId;
+  const selectedId = location.state?.selectedCardId;
 
   // 2. 根据 ID 找到完整的卡片对象
   const selectedCard = cards.find(card => card.id === selectedId);
@@ -32,7 +34,7 @@ const Page7_User_2 = () => {
   useEffect(() => {
     if (!selectedCard) {
       console.warn("No selected card found, redirecting to page 6.");
-      navigate('/page6'); // 假设 Page6 的路由是 '/page6'
+      navigate('/page14'); // 假设 Page6 的路由是 '/page6'
     }
   }, [selectedCard, navigate]);
 
@@ -83,4 +85,4 @@ const Page7_User_2 = () => {
   );
 };
 
-export default Page7_User_2;
+export default Page15_2;

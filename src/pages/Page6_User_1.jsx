@@ -58,7 +58,7 @@ const Page6_User_1 = () => {
   const handleNextPage = () => {
     // 因为总有一个卡片是选中的，所以这里不需要检查
     console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
-    navigate('/page7');
+    navigate('/page7', { state: { selectedId: selectedCardId } });
   };
 
   // ... (dummy functions for ChatDialog can remain the same)

@@ -56,3 +56,10 @@
 .connector.completed {
   background-color: #6E7478; /* 已完成的线颜色 */
 }
+
+
+.sub-node.completed {
+  /* For example, make it slightly bigger or brighter */
+  transform: scale(1.1);
+  opacity: 1;
+}

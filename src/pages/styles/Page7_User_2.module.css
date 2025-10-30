@@ -1,3 +1,6 @@
+/* src/pages/styles/Page7_User_2.module.css */
+
+/* --- START: 布局样式 (从 Page6 复制以保证一致) --- */
 .container {
   display: flex;
   justify-content: space-between;
@@ -10,58 +13,78 @@
   overflow: hidden;
   background-image: url('../../assets/页面剩余素材/Page68101112131415页面.svg');
   background-size: cover;
-  /* 将背景图片居中显示 */
   background-position: center center;
-  /* 防止背景图片平铺重复 */
   background-repeat: no-repeat;
 }
-  
-.leftPanel{
+
+.leftPanel {
   width: 15%;
   height: 90%;
 }
+
 .rightPanel {
   width: 32%;
-  height: 90%;
+  height: 92%;
 }
+
+.mainContent {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  /* 添加以下属性确保内容真正居中 */
+  margin: -100px auto;
+  padding: 0 0; /* 添加内边距避免贴边 */
   
-  .userAvatarContainer {
-      position: relative;
-      width: 60px; /* 根据您的头像大小调整 */
-      height: 60px; /* 根据您的头像大小调整 */
-      margin: 10px auto; /* 举例，具体位置需要您微调 */
-  }
-  
-  .avatar {
-      width: 100%;
-      height: 100%;
-  }
-  
-  .avatarOverlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.1); /* 添加一层叠加效果 */
-      border-radius: 50%;
-  }
-  
-  .mainContent {
-    width: 80%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .nextButton {
-    margin-top: 2rem;
-    padding: 0.8rem 2.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    background-color: #000;
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-  }
+}
+/* --- END: 布局样式 --- */
+
+
+/* --- START: Page7 内部内容专属样式 --- */
+/* (这些样式替换了 Page6 的 .cardCarousel, .arrowButton 等) */
+
+/* 用于包裹单张卡片的容器，帮助实现居中 */
+.cardDisplay {
+  display: flex;
+  justify-content: center;
+  align-items: normal;
+  flex-grow: 1; /* 占据主要空间，将卡片推到中间 */
+  width: 100%;
+  top: 20%;
+  margin-top: 32vh;
+}
+
+/* 单张卡片的样式 */
+.card {
+  /* 我们可以给它一个固定的尺寸或者使用 transform 来放大 */
+  width: 40%; 
+  /*    或者使用一个最大像素值，防止在大屏幕上变得过大 */
+  max-width: 400px; 
+}
+
+.card svg {
+
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 下一步按钮的样式 (可以从 Page6 的 .selectButton 复制并重命名) */
+.nextButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 2rem;
+  transition: transform 0.2s ease-in-out, opacity 0.3s ease;
+}
+
+.nextButton:hover {
+  transform: scale(1.05);
+}
+
+.nextButton svg {
+  display: block;
+}

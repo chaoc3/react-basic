@@ -1,6 +1,11 @@
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+import { ReactComponent as Mec1 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-1-1.svg';
+import { ReactComponent as Mec2 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-2-1.svg';
+import { ReactComponent as Mec3 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-3-1.svg';
+import { ReactComponent as Mec4 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-4-1.svg';
+import { ReactComponent as Mec5 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-5-1.svg';
+import { ReactComponent as Mec6 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-6-1.svg';
+import { ReactComponent as Mec7 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-7-1.svg';
+import { ReactComponent as Mec8 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-8-1.svg';
 import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
 import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
 import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
@@ -11,32 +16,33 @@ import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page6_User_1.module.css';
 
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 1, component: <Mec1 />, name: '慢病患者' },
+  { id: 2, component: <Mec2 />, name: '健康风险人群' },
+  { id: 3, component: <Mec3 />, name: '心理健康群体' },
+  { id: 4, component: <Mec4 />, name: '心理健康群体' },
+  { id: 5, component: <Mec5 />, name: '心理健康群体' },
+  { id: 6, component: <Mec6 />, name: '心理健康群体' },
+  { id: 7, component: <Mec7 />, name: '心理健康群体' },
+  { id: 8, component: <Mec8 />, name: '心理健康群体' },
 ];
 
-const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控制最大选择数，并设置默认值
+
+const Page10_1 = ({ maxSelections = 2 }) => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  // --- 关键改动：使用一个数组来存储所有被选中卡片的 ID ---
   const [selectedCardIds, setSelectedCardIds] = useState([]);
 
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
 
-  // --- 关键改动：处理卡片点击事件的逻辑 ---
   const handleCardClick = (cardId) => {
     setSelectedCardIds((prevSelectedIds) => {
       if (prevSelectedIds.includes(cardId)) {
-        // 取消选择
         return prevSelectedIds.filter((id) => id !== cardId);
       } else {
-        // 如果未达到上限则添加
         if (prevSelectedIds.length < maxSelections) {
           return [...prevSelectedIds, cardId];
         } else {
-          // 已达到上限，不允许选择更多
           console.log(`You can only select exactly ${maxSelections} cards.`);
           return prevSelectedIds;
         }
@@ -44,7 +50,6 @@ const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控�
     });
   };
 
-  // --- 关键改动：根据 selectedCardIds 数组来判断是否添加 .selected 类 ---
   const getCardClass = (index) => {
     const cardId = cards[index].id;
     const classes = [styles.card];
@@ -62,7 +67,6 @@ const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控�
       classes.push(styles.hidden);
     }
 
-    // 如果当前卡片的 id 在已选择的数组中，则添加 selected 类
     if (selectedCardIds.includes(cardId)) {
       classes.push(styles.selected);
     }
@@ -70,17 +74,16 @@ const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控�
   };
 
   const handleNextPage = () => {
-    // 传递被选中的卡片ID数组到下一页
-    console.log(`Navigating to Page 7 with selected card IDs: ${selectedCardIds}`);
-    // 你可以在这里通过 navigate state 或者其他方式将 selectedCardIds 传递给下一个路由
-    navigate('/page7', { state: { selectedCardIds } });
+    // 修正：使用 selectedCardIds 而不是 selectedCardId
+    console.log(`Navigating to Page 11 with selected card IDs: ${selectedCardIds}`);
+    navigate('/page11', { state: { selectedCardIds } }); // 修正这里
   };
 
-  // ... (dummy functions for ChatDialog can remain the same)
   const dummyOnSendMessage = async (input) => {
     console.log(`User input (disabled): ${input}`);
     return { responseText: "This is a static reply." };
   };
+  
   const dummyOnDataExtracted = (data) => {
     console.log("Data extraction (disabled). Received:", data);
   };
@@ -98,7 +101,7 @@ const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控�
               <div
                 key={card.id}
                 className={getCardClass(index)}
-                onClick={() => handleCardClick(card.id)} // 使用新的点击处理函数
+                onClick={() => handleCardClick(card.id)}
               >
                 {card.component}
               </div>
@@ -109,7 +112,7 @@ const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控�
         <button
           className={styles.selectButton}
           onClick={handleNextPage}
-          disabled={selectedCardIds.length !== maxSelections} // 当没有卡片被选中时禁用按钮
+          disabled={selectedCardIds.length !== maxSelections}
         >
           <SelectButtonSVG />
         </button>
@@ -125,4 +128,4 @@ const Page8_Scenario_1 = ({ maxSelections = 3 }) => { // 允许通过 props 控�
   );
 };
 
-export default Page8_Scenario_1;
+export default Page10_1;

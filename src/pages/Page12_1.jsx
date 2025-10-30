@@ -20,7 +20,7 @@ const cards = [
   { id: 3, component: <CardUser3 />, name: '心理健康群体' },
 ];
 
-const Page6_User_1 = () => {
+const Page12_1 = () => {
   
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -58,7 +58,7 @@ const Page6_User_1 = () => {
   const handleNextPage = () => {
     // 因为总有一个卡片是选中的，所以这里不需要检查
     console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
-    navigate('/page7');
+    navigate('/page13', { state: { selectedCardId } });
   };
 
   // ... (dummy functions for ChatDialog can remain the same)
@@ -109,5 +109,5 @@ const Page6_User_1 = () => {
   );
 };
 
-export default Page6_User_1;
+export default Page12_1;
 

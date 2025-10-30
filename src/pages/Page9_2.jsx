@@ -1,8 +1,11 @@
 // src/pages/Page7_User_2.jsx
 
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+import { ReactComponent as CardScenario1 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-1-1.svg';
+import { ReactComponent as CardScenario2 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-2-1.svg';
+import { ReactComponent as CardScenario3 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-3-1.svg';
+import { ReactComponent as CardScenario4 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-4-1.svg';
+import { ReactComponent as CardScenario5 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-5-1.svg';
+import { ReactComponent as CardScenario6 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,12 +15,16 @@ import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文�
 
 // 卡片数据定义，与 Page6 保持一致
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 1, component: <CardScenario1 />, name: '慢病患者' },
+  { id: 2, component: <CardScenario2 />, name: '健康风险人群' },
+  { id: 3, component: <CardScenario3 />, name: '心理健康群体' },
+  { id: 4, component: <CardScenario4 />, name: '心理健康群体' },
+  { id: 5, component: <CardScenario5 />, name: '心理健康群体' },
+  { id: 6, component: <CardScenario6 />, name: '心理健康群体' },
+  
 ];
 
-const Page7_User_2 = () => {
+const Page9_Scenario_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -38,7 +45,7 @@ const Page7_User_2 = () => {
 
   const handleNextPage = () => {
     console.log("Navigating to the next page (e.g., Page 8)");
-    navigate('/page8'); // 跳转到下一个页面
+    navigate('/page10'); // 跳转到下一个页面
   };
 
   // Dummy functions for ChatDialog
@@ -83,4 +90,4 @@ const Page7_User_2 = () => {
   );
 };
 
-export default Page7_User_2;
+export default Page9_Scenario_2;
