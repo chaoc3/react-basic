@@ -23,7 +23,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Page6_User_1 />} />
+          <Route path="/" element={<Page4_TargetPainpoint />} />
           
           <Route path="/intro-2" element={<Page2Intro />} />
           <Route path="/target-user" element={<Page3_TargetUser />} />

@@ -1,114 +1,64 @@
 /* src/pages/styles/Page3_Target-User.module.css */
 
 .pageContainer {
-    /* 尺寸和布局 */
-    width: 100vw;
-    height: 100vh;
-    padding: 50px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    overflow: hidden;
-  
-    /* 背景图片通用设置 */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  
-  /* 您页面中其他的样式，比如 .chatWrapper，保持不变 */
-  .chatWrapper {
-    flex-grow: 1;
-    margin: 0 50px;
-    /* 您可以给对话框一个最大宽度，以适应不同屏幕 */
-    max-width: 800px; 
-  }
-  
-  /* 左侧时间轴容器 */
-  .timelineContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* SVG之间的间距 */
-  }
-  
-  .timelineItem {
-    width: 50px; /* SVG容器尺寸 */
-    height: 50px;
-  }
-  
-  /* SVG 占位符样式 */
-  .timelineSvgActive {
-    width: 100%;
-    height: 100%;
-    background-color: white; /* 亮白色 */
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-  }
-  
-  .timelineSvgInactive {
-    width: 100%;
-    height: 100%;
-    background-color: #B3B3B3; /* 变灰色 */
-    opacity: 0.8; /* 80% 透明度 */
-    border-radius: 50%;
-  }
-  
-  
-  /* 中间对话框 */
-  .chatContainer {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 50px;
-    height: 300px; /* 根据您的设计调整 */
-    background-color: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
-  
-  /* LLM API的输出区域 */
-  .llmOutput {
-    padding: 20px;
-    color: #333;
-    font-size: 1.2rem;
-    text-align: center;
-  }
-  
-  /* 右侧箭头容器 */
-  .arrowContainer {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-  }
-  
-  /* SVG 占位符样式 */
-  .arrowSvg {
-    width: 50px;
-    height: 50px;
-    background-color: black;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-  }
+  /* 尺寸和布局 */
+  width: 100vw;
+  height: 100vh;
+  padding: 50px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
 
-  /* 在 Page3_Target-User.module.css 中添加 */
+  /* 背景图片通用设置 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* 
+  主要内容区，这是一个不可见的容器
+  它的作用是作为一个坐标系，让气泡文字和聊天框可以相对于它进行精确定位
+*/
+.mainContent {
+  position: relative;
+  /* 这些尺寸需要根据您的背景图片进行微调 */
+  width: 91vw;
+  height: 80vh;
+  left: 8vw;
+}
 
+/* 新增：用于放置在背景气泡中的标题 */
+.titleBubble {
+  position: absolute;
+  top: 0vh; /* 从 mainContent 顶部向下 90px */
+  left: 42%;
+  transform: translateX(-50%);
+  width: 80%;
+  text-align: left;
+  padding: 0 20px;
+  color: #3f3f3f; /* 调整为更柔和的黑色 */
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* 
+  修改：聊天框容器样式
+  这是解决您问题的核心：我们给它一个固定的高度和宽度，并用绝对定位
+*/
 .chatWrapper {
-    flex-grow: 1;
-    margin: 0 50px;
+  position: absolute;
+  bottom: 0vh; /* 从 mainContent 底部向上 80px */
+  left: 39%;
+  transform: translateX(-50%);
+  width: 95%; /* 宽度占 mainContent 的 88% */
+  height: 80%; /* 【关键】设置一个固定的高度 */
 }
-  
-  .arrowContainer.disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.6;
+
+/* 确保 ArrowButton 不受影响 (如果它不是用 position: absolute 的话) */
+.pageContainer > :global(.arrow-button-class) { /* 替换为 ArrowButton 的实际类名 */
+  position: absolute;
+  right: 50px;
+  bottom: 40vh;
 }
+

@@ -3,16 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ai-sdk/deepseek": "^1.0.27",
+    "@ai-sdk/openai": "^2.0.62",
+    "@ai-sdk/react": "^2.0.87",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "ai": "^5.0.87",
     "antd": "^5.27.5",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.4",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zod": "^4.1.12"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -37,5 +44,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "proxy": "http://localhost:3001"
 }

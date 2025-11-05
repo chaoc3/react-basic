@@ -56,7 +56,7 @@ function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
 
     } catch (error) {
       console.error("API call failed:", error);
-      const errorMessage = { id: Date.now() + 1, sender: 'bot', text: "抱歉，我好像出错了，请稍后再试。" };
+      const errorMessage = { id: Date.now() + 1, sender: 'bot', text: error};
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
       setIsLoading(false);
