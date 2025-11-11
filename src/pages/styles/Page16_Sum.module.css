@@ -1,0 +1,67 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .content {
+    width: 80%;
+    max-width: 900px;
+    height: 85%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+    padding: 40px 60px; /* 根据你的背景图调整内边距 */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .closeButton {
+    position: absolute;
+    top: 20px; /* 根据你的背景图调整位置 */
+    right: 30px; /* 根据你的背景图调整位置 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+  }
+  
+  .closeButton img {
+    width: 24px; /* 或者你想要的任何尺寸 */
+    height: 24px;
+  }
+  
+  .scrollableContent {
+    margin-top: 80px; /* 为标题和关闭按钮留出空间 */
+    overflow-y: auto; /* 这是实现垂直滚动的关键 */
+    height: 100%;
+    padding-right: 20px; /* 防止滚动条遮挡内容 */
+  }
+  
+  /* 美化滚动条 (可选) */
+  .scrollableContent::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollableContent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .scrollableContent::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  
+  .scrollableContent::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }

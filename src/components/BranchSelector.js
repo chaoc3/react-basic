@@ -58,12 +58,14 @@ const subNodeIcons = {
 
 
   // 您可以随时更改这个ID来查看不同阶段的激活状态
-  function BranchSelector() {
+  function BranchSelector({ onTimelineClick }) {
+    
+
     // Get all state and functions from the global context
     const { activeStageId, completedStages, selectedCards } = useTimeline();
   
     return (
-      <div className="branch-selector-container">
+      <div className="branch-selector-container" onClick={onTimelineClick}>
         {treeData.map((stage, index) => {
           let status = 'locked';
           if (completedStages.has(stage.id)) status = 'completed';

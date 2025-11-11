@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext } from 'react';
 
+
 // Define the shape of the data and functions we'll share
 const TimelineContext = createContext({
   activeStageId: 1,

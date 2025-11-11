@@ -1,5 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import { DesignProvider } from './context/DesignContext';
+
 import Page1Intro from './pages/Page1_Intro';
 import Page2Intro from './pages/Page2_Intro';
 import Page3_TargetUser from './pages/Page3_Target-User';
@@ -15,6 +18,7 @@ import Page12_1 from './pages/Page12_1';
 import Page13_2 from './pages/Page13_2';
 import Page14_User_1 from './pages/Page14_1';
 import Page15_2 from './pages/Page15_2';
+import Page16_Sum from './pages/Page16_Sum';
 
 
 function App() {
@@ -23,7 +27,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Page4_TargetPainpoint />} />
+          <Route path="/" element={<Page3_TargetUser />} />
           
           <Route path="/intro-2" element={<Page2Intro />} />
           <Route path="/target-user" element={<Page3_TargetUser />} />
@@ -39,6 +43,8 @@ function App() {
           <Route path="/page13" element={<Page13_2 />} />
           <Route path="/page14" element={<Page14_User_1 />} />
           <Route path="/page15" element={<Page15_2 />} />
+          <Route path="/summary" element={<Page16_Sum />} />
+          
         </Routes>
       </div>
     </Router>

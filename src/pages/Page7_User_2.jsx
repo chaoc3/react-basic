@@ -1,5 +1,5 @@
 // src/pages/Page7_User_2.jsx
-
+import { useDesign } from '../context/DesignContext';
 import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
 import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
 import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
@@ -20,23 +20,30 @@ const cards = [
 const Page7_User_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { designData, updateDesignData } = useDesign();
   // 1. 从 location.state 中获取传递过来的卡片 ID
   // 使用可选链操作符 `?.` 以防止 state 为 null 时出错
   const selectedId = location.state?.selectedId;
 
   // 2. 根据 ID 找到完整的卡片对象
   const selectedCard = cards.find(card => card.id === selectedId);
-
+  const selectedCard1 = designData.userCard;
   // 健壮性处理：如果用户直接访问 /page7 或没有 ID，则跳转回选择页面
   useEffect(() => {
-    if (!selectedCard) {
+    if (!selectedCard && !selectedCard1) {
       console.warn("No selected card found, redirecting to page 6.");
       navigate('/page6'); // 假设 Page6 的路由是 '/page6'
     }
   }, [selectedCard, navigate]);
 
   const handleNextPage = () => {
+    const userDetailsFromThisPage = {
+      // This is where you would get data from input fields on Page 7
+      age: 21, // Example data
+      gender: 'Female', // Example data
+      education: 'University' // Example data
+    };
+    updateDesignData('userDetails', userDetailsFromThisPage);
     console.log("Navigating to the next page (e.g., Page 8)");
     navigate('/page8'); // 跳转到下一个页面
   };

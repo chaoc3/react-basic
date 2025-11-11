@@ -5,11 +5,13 @@ import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面
 import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-3-1.svg';
 import { ReactComponent as CardUser4 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-4-1.svg';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文件
+import Page16_Sum from './Page16_Sum';
+
 
 // 卡片数据定义，与 Page6 保持一致
 const cards = [
@@ -26,6 +28,7 @@ const Page15_2 = () => {
   // 1. 从 location.state 中获取传递过来的卡片 ID
   // 使用可选链操作符 `?.` 以防止 state 为 null 时出错
   const selectedId = location.state?.selectedCardId;
+  const [isSumOpen, setIsSumOpen] = useState(false);
 
   // 2. 根据 ID 找到完整的卡片对象
   const selectedCard = cards.find(card => card.id === selectedId);
@@ -40,8 +43,16 @@ const Page15_2 = () => {
 
   const handleNextPage = () => {
     console.log("Navigating to the next page (e.g., Page 8)");
-    navigate('/page8'); // 跳转到下一个页面
+    setIsSumOpen(true);
   };
+
+  const handleCloseSum = (entryPoint) => {
+    setIsSumOpen(false);
+    // 根据需求，从Page15进入的，关闭后跳转到下一页useState
+    if (entryPoint === 'page15Next') {
+        navigate('/summary'); // 跳转到 Page17
+    }
+};
 
   // Dummy functions for ChatDialog
   const dummyOnSendMessage = async (input) => {
@@ -73,6 +84,11 @@ const Page15_2 = () => {
         <button className={styles.nextButton} onClick={handleNextPage}>
           <NextButtonSVG />
         </button>
+        <Page16_Sum 
+                isOpen={isSumOpen}
+                onClose={handleCloseSum}
+                entryPoint="page15Next" // 明确指定进入点
+            />
       </div>
       <div className={styles.rightPanel}>
         <ChatDialog

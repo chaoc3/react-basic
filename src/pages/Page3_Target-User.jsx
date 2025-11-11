@@ -7,6 +7,9 @@ import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
 import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg';
+import Page16_Sum from './Page16_Sum';
+import { useDesign } from '../context/DesignContext'; 
+
 
 // getAiResponse 函数保持不变...
 const getAiResponse = async (userInput, currentMessages) => {
@@ -62,24 +65,49 @@ const getAiResponse = async (userInput, currentMessages) => {
 
 const Page3_TargetUser = () => {
   const navigate = useNavigate();
+  const { updateDesignData } = useDesign();
   const [isTaskComplete, setIsTaskComplete] = useState(false);
   const [extractedUserData, setExtractedUserData] = useState(null);
 
+
+  const [isSumOpen, setIsSumOpen] = useState(false);
+  const [sumEntryPoint, setSumEntryPoint] = useState('');
+
   const handleDataExtracted = (data) => {
     console.log("任务完成，提取到的数据:", data);
+    updateDesignData('targetUser', data); 
     setExtractedUserData(data);
     setIsTaskComplete(true);
   };
   
+
+  const handleOpenSum = (entry) => {
+    setSumEntryPoint(entry);
+    setIsSumOpen(true);
+  };
+
+
+  const handleCloseSum = (entryPoint) => {
+    setIsSumOpen(false);
+    // 根据进入点执行不同操作
+    if (entryPoint === 'page15Next') {
+      // 如果是从Page15的next按钮进入的，关闭后跳转到Page17
+      navigate('/achieve'); // 假设 Page17 的路由是 /achieve
+    }
+    // 如果是从时间轴进入的，关闭后什么都不做，停留在当前页面
+  };
+
   const handleNext = () => {
-    navigate('/target-painpoint', { state: { userData: extractedUserData } });
+    navigate('/target-painpoint'); 
   };
 
   return (
     <div className={styles.pageContainer}
         style={{ backgroundImage: `url(${backgroundForPage})` }}
     >
-      <BranchSelector />
+
+      <BranchSelector onTimelineClick={() => handleOpenSum('timeline')} />
+      
 
       {/* 使用一个容器来相对定位内部元素 */}
       <div className={styles.mainContent}>
@@ -101,6 +129,11 @@ const Page3_TargetUser = () => {
       </div>
 
       <ArrowButton onClick={handleNext} disabled={!isTaskComplete} />
+      <Page16_Sum 
+        isOpen={isSumOpen} 
+        onClose={handleCloseSum}
+        entryPoint={sumEntryPoint}
+      />
     </div>
   );
 };

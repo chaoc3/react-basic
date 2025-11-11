@@ -1,5 +1,5 @@
 
-
+import { useDesign } from '../context/DesignContext'; 
 import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
 import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
 import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
@@ -25,7 +25,7 @@ const Page6_User_1 = () => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState(null); 
-
+  const { updateDesignData } = useDesign();
 
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
@@ -57,8 +57,11 @@ const Page6_User_1 = () => {
 
   const handleNextPage = () => {
     // 因为总有一个卡片是选中的，所以这里不需要检查
-    console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
-    navigate('/page7', { state: { selectedId: selectedCardId } });
+    const selectedCard = cards.find(card => card.id === selectedCardId);
+      updateDesignData('userCard', { id: selectedCard.id, name: selectedCard.name });
+      
+      // 4. Navigate without passing state
+      navigate('/page7');
   };
 
   // ... (dummy functions for ChatDialog can remain the same)
