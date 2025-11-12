@@ -1,65 +1,86 @@
 .branch-selector-container {
   display: flex;
-  flex-direction: column; 
-  align-items: center; 
-  height: 100%;
-  justify-content: center;
-  padding: 20px 0; /* 添加一些内边距，避免贴边 */
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0px; /* Add some space at the top */
 }
 
 .stage-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease;
 }
 
-.stage-container.locked {
-  opacity: 0.4;
-}
-
+/* --- Main Node Styling --- */
 .main-node {
-  width: 50px;
-  height: 50px;
-  margin: 10px 0;
+  width: 52px;  /* Adjust size to match your design */
+  height: 52px;
+  margin-bottom: 0px; /* Space between main node and sub-nodes */
 }
 .main-node svg {
   width: 100%;
   height: 100%;
+  display: block; /* 避免 svg 底部出现意外的空白 */
 }
-
+/* --- Sub-Node Container & Styling (KEY CHANGE) --- */
 .sub-nodes-container {
+  /* Use Flexbox to arrange sub-nodes in a row */
   display: flex;
+  flex-direction: row;
   justify-content: center;
-  gap: 8px;
-  max-width: 180px;
-  flex-wrap: wrap;
-  margin-bottom: 10px; /* 为子节点和连接线之间添加一些空间 */
+  align-items: center;
+  flex-wrap: wrap; /* Allows nodes to wrap on smaller screens */
+  
+  /* Set a max-width to control the layout of many nodes */
+  max-width: 200px; 
+  gap: 0px; /* Modern way to add space between items */
 }
 
 .sub-node {
-  width: 24px;
+  width: 24px; /* 设置你想要的图片容器大小 */
   height: 24px;
+  transition: all 0.2s ease;
+  border-radius: 50%; /* 让容器变成圆形 */
+  overflow: hidden; /* 隐藏图片的方形边角 */
+  border: 3px solid transparent; /* 为选中状态准备一个边框 */
 }
-.sub-node svg {
+
+/* --- ▼▼▼ 关键修改/新增 ▼▼▼ --- */
+.sub-node img {
   width: 100%;
   height: 100%;
+  object-fit: cover; /* 确保图片填满圆形而不变形 */
+  display: block;
+  opacity: 0.5; /* 未选中时半透明 */
+  transition: opacity 0.2s ease;
 }
-
-.connector {
-  width: 2px;
-  height: 40px;
-  background-color: #dcdcdc; /* 锁定状态的颜色调浅一些 */
-  transition: background-color 0.4s ease;
-}
-
-.connector.completed {
-  background-color: #6E7478; /* 已完成的线颜色 */
-}
-
 
 .sub-node.completed {
-  /* For example, make it slightly bigger or brighter */
+  border-color: #fff; /* 选中时显示白色边框 */
   transform: scale(1.1);
-  opacity: 1;
+}
+
+.sub-node.completed img {
+  opacity: 1; /* 选中时完全不透明 */
+}
+/* --- State Visuals (Locked/Grayed out) --- */
+.stage-container.locked {
+  opacity: 0.4;
+}
+
+
+/* --- Connector Styling --- */
+.connector {
+  width: 2px;
+  height: 20px; /* Adjust length of the line between stages */
+  background-color: #e0e0e0; /* Default color for locked connectors */
+  margin: 2px 0; /* Space above and below the connector */
+  transition: background-color 0.3s ease;
+}
+
+/* Style for completed connectors, as per your design document */
+.connector.completed {
+  /* Semi-transparent white line */
+  background-color: rgba(255, 255, 255, 0.3);
 }

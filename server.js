@@ -77,7 +77,7 @@ const getSystemPromptForTask = (task) => {
   };
 
 // 创建 API 路由
-app.post('/api/chat', async (req, res) => {
+app.post('/chat', async (req, res) => {
     console.log("\n--- [BACKEND] Express API /api/chat 被调用 ---");
     try {
       if (!process.env.DEEPSEEK_API_KEY) {
@@ -124,6 +124,7 @@ app.post('/api/chat', async (req, res) => {
       if (task === 'getTargetUser' && responseText.includes('用户群体')) {
         extractedData = { 'Target-User': '模拟提取的用户群体' };
       }
+
       // 其他工具的类似处理...
   
       console.log("[BACKEND] 准备返回数据:", { responseText, extractedData });

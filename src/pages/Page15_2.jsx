@@ -1,19 +1,17 @@
-// src/pages/Page7_User_2.jsx
+// src/pages/Page15_2.jsx
 
 import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-1-1.svg';
 import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-2-1.svg';
 import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-3-1.svg';
 import { ReactComponent as CardUser4 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-4-1.svg';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
-import React, { useEffect,useState } from 'react';
+import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文件
 import Page16_Sum from './Page16_Sum';
-
-
-// 卡片数据定义，与 Page6 保持一致
+import styles from './styles/Page7_User_2.module.css';
+import { useTimeline } from '../context/TimelineContext';
 const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
   { id: 2, component: <CardUser2 />, name: '健康风险人群' },
@@ -24,46 +22,47 @@ const cards = [
 const Page15_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // 1. 从 location.state 中获取传递过来的卡片 ID
-  // 使用可选链操作符 `?.` 以防止 state 为 null 时出错
   const selectedId = location.state?.selectedCardId;
+  const selectedCard = cards.find(card => card.id === selectedId);
+  const { setActiveStageId } = useTimeline();
   const [isSumOpen, setIsSumOpen] = useState(false);
 
-  // 2. 根据 ID 找到完整的卡片对象
-  const selectedCard = cards.find(card => card.id === selectedId);
-
-  // 健壮性处理：如果用户直接访问 /page7 或没有 ID，则跳转回选择页面
   useEffect(() => {
+    setActiveStageId(6);
     if (!selectedCard) {
-      console.warn("No selected card found, redirecting to page 6.");
-      navigate('/page14'); // 假设 Page6 的路由是 '/page6'
+      console.warn("No selected card found, redirecting to page 14.");
+      navigate('/page14');
     }
   }, [selectedCard, navigate]);
 
   const handleNextPage = () => {
-    console.log("Navigating to the next page (e.g., Page 8)");
     setIsSumOpen(true);
   };
 
+  // --- 这是修改的核心 ---
   const handleCloseSum = (entryPoint) => {
+    // 1. 首先，正常地关闭模态框
     setIsSumOpen(false);
-    // 根据需求，从Page15进入的，关闭后跳转到下一页useState
-    if (entryPoint === 'page15Next') {
-        navigate('/summary'); // 跳转到 Page17
-    }
-};
 
-  // Dummy functions for ChatDialog
+    // 2. 检查是否需要跳转
+    if (entryPoint === 'page15Next') {
+      // 3. 使用一个非常短的 setTimeout 来延迟导航
+      // 这给了 React 足够的时间来执行 Page16_Sum 的 useEffect 清理函数
+      setTimeout(() => {
+        navigate('/achieve');
+      }, 50); // 50毫秒的延迟对用户是无感的
+    }
+  };
+
   const dummyOnSendMessage = async (input) => {
     console.log(`User input (disabled): ${input}`);
     return { responseText: "This is a static reply." };
   };
+
   const dummyOnDataExtracted = (data) => {
     console.log("Data extraction (disabled). Received:", data);
   };
 
-  // 如果没有找到卡片，可以渲染一个加载中或 null，等待 useEffect 跳转
   if (!selectedCard) {
     return null;
   }
@@ -71,11 +70,9 @@ const Page15_2 = () => {
   return (
     <div className={styles.container}>
       <div className={styles.leftPanel}>
-        {/* BranchSelector 可能需要更新 activeStageId */}
         <BranchSelector activeStageId={2} />
       </div>
       <div className={styles.mainContent}>
-        {/* 3. 直接渲染被选中的卡片，不再需要轮播结构 */}
         <div className={styles.cardDisplay}>
           <div className={styles.card}>
             {selectedCard.component}
@@ -84,11 +81,17 @@ const Page15_2 = () => {
         <button className={styles.nextButton} onClick={handleNextPage}>
           <NextButtonSVG />
         </button>
-        <Page16_Sum 
-                isOpen={isSumOpen}
-                onClose={handleCloseSum}
-                entryPoint="page15Next" // 明确指定进入点
-            />
+        {/*
+          为了防止意外，最好在渲染 Page16_Sum 时也加上 isSumOpen 的判断
+          这样可以确保在 isSumOpen 为 false 时它一定不被渲染
+        */}
+        {isSumOpen && (
+          <Page16_Sum 
+            isOpen={isSumOpen}
+            onClose={handleCloseSum}
+            entryPoint="page15Next"
+          />
+        )}
       </div>
       <div className={styles.rightPanel}>
         <ChatDialog

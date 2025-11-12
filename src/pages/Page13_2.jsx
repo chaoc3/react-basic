@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文件
-
+import { useTimeline } from '../context/TimelineContext';
 // 卡片数据定义，与 Page6 保持一致
 const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
@@ -21,7 +21,7 @@ const cards = [
 const Page13_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { setActiveStageId } = useTimeline();
   // 1. 从 location.state 中获取传递过来的卡片 ID
   // 使用可选链操作符 `?.` 以防止 state 为 null 时出错
   const selectedId = location.state?.selectedCardId;
@@ -31,6 +31,7 @@ const Page13_2 = () => {
 
   // 健壮性处理：如果用户直接访问 /page7 或没有 ID，则跳转回选择页面
   useEffect(() => {
+    setActiveStageId(4);
     if (!selectedCard) {
       console.warn("No selected card found, redirecting to page 6.");
       navigate('/page12'); // 假设 Page6 的路由是 '/page6'

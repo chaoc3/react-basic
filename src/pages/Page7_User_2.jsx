@@ -1,16 +1,21 @@
-// src/pages/Page7_User_2.jsx
-import { useDesign } from '../context/DesignContext';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useTimeline } from '../context/TimelineContext'; // Import the global state hook
+
+// Component Imports
+import BranchSelector from '../components/BranchSelector';
+import ChatDialog from '../components/ChatDialog';
+
+// SVG Asset Imports
 import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
 import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
 import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import BranchSelector from '../components/BranchSelector';
-import ChatDialog from '../components/ChatDialog';
-import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文件
+import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
 
-// 卡片数据定义，与 Page6 保持一致
+// CSS Module Import
+import styles from './styles/Page7_User_2.module.css';
+
+// Card data definition (must be consistent with Page 6)
 const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
   { id: 2, component: <CardUser2 />, name: '健康风险人群' },
@@ -20,44 +25,44 @@ const cards = [
 const Page7_User_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { designData, updateDesignData } = useDesign();
-  // 1. 从 location.state 中获取传递过来的卡片 ID
-  // 使用可选链操作符 `?.` 以防止 state 为 null 时出错
+  
+  // Get state management functions from the global TimelineContext
+  const { setActiveStageId } = useTimeline();
+
+  // Get the selected card ID passed from the previous page
   const selectedId = location.state?.selectedId;
 
-  // 2. 根据 ID 找到完整的卡片对象
+  // Find the full card object based on the ID
   const selectedCard = cards.find(card => card.id === selectedId);
-  const selectedCard1 = designData.userCard;
-  // 健壮性处理：如果用户直接访问 /page7 或没有 ID，则跳转回选择页面
-  useEffect(() => {
-    if (!selectedCard && !selectedCard1) {
-      console.warn("No selected card found, redirecting to page 6.");
-      navigate('/page6'); // 假设 Page6 的路由是 '/page6'
-    }
-  }, [selectedCard, navigate]);
 
+  // On component mount, manage timeline state and handle invalid access
+  useEffect(() => {
+    // This page is a continuation of Stage 2, so keep it active
+    setActiveStageId(2);
+
+    // If a user navigates here directly without a selection, redirect them back
+    if (!selectedCard) {
+      console.warn("No selected card found. Redirecting to selection page.");
+      navigate('/page6');
+    }
+  }, [selectedCard, navigate, setActiveStageId]);
+
+  // Handles navigation to the next major step in the process
   const handleNextPage = () => {
-    const userDetailsFromThisPage = {
-      // This is where you would get data from input fields on Page 7
-      age: 21, // Example data
-      gender: 'Female', // Example data
-      education: 'University' // Example data
-    };
-    updateDesignData('userDetails', userDetailsFromThisPage);
     console.log("Navigating to the next page (e.g., Page 8)");
-    navigate('/page8'); // 跳转到下一个页面
+    navigate('/page8'); // Navigate to the scenario selection page
   };
 
-  // Dummy functions for ChatDialog
+  // Dummy functions for the ChatDialog component
   const dummyOnSendMessage = async (input) => {
-    console.log(`User input (disabled): ${input}`);
+    console.log(`User input (UI mode): ${input}`);
     return { responseText: "This is a static reply." };
   };
   const dummyOnDataExtracted = (data) => {
-    console.log("Data extraction (disabled). Received:", data);
+    console.log("Data extraction (UI mode). Received:", data);
   };
 
-  // 如果没有找到卡片，可以渲染一个加载中或 null，等待 useEffect 跳转
+  // Render nothing while the redirect is happening to prevent errors
   if (!selectedCard) {
     return null;
   }
@@ -65,11 +70,12 @@ const Page7_User_2 = () => {
   return (
     <div className={styles.container}>
       <div className={styles.leftPanel}>
-        {/* BranchSelector 可能需要更新 activeStageId */}
-        <BranchSelector activeStageId={2} />
+        {/* BranchSelector will correctly display the state for Stage 2 */}
+        <BranchSelector />
       </div>
+
       <div className={styles.mainContent}>
-        {/* 3. 直接渲染被选中的卡片，不再需要轮播结构 */}
+        {/* Display only the selected card */}
         <div className={styles.cardDisplay}>
           <div className={styles.card}>
             {selectedCard.component}
@@ -79,9 +85,10 @@ const Page7_User_2 = () => {
           <NextButtonSVG />
         </button>
       </div>
+
       <div className={styles.rightPanel}>
         <ChatDialog
-          initialBotMessage="你已选择用户画像，让我们来补充一些细节吧！"
+          initialBotMessage="太好了，我们已经确定了你的设计对象。接下来，我想更了解你的设计出发点。"
           onSendMessage={dummyOnSendMessage}
           onDataExtracted={dummyOnDataExtracted}
         />

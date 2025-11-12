@@ -17,6 +17,9 @@ import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 // 为了保证布局不变，我们复用同一个 CSS 文件
 import styles from './styles/Page6_User_1.module.css';
+import { useTimeline } from '../context/TimelineContext';
+
+const CURRENT_STAGE_ID = 4;
 
 const allCards = [
   { id: 1, component: <Mec1 />, name: '慢病患者' },
@@ -35,7 +38,7 @@ const allCards = [
 const Page11_2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { setActiveStageId } = useTimeline();
   // 1. 从 Page8 获取选中的 ID 数组
   const selectedIds = location.state?.selectedCardIds || [];
 
@@ -48,11 +51,14 @@ const Page11_2 = () => {
   
   // 如果没有选择任何卡片就直接访问此页面，则重定向回 Page8
   useEffect(() => {
+    // 3. 设置当前活动阶段
+    setActiveStageId(CURRENT_STAGE_ID);
+
     if (selectedIds.length === 0) {
-      console.warn("No selected scenarios found, redirecting to page 8.");
-      navigate('/page10'); // 假设 Page8 的路由是 '/page8'
+      console.warn("No selected cards found, redirecting to page 10.");
+      navigate('/page10');
     }
-  }, [selectedIds, navigate]);
+  }, [selectedIds, navigate, setActiveStageId]);
 
   // 3. 基于筛选后的 `selectedCards` 数组设置轮播
   const [currentIndex, setCurrentIndex] = useState(0);

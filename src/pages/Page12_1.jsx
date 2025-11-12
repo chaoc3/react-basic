@@ -12,7 +12,7 @@ import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page6_User_1.module.css';
 
-
+import { useTimeline } from '../context/TimelineContext';
 
 const cards = [
   { id: 1, component: <CardUser1 />, name: '慢病患者' },
@@ -25,11 +25,20 @@ const Page12_1 = () => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState(null); 
-
+  const { setActiveStageId, setSingleCard, completeStage } = useTimeline();
 
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
+  useEffect(() => {
+    setActiveStageId(5); // This page corresponds to Stage 2 in the timeline
+  }, [setActiveStageId]);
 
+  // Handles clicking on a card to select it
+  const handleCardClick = (cardId) => {
+    setSelectedCardId(cardId);
+    // Update the global state to reflect the selection for Stage 2
+    setSingleCard(5, cardId); 
+  };
 
 
   // --- 关键改动：添加一个函数来动态计算类名 ---
@@ -57,8 +66,14 @@ const Page12_1 = () => {
 
   const handleNextPage = () => {
     // 因为总有一个卡片是选中的，所以这里不需要检查
-    console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
+    if (selectedCardId) {
+      // Mark Stage 2 as completed in the global state
+      completeStage(5);
+      // Navigate to Page 7, passing the selected card's ID
+      console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
     navigate('/page13', { state: { selectedCardId } });
+    }
+    
   };
 
   // ... (dummy functions for ChatDialog can remain the same)
@@ -85,7 +100,7 @@ const Page12_1 = () => {
                 <div
                 key={card.id}
                 className={getCardClass(index)}
-                onClick={() => setSelectedCardId(card.id)}
+                onClick={() => handleCardClick(card.id)}
               >
                 {card.component}
               </div>

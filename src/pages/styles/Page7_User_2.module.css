@@ -1,6 +1,6 @@
-/* src/pages/styles/Page17_Achieve.module.css */
+/* src/pages/styles/Page7_User_2.module.css */
 
-/* --- 基础布局容器 (与 Page7 保持一致) --- */
+/* --- START: 布局样式 (从 Page6 复制以保证一致) --- */
 .container {
   display: flex;
   justify-content: space-between;
@@ -17,32 +17,74 @@
   background-repeat: no-repeat;
 }
 
-
-/* --- 关键修改：调整面板宽度 --- */
-
-/* 左侧面板保持不变 */
 .leftPanel {
   width: 15%;
   height: 90%;
 }
 
-/* 中间面板，调宽以匹配新图片 */
-.mainContent {
-  width: 90vh; 
-  /* 从 50% 增加到 55% */
-  height: 70vh;
-  
-  display: flex;
-  
-  justify-content: center;
-  align-items: center;
-  position: relative; /* 1. 开启相对定位 */
-  top: 60px;          /* 2. 向下移动 60px (请根据需要调整数值) */
-  left: -60px;        /* 3. 向左移动 40px (请根据需要调整数值) */
+.rightPanel {
+  width: 32%;
+  height: 92%;
 }
 
-/* 右侧面板，调窄以适配中间区域的扩大 */
-.rightPanel {
-  width: 27%; /* 从 32% 减小到 27% */
-  height: 92%;
+.mainContent {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  /* 添加以下属性确保内容真正居中 */
+  margin: -100px auto;
+  padding: 0 0; /* 添加内边距避免贴边 */
+  bottom: -5%;
+}
+/* --- END: 布局样式 --- */
+
+
+/* --- START: Page7 内部内容专属样式 --- */
+/* (这些样式替换了 Page6 的 .cardCarousel, .arrowButton 等) */
+
+/* 用于包裹单张卡片的容器，帮助实现居中 */
+.cardDisplay {
+  display: flex;
+  justify-content: center;
+  align-items: normal;
+  flex-grow: 1; /* 占据主要空间，将卡片推到中间 */
+  width: 100%;
+  top: 20%;
+  margin-top: 32vh;
+}
+
+/* 单张卡片的样式 */
+.card {
+  /* 我们可以给它一个固定的尺寸或者使用 transform 来放大 */
+  width: 40%; 
+  /*    或者使用一个最大像素值，防止在大屏幕上变得过大 */
+  max-width: 400px; 
+}
+
+.card svg {
+
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 下一步按钮的样式 (可以从 Page6 的 .selectButton 复制并重命名) */
+.nextButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 2rem;
+  transition: transform 0.2s ease-in-out, opacity 0.3s ease;
+}
+
+.nextButton:hover {
+  transform: scale(1.05);
+}
+
+.nextButton svg {
+  display: block;
 }

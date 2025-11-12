@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page6_User_1.module.css';
-
+import { useTimeline } from '../context/TimelineContext';
 
 
 const cards = [
@@ -28,11 +28,16 @@ const Page8_1 = () => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState(null); 
-
-
+  const { setActiveStageId, setSingleCard, completeStage } = useTimeline();
+  useEffect(() => {
+    setActiveStageId(3); // Page6 对应 stage 2
+  }, [setActiveStageId]);
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
-
+  const handleCardClick = (cardId) => {
+    setSelectedCardId(cardId);
+    setSingleCard(3, cardId); // 更新全局状态：在 stage 2 选择了 cardId
+  };
 
 
   // --- 关键改动：添加一个函数来动态计算类名 ---
@@ -59,9 +64,13 @@ const Page8_1 = () => {
   };
 
   const handleNextPage = () => {
+    if (selectedCardId) {
+      completeStage(3); // 标记 stage 2 已完成
+      console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
+      navigate('/page9', { state: { selectedId: selectedCardId } });
+    }
     // 因为总有一个卡片是选中的，所以这里不需要检查
-    console.log(`Navigating to Page 7 with selected card ID: ${selectedCardId}`);
-    navigate('/page9', { state: { selectedId: selectedCardId } });
+    
   };
 
   // ... (dummy functions for ChatDialog can remain the same)
@@ -78,7 +87,7 @@ const Page8_1 = () => {
     <div className={styles.container}>
       
       <div className={styles.leftPanel}>
-        <BranchSelector activeStageId={2} />
+        <BranchSelector />
       </div>
       <div className={styles.mainContent}>
         <div className={styles.cardCarousel}>
@@ -88,7 +97,7 @@ const Page8_1 = () => {
                 <div
                 key={card.id}
                 className={getCardClass(index)}
-                onClick={() => setSelectedCardId(card.id)}
+                onClick={() => handleCardClick(card.id)}
               >
                 {card.component}
               </div>

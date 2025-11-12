@@ -1,41 +1,57 @@
+// src/pages/Page16_Sum.js
+
 import React from 'react';
 import styles from './styles/Page16_Sum.module.css';
-import background from '../assets/页面剩余素材/Page6-展开页面.svg'; // 确认这是正确的背景图片路径
-import closeIcon from '../assets/页面剩余素材/Page16按钮.svg'; // 确认这是关闭按钮图标的路径
-import { useDesign } from '../context/DesignContext'; // <-- 1. Import the hook
+import background from '../assets/页面剩余素材/Page6-展开页面.svg';
+import closeIcon from '../assets/页面剩余素材/Page16按钮.svg';
+
+// --- ▼▼▼ 关键修改 ▼▼▼ ---
+import { useDesign } from '../context/DesignContext'; 
+import { useTimeline } from '../context/TimelineContext'; // 1. 导入 Timeline Hook
+import { cardAssets } from '../assets/cardAssets'; // 2. 导入我们创建的卡片资产库
+// --- ▲▲▲ 修改结束 ▲▲▲ ---
 
 const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
-  // Hooks规则保持正确：在组件顶层调用
-  const { designData } = useDesign();
+  const { designData } = useDesign(); // 用于获取文本数据
+  const { selectedCards } = useTimeline(); // 3. 从 Timeline Context 获取已选卡片数据
 
   React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    if (isOpen) document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = 'auto'; };
   }, [isOpen]);
 
-  if (!isOpen) {
-    return null;
-  }
-  
-  const renderData = (data, placeholder = '尚未确定') => {
-    if (data === null || typeof data === 'undefined' || data === '') {
-      return <span className={styles.placeholder}>{placeholder}</span>;
-    }
-    if (typeof data === 'object') {
-      return Object.entries(data)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(', ');
-    }
-    return data;
-  };
+  if (!isOpen) return null;
 
-  const handleClose = () => {
-    onClose(entryPoint);
+  // 这是一个辅助函数，用于渲染文本数据（您的原始代码）
+  const renderData = (data, placeholder = '尚未确定') => { /* ... 保持不变 ... */ };
+
+  // --- ▼▼▼ 关键新增 ▼▼▼ ---
+  // 4. 创建一个新的辅助函数，专门用于渲染已选择的卡片
+  const renderSelectedCards = (stageId) => {
+    const cardIdsSet = selectedCards[stageId]; // 获取这个阶段已选卡片的 Set
+
+    // 如果没有选择任何卡片，则显示占位符
+    if (!cardIdsSet || cardIdsSet.size === 0) {
+      return <span className={styles.placeholder}>尚未选择</span>;
+    }
+
+    // 将 Set 转换为数组，然后遍历渲染
+    return Array.from(cardIdsSet).map(cardId => {
+      // 从我们的资产库中查找对应的卡片组件
+      const CardComponent = cardAssets[stageId]?.[cardId];
+      
+      if (!CardComponent) return null; // 如果找不到，则不渲染
+
+      return (
+        <div key={cardId} className={styles.summaryCard}>
+          {CardComponent}
+        </div>
+      );
+    });
   };
+  // --- ▲▲▲ 新增结束 ▲▲▲ ---
+
+  const handleClose = () => onClose(entryPoint);
 
   return (
     <div className={styles.overlay}>
@@ -43,53 +59,67 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
         <img src={closeIcon} alt="Close" />
       </button>
 
-      {/* 
-        核心改动: .content 现在是一个相对定位的容器。
-        它不再有 background-image 样式。
-      */}
       <div className={styles.content}>
-        {/* 1. 使用真实的 <img> 标签来显示背景并撑开高度 */}
         <img src={background} alt="Design Summary Background" className={styles.backgroundImage} />
-
-        {/* 2. 创建一个新的 div 用于绝对定位，浮动在图片之上 */}
         <div className={styles.textOverlay}>
+          
+          {/* --- ▼▼▼ 关键修改：更新每个区块的内容 ▼▼▼ --- */}
 
-          {/* 3. 将之前的所有 .section 内容块都放入这个浮动层中 */}
-          <div className={styles.section} id="design-target">
-            <h2>设计目标</h2>
-            <div className={styles.infoGrid}>
-              <div>
-                <h4>用户群体</h4>
-                <p>{renderData(designData.targetUser?.TargetUser)}</p>
-              </div>
-              <div>
-                <h4>设计痛点</h4>
-                <p>{renderData(designData.targetPainpoint?.TargetPainpoint)}</p>
-              </div>
-              <div>
-                <h4>行为阶段</h4>
-                <p>{renderData(designData.targetStage?.TargetStage)}</p>
-              </div>
+          {/* Design Target Section (主要显示文本) */}
+          <div className={styles.section}>
+            <h3>Design Target</h3>
+            <p>这一部分明确你的设计方向...</p>
+            <div className={styles.dataField}>User: {renderData(designData.targetUser)}</div>
+            <div className={styles.dataField}>Painpoint: {renderData(designData.targetPainpoint)}</div>
+            <div className={styles.dataField}>Stage: {renderData(designData.targetStage)}</div>
+          </div>
+
+          {/* User Section (现在要显示卡片) */}
+          <div className={styles.section}>
+            <h3>User</h3>
+            <p>这一部分定义你的设计对象...</p>
+            <div className={styles.cardDisplayArea}>
+              {renderSelectedCards(2)} {/* 5. 调用函数渲染 Stage 2 的卡片 */}
             </div>
           </div>
 
-          <div className={styles.section} id="user-details">
-            <h2>用户画像</h2>
-            <h4>选择的用户卡片: {renderData(designData.userCard?.name)}</h4>
-            {designData.userDetails ? (
-              <ul>
-                <li>年龄: {renderData(designData.userDetails.UserAge)}</li>
-                <li>性别: {renderData(designData.userDetails.UserSexual)}</li>
-                <li>教育背景: {renderData(designData.userDetails.UserEdu)}</li>
-                <li>职业类型: {renderData(designData.userDetails.UserWork)}</li>
-                <li>设备熟练度: {renderData(designData.userDetails.UserEquip)}</li>
-              </ul>
-            ) : (
-              <p className={styles.placeholder}>用户详细信息尚未确定</p>
-            )}
+          {/* Scenario Section */}
+          <div className={styles.section}>
+            <h3>Scenario</h3>
+            <p>这一部分描绘设计发生的情境...</p>
+            <div className={styles.cardDisplayArea}>
+              {renderSelectedCards(3)} {/* 渲染 Stage 3 的卡片 */}
+            </div>
           </div>
-          
-          {/* 这里可以继续添加 Scenario, Mechanism 等其他部分 */}
+
+          {/* Mechanism Section */}
+          <div className={styles.section}>
+            <h3>Mechanism</h3>
+            <p>这一部分展示你用于影响用户行为的核心策略...</p>
+            <div className={styles.cardDisplayArea}>
+              {renderSelectedCards(4)} {/* 渲染 Stage 4 的卡片 */}
+            </div>
+          </div>
+
+          {/* Info Source Section */}
+          <div className={styles.section}>
+            <h3>Info Source</h3>
+            <p>这一部分说明方案依托的数据与知识基础...</p>
+            <div className={styles.cardDisplayArea}>
+              {renderSelectedCards(5)} {/* 渲染 Stage 5 的卡片 */}
+            </div>
+          </div>
+
+          {/* Mode Section */}
+          <div className={styles.section}>
+            <h3>Mode</h3>
+            <p>这一部分定义设计与用户的交互方式...</p>
+            <div className={styles.cardDisplayArea}>
+              {renderSelectedCards(6)} {/* 渲染 Stage 6 的卡片 */}
+            </div>
+          </div>
+
+          {/* --- ▲▲▲ 修改结束 ▲▲▲ --- */}
 
         </div>
       </div>

@@ -1,66 +1,75 @@
 // src/context/TimelineContext.js
 
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 
+// 1. 创建 Context
+const TimelineContext = createContext();
 
-// Define the shape of the data and functions we'll share
-const TimelineContext = createContext({
-  activeStageId: 1,
-  completedStages: new Set(),
-  selectedCards: {}, // e.g., { 3: new Set([1, 2]), 4: new Set([5]) }
-  setActiveStage: () => {},
-  completeStage: () => {},
-  toggleCardSelection: () => {},
-});
+// 2. 创建一个自定义 Hook，方便子组件使用 Context
+export const useTimeline = () => useContext(TimelineContext);
 
-// Create a custom hook for easy access
-export const useTimeline = () => {
-  return useContext(TimelineContext);
-};
-
-// Create the Provider component that will manage the state
+// 3. 创建 Provider 组件
 export const TimelineProvider = ({ children }) => {
+  // 当前活动阶段的 ID
   const [activeStageId, setActiveStageId] = useState(1);
+  
+  // 已完成阶段的 ID 集合
   const [completedStages, setCompletedStages] = useState(new Set());
+  
+  // 每个阶段所选卡片的映射，例如 { stageId: Set(cardId1, cardId2) }
   const [selectedCards, setSelectedCards] = useState({});
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
-  // Function to set the currently active page/stage
-  const handleSetActiveStage = (id) => {
-    setActiveStageId(id);
-  };
+  // 2. 创建打开和关闭的函数
+  const openSummary = useCallback(() => setIsSummaryOpen(true), []);
+  const closeSummary = useCallback(() => setIsSummaryOpen(false), []);
+  // 完成一个阶段
+  const completeStage = useCallback((stageId) => {
+    setCompletedStages(prev => new Set(prev).add(stageId));
+  }, []);
 
-  // Function to mark a main stage as completed
-  const handleCompleteStage = (id) => {
-    // We don't want to remove completion status if the user goes back
-    if (!completedStages.has(id)) {
-      setCompletedStages(prev => new Set(prev).add(id));
-    }
-  };
-
-  // Function to handle selecting/deselecting a card (sub-node)
-  const handleToggleCardSelection = (stageId, cardId) => {
+  // 选择一张卡片
+  const selectCard = useCallback((stageId, cardId) => {
     setSelectedCards(prev => {
-      const newSelected = { ...prev };
-      const stageSelections = new Set(newSelected[stageId] || []);
+      // 1. 获取当前阶段已选择的卡片集合，如果不存在则创建一个新的
+      const stageSelection = new Set(prev[stageId] || []);
 
-      if (stageSelections.has(cardId)) {
-        stageSelections.delete(cardId);
+      // 2. 检查卡片是否已存在
+      if (stageSelection.has(cardId)) {
+        stageSelection.delete(cardId); // 如果存在，则移除（取消选择）
       } else {
-        stageSelections.add(cardId);
+        stageSelection.add(cardId);    // 如果不存在，则添加（选择）
       }
-      
-      newSelected[stageId] = stageSelections;
-      return newSelected;
-    });
-  };
 
+      // 3. 返回更新后的状态
+      return { ...prev, [stageId]: stageSelection };
+    });
+  }, []);
+
+  const setSingleCard = useCallback((stageId, cardId) => {
+    setSelectedCards(prev => {
+      // 创建一个全新的 Set，只包含当前选择的 cardId
+      const newSelection = new Set();
+      if (cardId !== null) { // 确保 cardId 不是 null
+        newSelection.add(cardId);
+      }
+      // 返回一个新状态，用这个全新的 Set 替换掉旧的
+      return { ...prev, [stageId]: newSelection };
+    });
+  }, []);
+  // --- ▲▲▲ 新增结束 ▲▲▲ ---
+  // 暴露给子组件的值
   const value = {
     activeStageId,
     completedStages,
     selectedCards,
-    setActiveStage: handleSetActiveStage,
-    completeStage: handleCompleteStage,
-    toggleCardSelection: handleToggleCardSelection,
+    setActiveStageId,
+    completeStage,
+    selectCard,
+    isSummaryOpen,
+    openSummary,
+    closeSummary,
+    setSingleCard,
   };
 
   return (

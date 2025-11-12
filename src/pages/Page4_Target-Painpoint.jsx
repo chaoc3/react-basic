@@ -1,17 +1,17 @@
-
-// src/pages/Page3_Target-User.jsx
+// src/pages/Page4_TargetPainpoint.jsx
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './styles/Page3_Target-User.module.css';
+import { useNavigate, useLocation } from 'react-router-dom'; // 引入 useLocation
+import styles from './styles/Page3_Target-User.module.css'; // 假设样式可以复用
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
-import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg';  // <-- IMPORT your new component
+import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg';
+import { useDesign } from '../context/DesignContext'; // 引入 context
 
-// (The mockLlmApi function remains the same...)
-const getAiResponse = async (userInput, currentMessages) => {
-  console.log("1. [FRONTEND] 开始调用 getAiResponse 函数...");
+// 为 Page4 创建一个专门的 API 调用函数
+const getAiResponseForPainpoint = async (userInput, currentMessages) => {
+  console.log("1. [FRONTEND-P4] 开始调用 getAiResponseForPainpoint...");
 
   const messagesForApi = currentMessages.map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'assistant',
@@ -19,87 +19,76 @@ const getAiResponse = async (userInput, currentMessages) => {
   }));
   messagesForApi.push({ role: 'user', content: userInput });
 
+  // 关键修改：将 task 设置为 'getTargetPainpoint'
   const requestBody = {
     messages: messagesForApi,
-    task: 'getTargetUser'
+    task: 'getTargetPainpoint' 
   };
 
-  console.log("2. [FRONTEND] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
+  console.log("2. [FRONTEND-P4] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
 
   try {
+    // API 请求部分保持不变
     const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
     });
 
-    console.log("3. [FRONTEND] 收到来自后端的原始响应:", response);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`4. [FRONTEND] API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
-      throw new Error(`API request failed with status ${response.status}`);
+      throw new Error(`API request failed: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log("4. [FRONTEND] 成功解析后端的 JSON 数据:", data);
-    
-    return {
-      responseText: data.responseText,
-      extractedData: data.extractedData,
-    };
+    console.log("4. [FRONTEND-P4] 成功解析 JSON:", data);
+    return data;
 
   } catch (error) {
-    console.error("5. [FRONTEND] 在 fetch 或解析 JSON 时捕获到严重错误:", error);
-    return {
-      responseText: "抱歉，网络连接或服务器似乎出了点问题，请检查控制台信息。",
-      extractedData: null,
-    };
+    console.error("5. [FRONTEND-P4] 捕获到严重错误:", error);
+    return { responseText: "抱歉，出错了，请检查控制台。", extractedData: null };
   }
 };
 
 
 const Page4_TargetPainpoint = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // 获取路由状态
+  const { updateDesignData } = useDesign(); // 使用 context 更新数据
   const [isTaskComplete, setIsTaskComplete] = useState(false);
-  const [extractedUserData, setExtractedUserData] = useState(null);
+
+  // 从上一页获取数据，虽然本组件不用，但要传递下去
+  const previousData = location.state || {};
 
   const handleDataExtracted = (data) => {
-    console.log("任务完成，提取到的数据:", data);
-    setExtractedUserData(data);
-    setIsTaskComplete(true);
+    if (data && data['Target-Painpoint']) { // 检查是否真的提取到了数据
+      console.log("任务完成，提取到的数据:", data);
+      updateDesignData('targetPainpoint', data); // 更新到全局 context
+      setIsTaskComplete(true);
+    }
   };
   
   const handleNext = () => {
-    navigate('/target-stage', { state: { userData: extractedUserData } });
+    // 将之前和当前步骤的数据一起传递到下一页
+    navigate('/target-stage', { state: { ...previousData } }); 
   };
 
   return (
-    <div className={styles.pageContainer}
-    style={{ backgroundImage: `url(${backgroundForPage})` }}>
+    <div className={styles.pageContainer} style={{ backgroundImage: `url(${backgroundForPage})` }}>
       <BranchSelector />
-
       <div className={styles.mainContent}>
-
-        {/* 顶部气泡文字 */}
         <div className={styles.titleBubble}>
-          <p style={{ fontWeight: 'bold' }}>让我们一起确定你的设计目标吧!</p>
-          <p>你希望这个智能代理来帮助什么样的用户群体呢？可以用一句话告诉我,他们是谁、正在经历什么。</p>
+          <p style={{ fontWeight: 'bold' }}>太棒了！现在聊聊你想解决的问题吧！</p>
+          <p>你希望这个智能代理协助的助推机制想改变的问题是什么？可以用一句话告诉我你的设计发现或痛点。</p>
         </div>
-
-        {/* 聊天框容器 */}
         <div className={styles.chatWrapper}>
           <ChatDialog 
-            initialBotMessage="你希望这个智能代理来帮助什么样的用户群体呢？可以用一句话告诉我，他们是谁、正在经历什么。"
-            onSendMessage={getAiResponse}
+            initialBotMessage="你希望这个智能代理协助的助推机制想改变的问题是什么？"
+            onSendMessage={getAiResponseForPainpoint} // <-- 使用新的、正确的函数
             onDataExtracted={handleDataExtracted}
           />
         </div>
       </div>
-
-      {/* RENDER your new component here. No more inline definitions! */}
       <ArrowButton onClick={handleNext} disabled={!isTaskComplete} />
     </div>
   );

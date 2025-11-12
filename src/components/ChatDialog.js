@@ -56,7 +56,12 @@ function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
 
     } catch (error) {
       console.error("API call failed:", error);
-      const errorMessage = { id: Date.now() + 1, sender: 'bot', text: error};
+      const userFriendlyErrorMessage = `抱歉，处理您的请求时发生错误: ${error.message}`;
+      const errorMessage = { 
+        id: Date.now() + 1, 
+        sender: 'bot', 
+        text: userFriendlyErrorMessage // 确保这里是一个字符串
+      };
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
       setIsLoading(false);

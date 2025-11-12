@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 // 直接使用 Page7 的样式，因为布局和背景完全一致
-import styles from './styles/Page7_User_2.module.css'; 
+import styles from './styles/Page17_Achieve.module.css'; 
 
 const Page17_Achieve = () => {
   const navigate = useNavigate();
