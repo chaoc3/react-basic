@@ -31,14 +31,10 @@
   width: 90vh; 
   /* 从 50% 增加到 55% */
   height: 70vh;
-  
+  bottom:  50vh;
   display: flex;
-  
   justify-content: center;
   align-items: center;
-  position: relative; /* 1. 开启相对定位 */
-  top: 60px;          /* 2. 向下移动 60px (请根据需要调整数值) */
-  left: -60px;        /* 3. 向左移动 40px (请根据需要调整数值) */
 }
 
 /* 右侧面板，调窄以适配中间区域的扩大 */

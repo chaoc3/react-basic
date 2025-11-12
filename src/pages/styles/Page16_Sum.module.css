@@ -1,67 +1,113 @@
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .content {
-    width: 80%;
-    max-width: 900px;
-    height: 85%;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: relative;
-    padding: 40px 60px; /* 根据你的背景图调整内边距 */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .closeButton {
-    position: absolute;
-    top: 20px; /* 根据你的背景图调整位置 */
-    right: 30px; /* 根据你的背景图调整位置 */
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-  }
-  
-  .closeButton img {
-    width: 24px; /* 或者你想要的任何尺寸 */
-    height: 24px;
-  }
-  
-  .scrollableContent {
-    margin-top: 80px; /* 为标题和关闭按钮留出空间 */
-    overflow-y: auto; /* 这是实现垂直滚动的关键 */
-    height: 100%;
-    padding-right: 20px; /* 防止滚动条遮挡内容 */
-  }
-  
-  /* 美化滚动条 (可选) */
-  .scrollableContent::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  .scrollableContent::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-  }
-  
-  .scrollableContent::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
-  }
-  
-  .scrollableContent::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 5vh 0;
+  box-sizing: border-box;
+}
+
+/*
+  核心改动 1:
+  - .content 现在是相对定位的容器，为其内部的绝对定位元素提供坐标系。
+  - 移除了所有 background-* 样式。
+  - padding 移到了 textOverlay 中。
+*/
+.content {
+  position: relative; /* <--- 新增：为子元素的绝对定位创建上下文 */
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/*
+  核心改动 2:
+  - 为背景图片 <img> 标签创建样式。
+  - 它会自然地撑开 .content 的高度。
+*/
+.backgroundImage {
+  display: block; /* 移除图片下方的额外空间 */
+  width: 100%;
+  height: auto;
+}
+
+/*
+  核心改动 3:
+  - 创建一个浮动层，用于包裹所有文字。
+  - 它会覆盖在图片上。
+*/
+.textOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 50px 70px; /* 将内边距放在这里，控制文字与边缘的距离 */
+  box-sizing: border-box;
+}
+
+/* 关闭按钮样式保持不变 */
+.closeButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.closeButton img {
+  width: 32px; /* 可以根据你的图标大小调整 */
+  height: 32px;
+}
+
+/*
+  section 的定位逻辑现在依然有效，你需要调整这些值来对齐文字
+*/
+.section {
+  /* background-color: rgba(255, 255, 255, 0.5); */ /* 调试时可以取消注释看范围 */
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* 
+  *** 最重要的一步 ***
+  现在你需要根据新的布局，重新调整下面的 padding 和 margin 值，
+  让每个 section 的内容块，能精确地显示在背景图的对应位置上。
+*/
+.section#design-target {
+  padding-top: 150px; /* 示例值: 调整这个来定位第一个内容块 */
+}
+
+.section#user-details {
+  margin-top: 200px; /* 示例值: 调整这个来拉开与上一个块的距离 */
+}
+
+/* 通用文本样式，保持不变 */
+.section h2 {
+  color: #333;
+  margin-bottom: 15px;
+}
+.section p, .section li {
+  color: #555;
+  line-height: 1.6;
+}
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.infoGrid h4 {
+  color: #1a1a1a;
+  margin-bottom: 5px;
+}
+.placeholder {
+  color: #999;
+  font-style: italic;
+}
