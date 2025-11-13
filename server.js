@@ -95,7 +95,26 @@ const toolDefinitions = {
     },
   },
   extractUserChoice: { /* ... 定义 ... */ },
-  extractUserProfile: { /* ... 定义 ... */ },
+  
+  extractUserProfile: {
+    type: 'function',
+    function: {
+      name: 'extractUserProfile',
+      description: '根据用户的描述提取用户的基本信息。',
+      parameters: {
+        type: 'object',
+        properties: {
+          age: { type: 'string', description: '用户的年龄段' }, // 确保是 string
+          sexual: { type: 'string', description: '用户的性别' },
+          edu: { type: 'string', description: '用户的教育背景' },
+          work: { type: 'string', description: '用户的职业类型' },
+          equip: { type: 'string', description: '用户的智能设备使用熟练度' },
+        },
+        // 关键：这里不应该有 required 字段，因为它们都是可选的
+        // required: ['age', 'sexual', 'edu', 'work', 'equip'], // 确保没有这行或只包含必须字段
+      },
+    },
+  },
 };
 
 const taskConfigs = {
@@ -146,7 +165,7 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定他们想要解决的问题。
         你需要问用户：“你希望这个智能代理协助的助推机制想改变的问题是什么？”
         在用户回答后，分析他们的回答。如果回答清晰地描述了一个设计痛点，就使用 extractPainPoint 工具来提取这个信息。
-        成功提取后，你的最终回答必须是：“明白了，我已经了解你想聚焦的问题，这个方向很有意义。接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。点击右侧按钮进入下一步吧。”`;
+        成功提取后，你的最终回答必须是：“明白了，我已经了解你想聚焦的问题，这个方向很有意义。接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。点击右侧按钮进入下一步吧。”不要使用 Markdown 格式`;
   
       case 'getTargetStage':
         // (这里的逻辑暂时不变)
@@ -156,25 +175,57 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         在用户回答后，分析他们的回答并判断属于哪个阶段，然后使用 extractBehaviorStage 工具来提取这个信息。
         成功提取后，你的最终回答必须是：“很好，这样我们就更清楚你的设计目标了。接下来，让我们点击右侧按钮进入下一步吧。”`;
         
-        case 'recommendUserGroup': // Page 6 的任务
+      case 'recommendUserGroup': // Page 6 的任务
         return `你是一个辅助设计方案的陪伴者。你的任务是基于用户之前确定的设计目标，向他们推荐一个合适的用户群体。
         用户的设计目标是：“${additionalData.targetUser}”。
         你的回复应该是引导性的，例如：“根据你‘${additionalData.targetUser}’的目标，我为你推荐了几个可能的用户画像。你可以看看左边的卡片，选择一个最符合你想法的。”
-        保持友好和引导的语气。不要使用任何工具。`;
+        保持友好和引导的语气。不要使用任何工具。不要使用 Markdown 格式`;
 
 
 
-        case 'buildUserProfile': // Page 7 的任务
-        return `你是一个辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的用户画像。
+      case 'buildUserProfile': // Page 7 的任务
+    // ----------------------------------------------------------------
+    // 关键修改：移除固定流程，强调根据缺失字段提问
+    // ----------------------------------------------------------------
+        const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
+        const existingProfile = additionalData.userProfile || {};
+        
+        // 找出缺失的字段
+        const missingFields = requiredFields.filter(field => 
+            existingProfile[field] == null || existingProfile[field].trim() === ''
+        );
+        
+        let nextQuestionInstruction = '';
+        if (missingFields.length > 0) {
+            // 引导 AI 提问第一个缺失的字段
+            const nextMissingField = missingFields[0];
+            const fieldMap = {
+                'age': '年龄段',
+                'sexual': '性别',
+                'edu': '教育背景',
+                'work': '职业类型',
+                'equip': '智能设备使用熟练度'
+            };
+            nextQuestionInstruction = `你必须根据当前缺失的字段，向用户提出下一个问题。当前缺失的字段有：${missingFields.map(f => fieldMap[f]).join('、')}。你的下一个问题必须是关于**${fieldMap[nextMissingField]}**的。`;
+        } else {
+            nextQuestionInstruction = `所有信息已收集完毕。你的最终回复必须是：“非常好，我们已经为用户建立了详细的画像！点击下一步继续我们的设计之旅吧。”`;
+        }
+
+        return `你是一个友好且聪明的辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的用户画像。
+        
+        **【重要指令】在用户回答了你提出的任何一个画像字段后，你必须立即使用 \`extractUserProfile\` 工具来提取该信息。**
+        
         已知信息如下：
         - 用户的设计目标 (Target-User): "${additionalData.targetUser}"
         - 用户选择的画像卡片 (User): "${additionalData.user}"
-
-        你的流程应该是：
-        1. **分析已有信息**：基于以上两点，推断出一些基本信息（例如，提到“糖尿病患者”，可能年龄段偏大）。将这些推断出的信息作为预填写内容，并向用户确认：“根据我们已知的信息，我为你预填写了一些内容，看看是否准确？我们也可以随时修改。”
-        2. **逐一提问**：依次询问那些还**未知**的信息：年龄段、性别、教育背景、职业类型、智能设备使用熟练度。一次只问一个问题。
-        3. **提取信息**：在用户的每次回答后，使用 \`extractUserProfile\` 工具来提取对应的信息。你可以多次调用这个工具，每次只填充一部分字段。
-        4. **完成对话**：当所有五个字段（age, sexual, edu, work, equip）都被提取后，你的最终回复**必须**是：“非常好，我们已经为用户建立了详细的画像！点击下一步继续我们的设计之旅吧。”`;
+        - 当前已收集的画像信息: ${JSON.stringify(existingProfile)}
+        
+        你的回复必须遵循以下原则：
+        1. **如果用户提供了新的画像信息**：提取信息后，${nextQuestionInstruction}
+        2. **如果用户没有提供信息（例如首次加载或简单问候）**：你必须主动提出第一个缺失字段的问题。
+        3. **保持友好和引导的语气。**
+        4. **不要使用 Markdown 格式。**
+          ${nextQuestionInstruction}`; 
       default:
         return '你是一个乐于助人的助手。';
     }
@@ -211,7 +262,7 @@ app.post('/chat', async (req, res) => {
         const toolDefinition = toolDefinitions[taskConfig.toolName];
         if (toolDefinition) {
           requestData.tools = [toolDefinition];
-          requestData.tool_choice = 'none';
+          requestData.tool_choice = 'auto';
         }
       }
   
@@ -252,9 +303,44 @@ app.post('/chat', async (req, res) => {
               console.warn(`[BACKEND] 工具 ${name} 参数解析失败:`, parsedResult.error.flatten());
               continue;
             }
-            extractedData = taskConfig.transform(parsedResult.data);
-            isTaskComplete = true;
-            break;
+            
+            // ----------------------------------------------------------------
+            // 关键修改：针对 buildUserProfile 任务的特殊处理
+            // ----------------------------------------------------------------
+            if (task === 'buildUserProfile') {
+                // 1. 获取当前已有的画像数据 (从前端传递的 additionalData 中获取)
+                const existingProfile = additionalData.userProfile || {}; 
+                
+                // 2. 合并新提取的数据和已有数据
+                const newlyExtractedData = parsedResult.data;
+                const mergedProfile = { ...existingProfile, ...newlyExtractedData };
+                
+                // 3. 检查是否所有字段都已填充
+                const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
+                // 检查所有字段在 mergedProfile 中是否都有非空值
+                const allFieldsCollected = requiredFields.every(field => 
+                    mergedProfile[field] != null && mergedProfile[field].trim() !== ''
+                );
+
+                // 4. 设置返回数据
+                // 返回当前轮次提取到的数据，前端会负责合并
+                extractedData = taskConfig.transform(newlyExtractedData); 
+                
+                // 5. 只有当所有字段都收集完毕时，才设置 isTaskComplete 为 true
+                isTaskComplete = allFieldsCollected; 
+                
+                // 如果任务完成，设置最终回复
+                if (isTaskComplete) {
+                    finalResponseText = taskConfig.completionMessage;
+                }
+                
+            } else {
+                // 其他任务（如 getTargetUser, getTargetPainpoint）保持原有的简单逻辑
+                extractedData = taskConfig.transform(parsedResult.data);
+                isTaskComplete = true;
+            }
+            
+            break; // 退出循环，只处理第一个工具调用
           } catch (parseError) {
             console.warn(`[BACKEND] 工具 ${name} 参数 JSON 解析失败:`, parseError);
           }
@@ -262,10 +348,17 @@ app.post('/chat', async (req, res) => {
       }
 
       let finalResponseText = responseText;
+      
+      // ----------------------------------------------------------------
+      // 关键修改：移除固定回复逻辑，让 AI 的回复 (responseText) 成为最终回复
+      // ----------------------------------------------------------------
+      
+      // 只有在 AI 没有返回任何文本，但任务已完成时，才使用默认完成消息
       if (isTaskComplete && !finalResponseText) {
         finalResponseText = taskConfig?.completionMessage || '好的，我们已经完成了这一步。';
       }
 
+      // 如果 AI 仍然没有返回文本，则使用默认的“不理解”消息
       if (!finalResponseText) {
         finalResponseText = '抱歉，我暂时没有理解清楚，能再详细描述一下吗？';
       }
