@@ -76,48 +76,47 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
 
           {/* User Section (现在要显示卡片) */}
           <div className={styles.section}>
-            <h3>User</h3>
-            <p>这一部分定义你的设计对象...</p>
-            <div className={styles.cardDisplayArea}>
-              {renderSelectedCards(2)} {/* 5. 调用函数渲染 Stage 2 的卡片 */}
+            {/* 我们不再需要 h3 和 p 标签，因为它们已经画在背景图上了 */}
+            {/* <h3 >User</h3> */}
+            {/* <p>...</p> */}
+            {/* 1. 添加一个唯一的类名: styles.userCardArea */}
+            <div className={`${styles.cardDisplayArea} ${styles.userCardArea}`}>
+              {renderSelectedCards(2)}
             </div>
           </div>
 
           {/* Scenario Section */}
           <div className={styles.section}>
-            <h3>Scenario</h3>
-            <p>这一部分描绘设计发生的情境...</p>
-            <div className={styles.cardDisplayArea}>
-              {renderSelectedCards(3)} {/* 渲染 Stage 3 的卡片 */}
+            {/* 2. 添加唯一的类名: styles.scenarioCardArea */}
+            <div className={`${styles.cardDisplayArea} ${styles.scenarioCardArea}`}>
+              {renderSelectedCards(3)}
             </div>
           </div>
 
           {/* Mechanism Section */}
           <div className={styles.section}>
-            <h3>Mechanism</h3>
-            <p>这一部分展示你用于影响用户行为的核心策略...</p>
-            <div className={styles.cardDisplayArea}>
-              {renderSelectedCards(4)} {/* 渲染 Stage 4 的卡片 */}
+            {/* 3. 添加唯一的类名: styles.mechanismCardArea */}
+            <div className={`${styles.cardDisplayArea} ${styles.mechanismCardArea}`}>
+              {renderSelectedCards(4)}
             </div>
           </div>
 
           {/* Info Source Section */}
           <div className={styles.section}>
-            <h3>Info Source</h3>
-            <p>这一部分说明方案依托的数据与知识基础...</p>
-            <div className={styles.cardDisplayArea}>
-              {renderSelectedCards(5)} {/* 渲染 Stage 5 的卡片 */}
+            {/* 4. 添加唯一的类名: styles.infoSourceCardArea */}
+            <div className={`${styles.cardDisplayArea} ${styles.infoSourceCardArea}`}>
+              {renderSelectedCards(5)}
             </div>
           </div>
 
           {/* Mode Section */}
           <div className={styles.section}>
-            <h3>Mode</h3>
-            <p>这一部分定义设计与用户的交互方式...</p>
-            <div className={styles.cardDisplayArea}>
-              {renderSelectedCards(6)} {/* 渲染 Stage 6 的卡片 */}
+            {/* 5. 添加唯一的类名: styles.modeCardArea */}
+            <div className={`${styles.cardDisplayArea} ${styles.modeCardArea}`}>
+              {renderSelectedCards(6)}
             </div>
           </div>
+
 
           {/* --- ▲▲▲ 修改结束 ▲▲▲ --- */}
 

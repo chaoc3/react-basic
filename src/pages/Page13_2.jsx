@@ -1,21 +1,19 @@
 // src/pages/Page7_User_2.jsx
-
-
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-3-1.svg';
+import CardUser1 from '../assets/卡片背面/InfS-1-2.png';
+import CardUser2 from '../assets/卡片背面/InfS-2-2.png';
+import CardUser3 from '../assets/卡片背面/InfS-3-2.png';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文件
+import styles from './styles/Page13_InfS_2.module.css'; // 使用新的样式文件
 import { useTimeline } from '../context/TimelineContext';
 // 卡片数据定义，与 Page6 保持一致
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 1, component: <img src={CardUser1} alt="Info Source 1" />, name: '慢病患者' },
+  { id: 2, component: <img src={CardUser2} alt="Info Source 2" />, name: '健康风险人群' },
+  { id: 3, component: <img src={CardUser3} alt="Info Source 3" />, name: '心理健康群体' },
 ];
 
 const Page13_2 = () => {

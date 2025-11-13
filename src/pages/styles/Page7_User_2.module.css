@@ -11,7 +11,7 @@
   box-sizing: border-box;
   background-color: #f0f2f5;
   overflow: hidden;
-  background-image: url('../../assets/页面剩余素材/Page68101112131415页面.svg');
+  background-image: url('../../assets/背景带文字/Page7-User-2.svg');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -37,7 +37,7 @@
   /* 添加以下属性确保内容真正居中 */
   margin: -100px auto;
   padding: 0 0; /* 添加内边距避免贴边 */
-  bottom: -5%;
+  bottom: 0%;
 }
 /* --- END: 布局样式 --- */
 
@@ -58,17 +58,15 @@
 
 /* 单张卡片的样式 */
 .card {
-  /* 我们可以给它一个固定的尺寸或者使用 transform 来放大 */
-  width: 40%; 
-  /*    或者使用一个最大像素值，防止在大屏幕上变得过大 */
-  max-width: 400px; 
+  width: 40%;
+  max-width: 460px;
 }
 
-.card svg {
-
+.card img {
   width: 100%;
   height: auto;
   display: block;
+  object-fit: contain;
 }
 
 /* 下一步按钮的样式 (可以从 Page6 的 .selectButton 复制并重命名) */

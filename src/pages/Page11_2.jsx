@@ -16,7 +16,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 // 为了保证布局不变，我们复用同一个 CSS 文件
-import styles from './styles/Page6_User_1.module.css';
+import styles from './styles/Page11_Mec_2.module.css';
 import { useTimeline } from '../context/TimelineContext';
 
 const CURRENT_STAGE_ID = 4;

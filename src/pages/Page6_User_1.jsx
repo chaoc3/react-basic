@@ -5,7 +5,8 @@ import { useTimeline } from '../context/TimelineContext'; // Import the global s
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-
+import { useDesign } from '../context/DesignContext'; // 1. 导入 DesignContext
+import { getAiResponse } from '../services/aiService'; 
 // SVG Asset Imports
 import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
 import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
@@ -29,16 +30,29 @@ const Page6_User_1 = () => {
   
   // Get state management functions from the global TimelineContext
   const { setActiveStageId, setSingleCard, completeStage } = useTimeline();
-
+  const { designData, updateDesignData } = useDesign();
   // Local state for UI management
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState(null);
-
+  const [initialBotMessage, setInitialBotMessage] = useState("正在思考如何为你推荐..."); // 初始加载消息
   // On component mount, set the current stage in the timeline to active
   useEffect(() => {
     setActiveStageId(2); // This page corresponds to Stage 2 in the timeline
   }, [setActiveStageId]);
 
+  const fetchRecommendation = async () => {
+      if (designData.targetUser) {
+        const aiResult = await getAiResponse(
+          [], // 初始对话历史为空
+          'recommendUserGroup', // 任务名称
+          { targetUser: designData.targetUser } // 传入 Target-User
+        );
+        setInitialBotMessage(aiResult.responseText); // 更新 ChatDialog 的初始消息
+      } else {
+        // 如果没有 targetUser，提供一个默认消息
+        setInitialBotMessage("让我们一起确定你的设计对象吧！请在左侧选择一个用户画像。");
+      }
+    };
   // Handles clicking on a card to select it
   const handleCardClick = (cardId) => {
     setSelectedCardId(cardId);
@@ -49,6 +63,8 @@ const Page6_User_1 = () => {
   // Handles navigation to the next page
   const handleNextPage = () => {
     if (selectedCardId) {
+      const selectedCardName = cards.find(c => c.id === selectedCardId)?.name;
+      updateDesignData('user', selectedCardName); 
       // Mark Stage 2 as completed in the global state
       completeStage(2);
       // Navigate to Page 7, passing the selected card's ID
@@ -84,10 +100,7 @@ const Page6_User_1 = () => {
   };
 
   // Dummy functions for the ChatDialog component
-  const dummyOnSendMessage = async (input) => {
-    console.log(`User input (UI mode): ${input}`);
-    return { responseText: "This is a static reply." };
-  };
+  const dummyOnSendMessage = async (input) => ({ responseText: "请在左侧选择卡片后点击下方的按钮继续。" });
   const dummyOnDataExtracted = (data) => {
     console.log("Data extraction (UI mode). Received:", data);
   };
@@ -126,9 +139,10 @@ const Page6_User_1 = () => {
 
       <div className={styles.rightPanel}>
         <ChatDialog
-          initialBotMessage="让我们一起确定你的设计对象吧！你希望这个智能代理来帮助什么样的用户群体呢？"
+          key={initialBotMessage} // 使用 key 来强制重新渲染
+          initialBotMessage={initialBotMessage}
           onSendMessage={dummyOnSendMessage}
-          onDataExtracted={dummyOnDataExtracted}
+          // 这个页面不提取数据
         />
       </div>
     </div>

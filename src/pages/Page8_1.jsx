@@ -11,7 +11,7 @@ import React, { useState,useEffect  } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-import styles from './styles/Page6_User_1.module.css';
+import styles from './styles/Page8_Scenario_1.module.css';
 import { useTimeline } from '../context/TimelineContext';
 
 

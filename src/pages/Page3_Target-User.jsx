@@ -8,10 +8,9 @@ import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
 import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg';
 import Page16_Sum from './Page16_Sum';
-import { useDesign } from '../context/DesignContext'; 
+import { useDesign } from '../context/DesignContext';
 
-
-// getAiResponse 函数保持不变，它依然负责与后端通信
+// MODIFICATION START: 更新 getAiResponse 以处理新的后端响应
 const getAiResponse = async (userInput, currentMessages) => {
   console.log("1. [FRONTEND] 开始调用 getAiResponse 函数...");
 
@@ -19,11 +18,13 @@ const getAiResponse = async (userInput, currentMessages) => {
     role: msg.sender === 'user' ? 'user' : 'assistant',
     content: msg.text,
   }));
-  messagesForApi.push({ role: 'user', content: userInput });
+  // 注意：根据 Vercel AI SDK 的标准，通常不需要将当前用户输入再次添加到数组中
+  // 但如果你的 ChatDialog 组件没有这样做，这里的 push 就是必要的
+  // messagesForApi.push({ role: 'user', content: userInput });
 
   const requestBody = {
     messages: messagesForApi,
-    task: 'getTargetUser'
+    task: 'getTargetUser' // 明确告知后端当前任务
   };
 
   console.log("2. [FRONTEND] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
@@ -31,58 +32,56 @@ const getAiResponse = async (userInput, currentMessages) => {
   try {
     const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
     });
 
-    console.log("3. [FRONTEND] 收到来自后端的原始响应:", response);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`4. [FRONTEND] API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
+      console.error(`API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
       throw new Error(`API request failed with status ${response.status}`);
     }
 
     const data = await response.json();
     console.log("4. [FRONTEND] 成功解析后端的 JSON 数据:", data);
     
-    return {
-      responseText: data.responseText,
-      extractedData: data.extractedData,
-    };
+    // 返回完整的响应对象
+    return data;
 
   } catch (error) {
     console.error("5. [FRONTEND] 在 fetch 或解析 JSON 时捕获到严重错误:", error);
     return {
-      responseText: "抱歉，网络连接或服务器似乎出了点问题，请检查控制台信息。",
+      responseText: "抱歉，网络连接或服务器似乎出了点问题，请稍后再试。",
       extractedData: null,
+      isTaskComplete: false, // 出错时任务肯定未完成
     };
   }
 };
+// MODIFICATION END
 
 
 const Page3_TargetUser = () => {
   const navigate = useNavigate();
   const { updateDesignData } = useDesign();
   
-  // --- 修改 1: 移除了 isTaskComplete 状态 ---
-  // const [isTaskComplete, setIsTaskComplete] = useState(false); 
-  
-  const [extractedUserData, setExtractedUserData] = useState(null);
   const [isSumOpen, setIsSumOpen] = useState(false);
   const [sumEntryPoint, setSumEntryPoint] = useState('');
 
-  const handleDataExtracted = (data) => {
-    console.log("任务完成，提取到的数据:", data);
-    // 即使按钮可以随时点击，我们仍然需要保存 AI 返回的数据
-    updateDesignData('targetUser', data); 
-    setExtractedUserData(data);
+  // MODIFICATION START: 添加处理任务完成的函数
+  const handleTaskComplete = (data) => {
+    console.log("任务完成，准备跳转。提取到的数据:", data);
     
-    // --- 修改 2: 移除了 setIsTaskComplete 的调用 ---
-    // setIsTaskComplete(true);
+    // 1. 更新全局状态
+    if (data && data.targetUser) {
+      updateDesignData('targetUser', data.targetUser);
+    }
+
+    // 2. 延迟跳转，给用户阅读反馈的时间
+    setTimeout(() => {
+      navigate('/target-painpoint'); // 跳转到下一页
+    }, 1500); // 延迟1.5秒
   };
+  // MODIFICATION END
   
   const handleOpenSum = (entry) => {
     setSumEntryPoint(entry);
@@ -96,8 +95,8 @@ const Page3_TargetUser = () => {
     }
   };
 
+  // 这个手动下一页的按钮仍然可以保留，作为AI无法正确识别时的备用方案
   const handleNext = () => {
-    // 这个函数现在可以无条件地被调用
     navigate('/target-painpoint'); 
   };
 
@@ -116,13 +115,13 @@ const Page3_TargetUser = () => {
         <div className={styles.chatWrapper}>
           <ChatDialog 
             initialBotMessage="你希望这个智能代理来帮助什么样的用户群体呢？可以用一句话告诉我，他们是谁、正在经历什么。"
-            onSendMessage={getAiResponse}
-            onDataExtracted={handleDataExtracted}
+            getAiResponse={getAiResponse} // MODIFICATION: 更改了 prop 名称以匹配函数
+            onTaskComplete={handleTaskComplete} // MODIFICATION: 传入新的回调函数
           />
         </div>
       </div>
 
-      {/* --- 修改 3: 移除了 ArrowButton 的 disabled 属性 --- */}
+      {/* 这个按钮现在是备用方案 */}
       <ArrowButton onClick={handleNext} />
       
       <Page16_Sum 

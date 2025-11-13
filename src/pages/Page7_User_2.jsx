@@ -6,10 +6,10 @@ import { useTimeline } from '../context/TimelineContext'; // Import the global s
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 
-// SVG Asset Imports
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
+// Card Asset Imports (Back Side PNGs)
+import CardUser1 from '../assets/卡片背面/User-1-2.png';
+import CardUser2 from '../assets/卡片背面/User-2-2.png';
+import CardUser3 from '../assets/卡片背面/User-3-2.png';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
 
 // CSS Module Import
@@ -17,9 +17,9 @@ import styles from './styles/Page7_User_2.module.css';
 
 // Card data definition (must be consistent with Page 6)
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { id: 1, component: <img src={CardUser1} alt="慢病患者" />, name: '慢病患者' },
+  { id: 2, component: <img src={CardUser2} alt="健康风险人群" />, name: '健康风险人群' },
+  { id: 3, component: <img src={CardUser3} alt="心理健康群体" />, name: '心理健康群体' },
 ];
 
 const Page7_User_2 = () => {

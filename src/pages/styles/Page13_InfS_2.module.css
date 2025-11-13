@@ -1,0 +1,77 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  background-color: #f0f2f5;
+  overflow: hidden;
+  background-image: url('../../assets/背景带文字/Page13-InfS-2.svg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.leftPanel {
+  width: 15%;
+  height: 90%;
+}
+
+.rightPanel {
+  width: 32%;
+  height: 92%;
+}
+
+.mainContent {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: -100px auto;
+  padding: 0 0;
+  bottom: 0%;
+}
+
+.cardDisplay {
+  display: flex;
+  justify-content: center;
+  align-items: normal;
+  flex-grow: 1;
+  width: 100%;
+  top: 20%;
+  margin-top: 32vh;
+}
+
+.card {
+  width: 40%;
+  max-width: 460px;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.nextButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 2rem;
+  transition: transform 0.2s ease-in-out, opacity 0.3s ease;
+}
+
+.nextButton:hover {
+  transform: scale(1.05);
+}
+
+.nextButton svg {
+  display: block;
+}
+

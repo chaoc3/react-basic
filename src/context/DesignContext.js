@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 
 // 1. Create the context
 const DesignContext = createContext();
@@ -9,7 +9,14 @@ export const DesignProvider = ({ children }) => {
   const [designData, setDesignData] = useState({
     targetUser: null,       // From Page 3
     targetPainpoint: null,  // From Page 4
-    targetStage: null,      // From Page 5
+    targetStage: null,  
+    userProfile: {
+      age: null,
+      sexual: null,
+      edu: null,
+      work: null,
+      equip: null,
+    },    // From Page 5
     userCard: null,         // From Page 6 (e.g., { id: 1, name: '慢病患者' })
     userDetails: null,      // From Page 7 (e.g., { age: 25, gender: 'Male' })
     scenarioCard: null,     // From Page 8
@@ -23,13 +30,20 @@ export const DesignProvider = ({ children }) => {
   });
 
   // A single function to update any part of the design data
-  const updateDesignData = (key, value) => {
-    setDesignData((prevData) => ({
-      ...prevData,
-      [key]: value,
-    }));
-    console.log('Design data updated:', { [key]: value });
-  };
+  const updateDesignData = useCallback((key, value) => {
+    setDesignData(prevData => {
+      // 如果 key 是 userProfile，则合并对象
+      if (key === 'userProfile') {
+        return {
+          ...prevData,
+          userProfile: { ...prevData.userProfile, ...value },
+        };
+      }
+      // 否则，直接更新
+      return { ...prevData, [key]: value };
+    });
+  }, []);
+
 
   // The value provided to consuming components
   const value = { designData, updateDesignData };

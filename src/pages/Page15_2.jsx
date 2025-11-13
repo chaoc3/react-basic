@@ -1,22 +1,22 @@
 // src/pages/Page15_2.jsx
 
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-3-1.svg';
-import { ReactComponent as CardUser4 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-4-1.svg';
+import CardUser1 from '../assets/卡片背面/Mod-1-2.png';
+import CardUser2 from '../assets/卡片背面/Mod-2-2.png';
+import CardUser3 from '../assets/卡片背面/Mod-3-2.png';
+import CardUser4 from '../assets/卡片背面/Mod-4-2.png';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import Page16_Sum from './Page16_Sum';
-import styles from './styles/Page7_User_2.module.css';
+import styles from './styles/Page15_Mod_2.module.css';
 import { useTimeline } from '../context/TimelineContext';
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
-  { id: 4, component: <CardUser4 />, name: '心理健康群体'}
+  { id: 1, component: <img src={CardUser1} alt="Mode 1" />, name: '慢病患者' },
+  { id: 2, component: <img src={CardUser2} alt="Mode 2" />, name: '健康风险人群' },
+  { id: 3, component: <img src={CardUser3} alt="Mode 3" />, name: '心理健康群体' },
+  { id: 4, component: <img src={CardUser4} alt="Mode 4" />, name: '心理健康群体'}
 ];
 
 const Page15_2 = () => {

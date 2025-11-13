@@ -7,27 +7,31 @@ import './ChatDialog.css';
  * ChatDialog Component
  * @param {object} props
  * @param {string} props.initialBotMessage - The first message the bot displays.
- * @param {function} props.onSendMessage - An async function to call when the user sends a message. It receives the user's text and should return the bot's response.
- * @param {function} props.onDataExtracted - A callback function that gets triggered when the API returns specific data, signaling a task is complete.
+ * @param {function} props.getAiResponse - An async function that takes user input and message history, and returns an object: { responseText, extractedData, isTaskComplete }.
+ * @param {function} props.onTaskComplete - A callback function triggered when the AI signals the task is complete. It receives the extracted data.
  */
-function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
-  // 1. 状态管理
+// MODIFICATION 1: Renamed props for clarity and to match the new architecture.
+function ChatDialog({ initialBotMessage, getAiResponse, onTaskComplete }) {
+  // 1. 状态管理 (No changes here)
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null); // 用于自动滚动到最新消息
+  const messagesEndRef = useRef(null);
 
-  // 2. 自动滚动功能
+  // 2. 自动滚动功能 (No changes here)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [messages]); // 每当 messages 更新时，执行滚动
+  useEffect(scrollToBottom, [messages]);
 
-  // 3. 设置初始机器人消息
+  // 3. 设置初始机器人消息 (No changes here)
   useEffect(() => {
-    setMessages([{ id: Date.now(), sender: 'bot', text: initialBotMessage }]);
-  }, [initialBotMessage]);
+    // Added a check to prevent re-adding the initial message on re-renders
+    if (messages.length === 0) {
+      setMessages([{ id: Date.now(), sender: 'bot', text: initialBotMessage }]);
+    }
+  }, [initialBotMessage, messages.length]);
 
   // 4. 处理用户提交
   const handleSubmit = async (event) => {
@@ -36,31 +40,34 @@ function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
 
     const userMessage = { id: Date.now(), sender: 'user', text: userInput };
     
-    // 立即更新UI，显示用户消息
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    // We'll pass the *updated* message list to the API function
+    const updatedMessages = [...messages, userMessage];
+    
+    setMessages(updatedMessages);
     setUserInput('');
     setIsLoading(true);
 
     try {
       // 5. 调用父组件传入的API函数
-      const apiResponse = await onSendMessage(userInput, messages);
+      // MODIFICATION 2: The function is now called `getAiResponse` and it receives the most current message list.
+      const apiResponse = await getAiResponse(userInput, updatedMessages); 
       const botMessage = { id: Date.now() + 1, sender: 'bot', text: apiResponse.responseText };
 
-      // 更新UI，显示机器人回复
       setMessages(prevMessages => [...prevMessages, botMessage]);
 
-      // 6. 如果API返回了需要的数据，则通知父组件
-      if (apiResponse.extractedData) {
-        onDataExtracted(apiResponse.extractedData);
+      // MODIFICATION 3: This is the core logic change.
+      // We now check for the `isTaskComplete` flag from the backend.
+      // If it's true, we call the `onTaskComplete` callback with the extracted data.
+      if (apiResponse.isTaskComplete && onTaskComplete) {
+        onTaskComplete(apiResponse.extractedData);
       }
 
     } catch (error) {
-      console.error("API call failed:", error);
-      const userFriendlyErrorMessage = `抱歉，处理您的请求时发生错误: ${error.message}`;
+      console.error("API call failed in ChatDialog:", error);
       const errorMessage = { 
         id: Date.now() + 1, 
         sender: 'bot', 
-        text: userFriendlyErrorMessage // 确保这里是一个字符串
+        text: "抱歉，我这边好像出了一点问题，请稍后再试。"
       };
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
@@ -68,6 +75,7 @@ function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
     }
   };
 
+  // The JSX remains the same.
   return (
     <div className="chat-dialog-container">
       <div className="messages-list">
@@ -79,17 +87,14 @@ function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
             {message.text}
           </div>
         ))}
-        {/* 当机器人正在 "思考" 时显示加载提示 */}
         {isLoading && (
           <div className="chat-message bot-message typing-indicator">
             <span></span><span></span><span></span>
           </div>
         )}
-        {/* 空 div 用于自动滚动定位 */}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 真实的输入表单 */}
       <form className="chat-input-area" onSubmit={handleSubmit}>
         <input
           type="text"
@@ -97,7 +102,7 @@ function ChatDialog({ initialBotMessage, onSendMessage, onDataExtracted }) {
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="请在这里输入..."
-          disabled={isLoading} // 加载时禁用输入框
+          disabled={isLoading}
         />
         <button type="submit" className="send-button" disabled={isLoading}>
           发送

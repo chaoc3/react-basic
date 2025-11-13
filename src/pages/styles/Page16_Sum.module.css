@@ -111,3 +111,72 @@
   color: #999;
   font-style: italic;
 }
+
+.textOverlay {
+  position: absolute; /* 必须是 absolute 或 relative */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* 这个容器现在是所有卡片区域的定位“锚点” */
+}
+
+/* 2. 为所有卡片展示区设置基础样式 */
+.cardDisplayArea {
+  position: absolute; /* 让我们可以用 top/left 来定位它 */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* 如果一个区域有多张卡片，它们之间的间距 */
+}
+
+/* 3. 单个卡片的大小控制 */
+.summaryCard {
+  /* ▼▼▼ 在这里调整卡片的大小 ▼▼▼ */
+  width: 160px; /* 例如，设置卡片宽度为 120px */
+  height: auto; /* 高度自适应 */
+  aspect-ratio: 2.6 / 4; /* 保持 3:4 的宽高比，可以根据你的卡片设计调整 */
+  /* ▲▲▲ 调整结束 ▲▲▲ */
+  
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.summaryCard svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+
+/* 4. 【最关键的一步】为每个区域设置精确的位置 */
+/* ▼▼▼ 在这里调整每个区域的位置 ▼▼▼ */
+
+.userCardArea {
+  top: 20%;   /* 距离顶部 25% */
+  left: 12%;  /* 距离左侧 10% */
+  width: 300px; /* 可以限制这个区域的最大宽度 */
+}
+
+.scenarioCardArea {
+  top: 37%;
+  left: 12%;
+}
+
+.mechanismCardArea {
+  top: 53%;
+  left: 12%;
+  width: 400px; /* 比如这个区域可以更宽以容纳更多卡片 */
+}
+
+.infoSourceCardArea {
+  top: 69%;
+  left: 12%;
+}
+
+.modeCardArea {
+  top: 85%;
+  left: 12%;
+}
+
+/* ▲▲▲ 调整结束 ▲▲▲ */

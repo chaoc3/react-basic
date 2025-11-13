@@ -1,27 +1,26 @@
 // src/pages/Page7_User_2.jsx
 
-import { ReactComponent as CardScenario1 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-1-1.svg';
-import { ReactComponent as CardScenario2 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-2-1.svg';
-import { ReactComponent as CardScenario3 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-3-1.svg';
-import { ReactComponent as CardScenario4 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-4-1.svg';
-import { ReactComponent as CardScenario5 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-5-1.svg';
-import { ReactComponent as CardScenario6 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
+import CardScenario1 from '../assets/卡片背面/Scenario-1-2.png';
+import CardScenario2 from '../assets/卡片背面/Scenario-2-2.png';
+import CardScenario3 from '../assets/卡片背面/Scenario-3-2.png';
+import CardScenario4 from '../assets/卡片背面/Scenario-4-2.png';
+import CardScenario5 from '../assets/卡片背面/Scenario-5-2.png';
+import CardScenario6 from '../assets/卡片背面/Scenario-6-2.png';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; // 假设 "Next" 按钮是同一个
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-import styles from './styles/Page7_User_2.module.css'; // 使用新的样式文件
+import styles from './styles/Page9_Scenario_2.module.css'; // 使用新的样式文件
 import { useTimeline } from '../context/TimelineContext';
 // 卡片数据定义，与 Page6 保持一致
 const cards = [
-  { id: 1, component: <CardScenario1 />, name: '慢病患者' },
-  { id: 2, component: <CardScenario2 />, name: '健康风险人群' },
-  { id: 3, component: <CardScenario3 />, name: '心理健康群体' },
-  { id: 4, component: <CardScenario4 />, name: '心理健康群体' },
-  { id: 5, component: <CardScenario5 />, name: '心理健康群体' },
-  { id: 6, component: <CardScenario6 />, name: '心理健康群体' },
-  
+  { id: 1, component: <img src={CardScenario1} alt="Scenario 1" />, name: '慢病患者' },
+  { id: 2, component: <img src={CardScenario2} alt="Scenario 2" />, name: '健康风险人群' },
+  { id: 3, component: <img src={CardScenario3} alt="Scenario 3" />, name: '心理健康群体' },
+  { id: 4, component: <img src={CardScenario4} alt="Scenario 4" />, name: '心理健康群体' },
+  { id: 5, component: <img src={CardScenario5} alt="Scenario 5" />, name: '心理健康群体' },
+  { id: 6, component: <img src={CardScenario6} alt="Scenario 6" />, name: '心理健康群体' },
 ];
 
 const Page9_Scenario_2 = () => {
