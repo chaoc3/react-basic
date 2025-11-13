@@ -7,10 +7,14 @@ const DesignContext = createContext();
 export const DesignProvider = ({ children }) => {
   // This state will hold all the data from the entire flow
   const [designData, setDesignData] = useState({
-    targetUser: "需要长期自我管理血糖的年轻糖尿病患者",       
+    /* targetUser: "需要长期自我管理血糖的年轻糖尿病患者",       
     
     targetPainpoint: "难以坚持每日测量血糖",  // 模拟 Page 4
-    targetStage: "行为促进阶段",  
+    targetStage: "行为促进阶段",   */
+    targetUser: null,       
+    
+    targetPainpoint: null,  // 模拟 Page 4
+    targetStage: null,
     userProfile: {
       age: null,
       sexual: null,
