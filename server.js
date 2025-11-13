@@ -211,7 +211,7 @@ app.post('/chat', async (req, res) => {
         const toolDefinition = toolDefinitions[taskConfig.toolName];
         if (toolDefinition) {
           requestData.tools = [toolDefinition];
-          requestData.tool_choice = 'auto';
+          requestData.tool_choice = 'none';
         }
       }
   
