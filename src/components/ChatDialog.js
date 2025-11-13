@@ -1,4 +1,4 @@
-// src/components/ChatDialog.js
+// ChatDialog.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatDialog.css';
@@ -7,60 +7,74 @@ import './ChatDialog.css';
  * ChatDialog Component
  * @param {object} props
  * @param {string} props.initialBotMessage - The first message the bot displays.
- * @param {function} props.getAiResponse - An async function that takes user input and message history, and returns an object: { responseText, extractedData, isTaskComplete }.
- * @param {function} props.onTaskComplete - A callback function triggered when the AI signals the task is complete. It receives the extracted data.
+ * @param {function} props.getAiResponse - An async function that takes (userInput, messageHistory) and returns a full API response object. // <--- 更改注释
+ * @param {function} props.onDataExtracted - A callback for when the AI extracts data.
+ * @param {function} props.onTaskComplete - A callback for when the AI signals the task is complete.
  */
-// MODIFICATION 1: Renamed props for clarity and to match the new architecture.
-function ChatDialog({ initialBotMessage, getAiResponse, onTaskComplete }) {
-  // 1. 状态管理 (No changes here)
+// 更改函数签名，将 onSendMessage 替换为 getAiResponse
+function ChatDialog({ initialBotMessage, getAiResponse, onDataExtracted, onTaskComplete }) {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // 2. 自动滚动功能 (No changes here)
+  // 自动滚动功能 (无需修改)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [messages]);
 
-  // 3. 设置初始机器人消息 (No changes here)
+  // 设置初始机器人消息 (无需修改)
   useEffect(() => {
-    // Added a check to prevent re-adding the initial message on re-renders
-    if (messages.length === 0) {
+    if (messages.length === 0 && initialBotMessage) {
       setMessages([{ id: Date.now(), sender: 'bot', text: initialBotMessage }]);
     }
   }, [initialBotMessage, messages.length]);
 
-  // 4. 处理用户提交
+  // 处理用户提交的核心逻辑
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!userInput.trim() || isLoading) return;
 
     const userMessage = { id: Date.now(), sender: 'user', text: userInput };
     
-    // We'll pass the *updated* message list to the API function
-    const updatedMessages = [...messages, userMessage];
-    
-    setMessages(updatedMessages);
+    // 立即将用户消息显示在界面上
+    const currentMessages = [...messages, userMessage];
+    setMessages(currentMessages);
     setUserInput('');
     setIsLoading(true);
 
     try {
-      // 5. 调用父组件传入的API函数
-      // MODIFICATION 2: The function is now called `getAiResponse` and it receives the most current message list.
-      const apiResponse = await getAiResponse(userInput, updatedMessages); 
-      const botMessage = { id: Date.now() + 1, sender: 'bot', text: apiResponse.responseText };
+      // --- ▼▼▼ 关键修改 1: 调用 getAiResponse ▼▼▼ ---
+      // 调用 getAiResponse，而不是 onSendMessage
+      const apiResponse = await getAiResponse(userInput, messages); 
+      // --- ▲▲▲ 修改结束 ▲▲▲ ---
 
+      // 确保我们收到了一个有效的响应
+      if (!apiResponse || typeof apiResponse.responseText !== 'string') {
+        throw new Error("Invalid API response structure");
+      }
+
+      const botMessage = { id: Date.now() + 1, sender: 'bot', text: apiResponse.responseText };
+      
+      // 将机器人的回复添加到消息列表
       setMessages(prevMessages => [...prevMessages, botMessage]);
 
-      // MODIFICATION 3: This is the core logic change.
-      // We now check for the `isTaskComplete` flag from the backend.
-      // If it's true, we call the `onTaskComplete` callback with the extracted data.
-      if (apiResponse.isTaskComplete && onTaskComplete) {
-        onTaskComplete(apiResponse.extractedData);
+      // --- ▼▼▼ 关键修改 2: 数据处理逻辑 ▼▼▼ ---
+      // 这个逻辑现在更加清晰，因为它直接处理从 onSendMessage 返回的完整对象。
+
+      // 1. 检查是否有提取出的数据，并调用 onDataExtracted
+      // 这个回调应该在每次AI返回数据时都检查，而不仅仅是在任务完成时
+      if (apiResponse.extractedData && onDataExtracted) {
+        onDataExtracted(apiResponse.extractedData);
       }
+
+      // 2. 检查任务是否完成，并调用 onTaskComplete
+      if (apiResponse.isTaskComplete && onTaskComplete) {
+        onTaskComplete(apiResponse.extractedData); // 任务完成时，将提取的数据传回给父组件
+      }
+      // --- ▲▲▲ 修改结束 ▲▲▲ ---
 
     } catch (error) {
       console.error("API call failed in ChatDialog:", error);
@@ -75,7 +89,7 @@ function ChatDialog({ initialBotMessage, getAiResponse, onTaskComplete }) {
     }
   };
 
-  // The JSX remains the same.
+  // JSX 渲染部分 (无需修改)
   return (
     <div className="chat-dialog-container">
       <div className="messages-list">

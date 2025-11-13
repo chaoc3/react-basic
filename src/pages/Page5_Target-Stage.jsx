@@ -1,4 +1,4 @@
-// src/pages/Page3_Target-User.jsx
+// src/pages/Page5_TargetStage.jsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,54 +7,53 @@ import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
 import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg';
+import { useDesign } from '../context/DesignContext'; 
 
-// (getAiResponse function remains the same...)
-const getAiResponse = async (userInput, currentMessages) => {
-  console.log("1. [FRONTEND] 开始调用 getAiResponse 函数...");
+// 为 Page5 创建一个专门的 API 调用函数
+const getAiResponseForStage = async (userInput, currentMessages) => {
+  console.log("1. [FRONTEND-P5] 开始调用 getAiResponseForStage 函数...");
 
+  // 消息历史处理：将当前用户输入添加到消息列表
   const messagesForApi = currentMessages.map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'assistant',
     content: msg.text,
   }));
   messagesForApi.push({ role: 'user', content: userInput });
 
+  // 关键修改：将 task 设置为 'getTargetStage'
   const requestBody = {
     messages: messagesForApi,
-    task: 'getTargetUser'
+    task: 'getTargetStage' 
   };
 
-  console.log("2. [FRONTEND] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
+  console.log("2. [FRONTEND-P5] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
 
   try {
+    // API 请求部分保持不变
     const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
     });
 
-    console.log("3. [FRONTEND] 收到来自后端的原始响应:", response);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`4. [FRONTEND] API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
+      console.error(`API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
       throw new Error(`API request failed with status ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("4. [FRONTEND] 成功解析后端的 JSON 数据:", data);
+    console.log("4. [FRONTEND-P5] 成功解析 JSON:", data);
     
-    return {
-      responseText: data.responseText,
-      extractedData: data.extractedData,
-    };
+    // 返回完整的响应对象，包括 isTaskComplete
+    return data;
 
   } catch (error) {
-    console.error("5. [FRONTEND] 在 fetch 或解析 JSON 时捕获到严重错误:", error);
-    return {
-      responseText: "抱歉，网络连接或服务器似乎出了点问题，请检查控制台信息。",
+    console.error("5. [FRONTEND-P5] 捕获到严重错误:", error);
+    return { 
+      responseText: "抱歉，网络连接或服务器似乎出了点问题，请稍后再试。", 
       extractedData: null,
+      isTaskComplete: false,
     };
   }
 };
@@ -62,19 +61,38 @@ const getAiResponse = async (userInput, currentMessages) => {
 
 const Page5_TargetStage = () => {
   const navigate = useNavigate();
-  // 👇👇👇 修改这里：将 useState 的初始值从 false 改为 true 👇👇👇
-  const [isTaskComplete, setIsTaskComplete] = useState(true);
-  const [extractedUserData, setExtractedUserData] = useState(null);
+  const { updateDesignData } = useDesign(); 
+  const [isTaskComplete, setIsTaskComplete] = useState(false); // 初始值应为 false
 
-  const handleDataExtracted = (data) => {
-    console.log("任务完成，提取到的数据:", data);
-    setExtractedUserData(data);
-    setIsTaskComplete(true);
+  // MODIFICATION START: 实现 handleTaskComplete
+  const handleTaskComplete = (data) => {
+    console.log("P5 任务完成，准备跳转。提取到的数据:", data);
+    
+    // 1. 更新全局状态 (使用后端返回的 targetStage 字段)
+    if (data && data.targetStage) {
+      updateDesignData('targetStage', data.targetStage);
+      setIsTaskComplete(true); // 标记任务完成，启用按钮
+    }
+
+    // 2. 延迟跳转，给用户阅读反馈的时间
+    setTimeout(() => {
+      navigate('/page6'); // 跳转到下一页 Page6
+    }, 1500); // 延迟1.5秒
   };
+  // MODIFICATION END
   
+  // 备用跳转函数
   const handleNext = () => {
-    navigate('/page6');
+    navigate('/user-select-1'); // 假设 Page6 的路由是 /user-select-1
   };
+
+  // 初始消息：需要向用户介绍三个阶段
+  const initialBotMessage = `接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。我这里有三个阶段供你参考：
+  1. 意识提升阶段 - 让用户开始意识到健康问题的重要性。
+  2. 行为促进阶段 - 推动用户开始采取具体健康行为。
+  3. 行为增强阶段 - 帮助用户维持并强化健康行为。
+  你觉得你的设计想聚焦在哪个阶段呢？可以和我聊聊你的想法。`;
+
 
   return (
     <div className={styles.pageContainer}
@@ -83,26 +101,26 @@ const Page5_TargetStage = () => {
 
       <div className={styles.mainContent}>
 
-        {/* 顶部气泡文字 */}
+        {/* MODIFICATION START: 更新气泡标题和提示词以匹配需求文档 Page 4 */}
         <div className={styles.titleBubble}>
           <p style={{ fontWeight: 'bold' }}>让我们一起确定你的设计目标吧!</p>
-          <p>你希望这个智能代理来帮助什么样的用户群体呢？可以用一句话告诉我,他们是谁、正在经历什么。</p>
+          <p>接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。我这里有三个阶段供你参考:意识提升阶段、行为促进阶段、行为增强阶段。你觉得你的设计想聚焦在哪个阶段呢?可以和我聊聊你的想法。</p>
         </div>
+        {/* MODIFICATION END */}
 
         {/* 聊天框容器 */}
         <div className={styles.chatWrapper}>
           <ChatDialog 
-            initialBotMessage="请描述想达到的行为改变效果并确定最终的行为阶段"
-            onSendMessage={getAiResponse}
-            onDataExtracted={handleDataExtracted}
+            // MODIFICATION: 统一属性名为 getAiResponse
+            getAiResponse={getAiResponseForStage}
+            // MODIFICATION: 传入新的回调函数
+            onTaskComplete={handleTaskComplete}
+            initialBotMessage={initialBotMessage}
           />
         </div>
       </div>
       
-      {/* 
-        因为 isTaskComplete 初始值为 true，这个按钮将不再是 disabled 状态。
-        `disabled={!isTaskComplete}` 会被计算为 `disabled={!true}` 即 `disabled={false}`
-      */}
+      {/* 按钮现在由 handleTaskComplete 自动触发跳转，这里作为备用 */}
       <ArrowButton onClick={handleNext} disabled={!isTaskComplete} />
     </div>
   );

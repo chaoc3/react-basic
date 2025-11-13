@@ -20,9 +20,24 @@ import styles from './styles/Page6_User_1.module.css';
 
 // Card data definition
 const cards = [
-  { id: 1, component: <CardUser1 />, name: '慢病患者' },
-  { id: 2, component: <CardUser2 />, name: '健康风险人群' },
-  { id: 3, component: <CardUser3 />, name: '心理健康群体' },
+  { 
+    id: 1, 
+    component: <CardUser1 />, 
+    name: '慢病患者',
+    description: '已确诊慢性疾病，需要长期自我管理与治疗依从性支持的人群。' 
+  },
+  { 
+    id: 2, 
+    component: <CardUser2 />, 
+    name: '健康风险人群',
+    description: '具有较高健康风险因素（如不良生活习惯、家族病史），需要预防性干预和健康教育的人群。'
+  },
+  { 
+    id: 3, 
+    component: <CardUser3 />, 
+    name: '心理健康群体',
+    description: '面临压力、焦虑等心理健康挑战，需要情绪支持和应对策略引导的人群。'
+  },
 ];
 
 const Page6_User_1 = () => {
@@ -64,11 +79,13 @@ const Page6_User_1 = () => {
   const handleNextPage = () => {
     if (selectedCardId) {
       const selectedCardName = cards.find(c => c.id === selectedCardId)?.name;
-      updateDesignData('user', selectedCardName); 
+      if (selectedCardName) {
+        updateDesignData('user', selectedCardName);
+      }
       // Mark Stage 2 as completed in the global state
       completeStage(2);
       // Navigate to Page 7, passing the selected card's ID
-      navigate('/page7', { state: { selectedId: selectedCardId } });
+      navigate('/page7');
     }
   };
 
@@ -100,7 +117,7 @@ const Page6_User_1 = () => {
   };
 
   // Dummy functions for the ChatDialog component
-  const dummyOnSendMessage = async (input) => ({ responseText: "请在左侧选择卡片后点击下方的按钮继续。" });
+  const dummyGetAiResponse = async (input) => ({ responseText: "请在左侧选择卡片后点击下方的按钮继续。" });
   const dummyOnDataExtracted = (data) => {
     console.log("Data extraction (UI mode). Received:", data);
   };
@@ -141,7 +158,8 @@ const Page6_User_1 = () => {
         <ChatDialog
           key={initialBotMessage} // 使用 key 来强制重新渲染
           initialBotMessage={initialBotMessage}
-          onSendMessage={dummyOnSendMessage}
+          // 关键修改：将 onSendMessage 替换为 getAiResponse
+          getAiResponse={dummyGetAiResponse} 
           // 这个页面不提取数据
         />
       </div>

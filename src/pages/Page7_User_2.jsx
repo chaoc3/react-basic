@@ -1,96 +1,134 @@
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useTimeline } from '../context/TimelineContext'; // Import the global state hook
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTimeline } from '../context/TimelineContext';
+import { useDesign } from '../context/DesignContext';
+import { getAiResponse } from '../services/aiService';
 
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
-
-// Card Asset Imports (Back Side PNGs)
-import CardUser1 from '../assets/卡片背面/User-1-2.png';
-import CardUser2 from '../assets/卡片背面/User-2-2.png';
-import CardUser3 from '../assets/卡片背面/User-3-2.png';
+import UserProfileCard from '../components/UserProfileCard';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
 
 // CSS Module Import
 import styles from './styles/Page7_User_2.module.css';
 
-// Card data definition (must be consistent with Page 6)
-const cards = [
-  { id: 1, component: <img src={CardUser1} alt="慢病患者" />, name: '慢病患者' },
-  { id: 2, component: <img src={CardUser2} alt="健康风险人群" />, name: '健康风险人群' },
-  { id: 3, component: <img src={CardUser3} alt="心理健康群体" />, name: '心理健康群体' },
-];
-
 const Page7_User_2 = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Get state management functions from the global TimelineContext
-  const { setActiveStageId } = useTimeline();
+  const { setActiveStageId, completeStage } = useTimeline();
+  const { designData, updateDesignData } = useDesign();
 
-  // Get the selected card ID passed from the previous page
-  const selectedId = location.state?.selectedId;
+  // State to track if the AI has confirmed all profile details are collected
+  const [isTaskComplete, setIsTaskComplete] = useState(false);
+  // State for the initial message from the bot, shown when the component loads
+  const [initialBotMessage, setInitialBotMessage] = useState("正在分析用户信息，请稍候...");
 
-  // Find the full card object based on the ID
-  const selectedCard = cards.find(card => card.id === selectedId);
+  // This function runs once when the component mounts to kick off the AI conversation
+  const startProfileBuilding = useCallback(async () => {
+    // Ensure we have the necessary data from previous steps
+    if (designData.targetUser && designData.user) {
+      const aiResult = await getAiResponse(
+        [], // Initial conversation history is empty
+        'buildUserProfile', // The specific task for the backend AI
+        { 
+          targetUser: designData.targetUser,
+          user: designData.user 
+        }
+      );
+      
+      // Set the first message in the chat dialog
+      setInitialBotMessage(aiResult.responseText);
+      
+      // The AI might extract some data in its first turn, so we update the state
+      if (aiResult.extractedData && aiResult.extractedData.userProfile) {
+        updateDesignData('userProfile', aiResult.extractedData.userProfile);
+      }
+      
+      // If the task is somehow completed in one go, update the state
+      if (aiResult.isTaskComplete) {
+        setIsTaskComplete(true);
+      }
 
-  // On component mount, manage timeline state and handle invalid access
-  useEffect(() => {
-    // This page is a continuation of Stage 2, so keep it active
-    setActiveStageId(2);
-
-    // If a user navigates here directly without a selection, redirect them back
-    if (!selectedCard) {
-      console.warn("No selected card found. Redirecting to selection page.");
+    } else {
+      // If data is missing, it's likely a direct navigation. Redirect to the previous page.
+      console.warn("Missing targetUser or user data, redirecting to /page6.");
       navigate('/page6');
     }
-  }, [selectedCard, navigate, setActiveStageId]);
+  }, [designData.targetUser, designData.user, navigate, updateDesignData]);
 
-  // Handles navigation to the next major step in the process
+  // useEffect to run the initial AI call
+  useEffect(() => {
+    setActiveStageId(2); // This page is part of Stage 2
+    startProfileBuilding();
+  }, [setActiveStageId, startProfileBuilding]);
+
+  // Function to handle sending a user's message to the AI backend
+  const handleSendMessage = async (userInput, currentMessages) => {
+    const aiResult = await getAiResponse(
+      // Pass the full conversation history, including the new user message
+      [...currentMessages, { sender: 'user', text: userInput }],
+      'buildUserProfile',
+      { 
+        targetUser: designData.targetUser,
+        user: designData.user 
+      }
+    );
+    return aiResult; // Return the full response object to the ChatDialog
+  };
+
+  // Callback for when the AI extracts new data
+  const handleDataExtracted = (data) => {
+    if (data && data.userProfile) {
+      console.log("Extracted new user profile data:", data.userProfile);
+      // Merge the newly extracted data into our global design state
+      updateDesignData('userProfile', data.userProfile);
+    }
+  };
+
+  // Callback for when the AI signals that the task is fully complete
+  const handleTaskComplete = () => {
+    console.log("AI has confirmed: user profile task is complete.");
+    setIsTaskComplete(true);
+  };
+
+  // Function to navigate to the next page
   const handleNextPage = () => {
-    console.log("Navigating to the next page (e.g., Page 8)");
-    navigate('/page8'); // Navigate to the scenario selection page
+    completeStage(2); // Mark Stage 2 as fully completed
+    navigate('/page8'); // Proceed to the next part of the design process
   };
-
-  // Dummy functions for the ChatDialog component
-  const dummyOnSendMessage = async (input) => {
-    console.log(`User input (UI mode): ${input}`);
-    return { responseText: "This is a static reply." };
-  };
-  const dummyOnDataExtracted = (data) => {
-    console.log("Data extraction (UI mode). Received:", data);
-  };
-
-  // Render nothing while the redirect is happening to prevent errors
-  if (!selectedCard) {
-    return null;
-  }
 
   return (
     <div className={styles.container}>
       <div className={styles.leftPanel}>
-        {/* BranchSelector will correctly display the state for Stage 2 */}
         <BranchSelector />
       </div>
 
       <div className={styles.mainContent}>
-        {/* Display only the selected card */}
         <div className={styles.cardDisplay}>
-          <div className={styles.card}>
-            {selectedCard.component}
-          </div>
+          {/* The UserProfileCard dynamically displays data from the global state */}
+          <UserProfileCard 
+            profileData={designData.userProfile} 
+            cardName={designData.user} 
+          />
         </div>
-        <button className={styles.nextButton} onClick={handleNextPage}>
+        <button 
+          className={styles.nextButton} 
+          onClick={handleNextPage}
+          disabled={!isTaskComplete} // The button is disabled until the AI task is complete
+        >
           <NextButtonSVG />
         </button>
       </div>
 
       <div className={styles.rightPanel}>
+        {/* The ChatDialog is the main interaction point for this page */}
         <ChatDialog
-          initialBotMessage="太好了，我们已经确定了你的设计对象。接下来，我想更了解你的设计出发点。"
-          onSendMessage={dummyOnSendMessage}
-          onDataExtracted={dummyOnDataExtracted}
+          // Using a key ensures the component re-mounts if the initial message changes
+          key={initialBotMessage} 
+          initialBotMessage={initialBotMessage}
+          getAiResponse={handleSendMessage}
+          onDataExtracted={handleDataExtracted}
+          onTaskComplete={handleTaskComplete}
         />
       </div>
     </div>

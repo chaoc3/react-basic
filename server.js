@@ -127,7 +127,7 @@ const taskConfigs = {
 };
 
 // 定义不同任务的系统提示
-const getSystemPromptForTask = (task) => {
+const getSystemPromptForTask = (task, additionalData = {}) => {
     switch (task) {
       case 'getTargetUser':
         return `你是一个友好且聪明的辅助设计方案的陪伴者。你的核心目标是与用户对话，并从他们的回答中识别出他们想要帮助的用户群体。
@@ -156,13 +156,15 @@ const getSystemPromptForTask = (task) => {
         在用户回答后，分析他们的回答并判断属于哪个阶段，然后使用 extractBehaviorStage 工具来提取这个信息。
         成功提取后，你的最终回答必须是：“很好，这样我们就更清楚你的设计目标了。接下来，让我们点击右侧按钮进入下一步吧。”`;
         
-      case 'recommendUserGroup': // Page 6 的提示词
+        case 'recommendUserGroup': // Page 6 的任务
         return `你是一个辅助设计方案的陪伴者。你的任务是基于用户之前确定的设计目标，向他们推荐一个合适的用户群体。
         用户的设计目标是：“${additionalData.targetUser}”。
         你的回复应该是引导性的，例如：“根据你‘${additionalData.targetUser}’的目标，我为你推荐了几个可能的用户画像。你可以看看左边的卡片，选择一个最符合你想法的。”
         保持友好和引导的语气。不要使用任何工具。`;
 
-      case 'buildUserProfile': // Page 7 的提示词
+
+
+        case 'buildUserProfile': // Page 7 的任务
         return `你是一个辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的用户画像。
         已知信息如下：
         - 用户的设计目标 (Target-User): "${additionalData.targetUser}"
@@ -179,7 +181,7 @@ const getSystemPromptForTask = (task) => {
   };
 
 // 创建 API 路由
-app.post('/api/chat', async (req, res) => {
+app.post('/chat', async (req, res) => {
     console.log("\n--- [BACKEND] Express API /api/chat 被调用 ---");
     try {
       if (!process.env.DEEPSEEK_API_KEY) {
