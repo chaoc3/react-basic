@@ -40,6 +40,21 @@ const toolSchemas = {
     work: z.string().optional().describe('用户的职业类型'),
     equip: z.string().optional().describe('用户的智能设备使用熟练度'),
   }),
+  extractScenarioDetails: z.object({
+    when: z.string().optional().describe('场景发生的时间，例如 "早上"、"饭后"'),
+    where: z.string().optional().describe('场景发生的地点，例如 "厨房"、"办公室"'),
+    who: z.string().optional().describe('场景发生时在场的人物，例如 "家人"、"同事"'),
+  }),
+  extractInfoSourceDetails: z.object({
+    strategy1: z.string().optional().describe('第一个信息源的具体数据点，例如 "每日饮水量"'),
+    strategy2: z.string().optional().describe('第二个信息源的具体数据点，例如 "每周运动时长"'),
+    strategy3: z.string().optional().describe('第三个信息源的具体数据点，例如 "专家建议的卡路里摄入量"'),
+}),
+extractModeDetails: z.object({
+    strategy1: z.string().optional().describe('第一个交互方式的具体描述，例如 "每日推送卡片"'),
+    strategy2: z.string().optional().describe('第二个交互方式的具体描述，例如 "语音提醒"'),
+    strategy3: z.string().optional().describe('第三个交互方式的具体描述，例如 "视觉化图表"'),
+}),
 };
 
 const toolDefinitions = {
@@ -115,6 +130,53 @@ const toolDefinitions = {
       },
     },
   },
+    extractScenarioDetails: {
+      type: 'function',
+      function: {
+          name: 'extractScenarioDetails',
+          description: '根据用户的描述提取场景的细节信息。',
+          parameters: {
+              type: 'object',
+              properties: {
+                  when: { type: 'string', description: '场景发生的时间' },
+                  where: { type: 'string', description: '场景发生的地点' },
+                  who: { type: 'string', description: '场景发生时在场的人物' },
+              },
+          },
+      },
+  },
+  extractInfoSourceDetails: {
+    type: 'function',
+    function: {
+        name: 'extractInfoSourceDetails',
+        description: '根据用户的描述提取信息源的具体数据点。',
+        parameters: {
+            type: 'object',
+            properties: {
+                strategy1: { type: 'string', description: '第一个信息源的具体数据点' },
+                strategy2: { type: 'string', description: '第二个信息源的具体数据点' },
+                strategy3: { type: 'string', description: '第三个信息源的具体数据点' },
+            },
+        },
+    },
+},
+extractModeDetails: {
+    type: 'function',
+    function: {
+        name: 'extractModeDetails',
+        description: '根据用户的描述提取交互模态的具体策略。',
+        parameters: {
+            type: 'object',
+            properties: {
+                strategy1: { type: 'string', description: '第一个交互方式的具体描述' },
+                strategy2: { type: 'string', description: '第二个交互方式的具体描述' },
+                strategy3: { type: 'string', description: '第三个交互方式的具体描述' },
+            },
+        },
+    },
+},
+
+
 };
 
 const taskConfigs = {
@@ -141,6 +203,24 @@ const taskConfigs = {
     toolName: 'extractUserProfile',
     completionMessage: '非常好，我们已经为用户建立了详细的画像！点击下一步继续我们的设计之旅吧。',
     transform: (data) => ({ userProfile: data }), // 返回一个包含 userProfile 对象的对象
+  },
+
+
+  buildInfoSourceDetails: {
+      toolName: 'extractInfoSourceDetails',
+      completionMessage: '太棒了，我们已经确定了信息依据！点击下一步继续吧。',
+      transform: (data) => ({ infoSourceDetails: data }),
+  },
+
+  buildScenarioDetails: {
+    toolName: 'extractScenarioDetails',
+    completionMessage: '太棒了，我们已经确定了场景细节！点击下一步继续吧。',
+    transform: (data) => ({ scenarioDetails: data }),
+  },
+  buildModeDetails: {
+      toolName: 'extractModeDetails',
+      completionMessage: '太棒了，我们已经完善了交互方式！点击下一步进入总览吧。',
+      transform: (data) => ({ modeDetails: data }),
   },
 
 };
@@ -226,6 +306,72 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         3. **保持友好和引导的语气。**
         4. **不要使用 Markdown 格式。**
           ${nextQuestionInstruction}`; 
+      case 'buildScenarioDetails':
+        return `你是一个辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的场景细节。
+        
+        **【重要指令】在用户回答了你提出的任何一个场景字段（时间、地点、人物）后，你必须立即使用 \`extractScenarioDetails\` 工具来提取该信息。**
+        
+        已知信息如下：
+        - 用户的设计目标 (Target-User): "${additionalData.targetUser}"
+        - 用户选择的画像卡片 (User): "${additionalData.user}"
+        - 用户选择的场景卡片 (Scenario): "${additionalData.scenarioCard}"
+        - 当前已收集的场景信息: ${JSON.stringify(additionalData.scenarioDetails || {})}
+        
+        你的回复必须遵循以下原则：
+        1. **首次回复**：基于已知信息，向用户提出第一个缺失的场景细节问题（时间、地点或人物）。
+        2. **逐一提问**：依次询问那些还**未知**的信息：什么时候最容易发生？在哪里发生？当时通常还有谁在你身边？
+        3. **提取信息**：在用户的每次回答后，**必须**使用 \`extractScenarioDetails\` 工具来提取对应的信息。
+        4. **完成对话**：当所有三个字段（when, where, who）都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了场景细节！点击下一步继续吧。”不要使用 Markdown 格式。`;
+
+
+      case 'buildInfoSourceDetails':
+    // ... (提示词逻辑需要根据 Mec-1, Mec-2, Mec-3 字段来动态生成，这里简化)
+        return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定每个已选信息源的具体可追踪数据点。
+        
+        **【重要指令】在用户回答了任何一个数据点后，你必须立即使用 \`extractInfoSourceDetails\` 工具来提取该信息。**
+        
+        已知信息如下：
+        - 已选信息源: ${additionalData.infoSourceCards.join('、')}
+        - 当前已收集的数据点: ${JSON.stringify(additionalData.infoSourceDetails || {})}
+        
+        你的回复必须遵循以下原则：
+        1. **逐一提问**：针对每个已选信息源，询问用户希望追踪的具体数据点。
+        2. **提取信息**：在用户的每次回答后，**必须**使用 \`extractInfoSourceDetails\` 工具来提取对应的信息。
+        3. **完成对话**：当所有已选信息源的数据点都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了信息依据！点击下一步继续吧。”不要使用 Markdown 格式。`;
+
+      case 'buildModeDetails':
+    // ... (提示词逻辑需要根据 Mod 字段来动态生成，这里简化)
+      return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定已选交互模态的具体实现方式。
+      
+      **【重要指令】在用户回答了任何一个实现方式后，你必须立即使用 \`extractModeDetails\` 工具来提取该信息。**
+      
+      已知信息如下：
+      - 已选交互模态: ${additionalData.modeCard}
+      - 当前已收集的实现方式: ${JSON.stringify(additionalData.modeDetails || {})}
+      
+      你的回复必须遵循以下原则：
+      1. **逐一提问**：针对已选模态，询问用户希望如何具体实现（例如：文本交互的具体内容）。
+      2. **提取信息**：在用户的每次回答后，**必须**使用 \`extractModeDetails\` 工具来提取对应的信息。
+      3. **完成对话**：当所有三个策略字段（strategy1, strategy2, strategy3）都被提取后，你的最终回复**必须**是：“太棒了，我们已经完善了交互方式！点击下一步进入总览吧。”不要使用 Markdown 格式。`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       default:
         return '你是一个乐于助人的助手。';
     }

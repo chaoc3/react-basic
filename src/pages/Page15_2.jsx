@@ -1,90 +1,180 @@
-// src/pages/Page15_2.jsx
+// src/pages/Page15_Mod_2.jsx
 
-import CardUser1 from '../assets/卡片背面/Mod-1-2.png';
-import CardUser2 from '../assets/卡片背面/Mod-2-2.png';
-import CardUser3 from '../assets/卡片背面/Mod-3-2.png';
-import CardUser4 from '../assets/卡片背面/Mod-4-2.png';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTimeline } from '../context/TimelineContext';
+import { useDesign } from '../context/DesignContext';
+import { getAiResponse } from '../services/aiService'; // 导入 AI 服务
+
+// PNG Asset Imports (卡片背面)
+import CardMod1 from '../assets/卡片背面/Mod-1-2.png';
+import CardMod2 from '../assets/卡片背面/Mod-2-2.png';
+import CardMod3 from '../assets/卡片背面/Mod-3-2.png';
+import CardMod4 from '../assets/卡片背面/Mod-4-2.png';
+import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; 
+
+// Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
+import OverlayCard from '../components/OverlayCard'; // 导入通用卡片组件
 import Page16_Sum from './Page16_Sum';
-import styles from './styles/Page15_Mod_2.module.css';
-import { useTimeline } from '../context/TimelineContext';
+import styles from './styles/Page15_Mod_2.module.css'; 
+
+// 交互模态卡片数据 (用于展示 PNG)
 const cards = [
-  { id: 1, component: <img src={CardUser1} alt="Mode 1" />, name: '慢病患者' },
-  { id: 2, component: <img src={CardUser2} alt="Mode 2" />, name: '健康风险人群' },
-  { id: 3, component: <img src={CardUser3} alt="Mode 3" />, name: '心理健康群体' },
-  { id: 4, component: <img src={CardUser4} alt="Mode 4" />, name: '心理健康群体'}
+  { name: '文本交互', image: CardMod1, keys: ['strategy1', 'strategy2', 'strategy3'] },
+  { name: '语言交互', image: CardMod2, keys: ['strategy1', 'strategy2', 'strategy3'] },
+  { name: '视觉交互', image: CardMod3, keys: ['strategy1', 'strategy2', 'strategy3'] },
+  { name: '多模态交互', image: CardMod4, keys: ['strategy1', 'strategy2', 'strategy3'] },
 ];
 
 const Page15_2 = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const selectedId = location.state?.selectedCardId;
-  const selectedCard = cards.find(card => card.id === selectedId);
-  const { setActiveStageId } = useTimeline();
+  const { setActiveStageId, completeStage } = useTimeline();
+  const { designData, updateDesignData } = useDesign();
+
+  const [isTaskComplete, setIsTaskComplete] = useState(false);
+  const [initialBotMessage, setInitialBotMessage] = useState("正在分析交互方式细节，请稍候...");
   const [isSumOpen, setIsSumOpen] = useState(false);
 
-  useEffect(() => {
-    setActiveStageId(6);
-    if (!selectedCard) {
-      console.warn("No selected card found, redirecting to page 14.");
+  // --- 1. AI 引导逻辑 ---
+  const startDetailsBuilding = useCallback(async () => {
+    if (designData.modeCard) {
+      const aiResult = await getAiResponse(
+        [], 
+        'buildModeDetails', // 任务名称
+        { 
+          modeCard: designData.modeCard,
+          modeDetails: designData.modeDetails
+        }
+      );
+      
+      setInitialBotMessage(aiResult.responseText);
+      
+      if (aiResult.extractedData && aiResult.extractedData.modeDetails) {
+        updateDesignData('modeDetails', aiResult.extractedData.modeDetails);
+      }
+      
+      if (aiResult.isTaskComplete) {
+        setIsTaskComplete(true);
+      }
+
+    } else {
+      console.warn("Missing modeCard data, redirecting to /page14.");
       navigate('/page14');
     }
-  }, [selectedCard, navigate]);
+  }, [designData.modeCard, designData.modeDetails, navigate, updateDesignData]);
 
-  const handleNextPage = () => {
-    setIsSumOpen(true);
+  useEffect(() => {
+    setActiveStageId(6); // Page 15 仍属于 Stage 6
+    startDetailsBuilding();
+  }, [setActiveStageId, startDetailsBuilding]);
+
+  // --- 2. AI 交互函数 ---
+  const handleSendMessage = async (userInput, currentMessages) => {
+    const messagesForApi = [...currentMessages, { sender: 'user', text: userInput }];
+    
+    const aiResult = await getAiResponse(
+      messagesForApi,
+      'buildModeDetails', 
+      { 
+        modeCard: designData.modeCard,
+        modeDetails: designData.modeDetails
+      }
+    );
+    return aiResult; 
   };
 
-  // --- 这是修改的核心 ---
-  const handleCloseSum = (entryPoint) => {
-    // 1. 首先，正常地关闭模态框
-    setIsSumOpen(false);
-
-    // 2. 检查是否需要跳转
-    if (entryPoint === 'page15Next') {
-      // 3. 使用一个非常短的 setTimeout 来延迟导航
-      // 这给了 React 足够的时间来执行 Page16_Sum 的 useEffect 清理函数
-      setTimeout(() => {
-        navigate('/achieve');
-      }, 50); // 50毫秒的延迟对用户是无感的
+  // --- 3. 数据提取和任务完成逻辑 ---
+  const handleDataExtracted = (data) => {
+    if (data && data.modeDetails) {
+        const newlyExtractedDetails = data.modeDetails;
+        
+        // 1. 提取到新数据，合并到全局状态
+        updateDesignData('modeDetails', newlyExtractedDetails);
+        
+        // 2. 检查完整性
+        const requiredKeys = ['strategy1', 'strategy2', 'strategy3']; // 总是需要 3 个策略
+        
+        // 获取合并后的最新数据
+        const currentDetails = { 
+            ...designData.modeDetails, 
+            ...newlyExtractedDetails      
+        };
+        
+        // 检查所有 3 个策略 key 是否都有非空值
+        const allFieldsCollected = requiredKeys.every(key => 
+            currentDetails[key] != null && currentDetails[key].trim() !== ''
+        );
+        
+        // 3. 如果完整，则手动触发任务完成
+        if (allFieldsCollected) {
+            handleTaskComplete({ isManualComplete: true });
+        }
     }
   };
 
-  const dummyOnSendMessage = async (input) => {
-    console.log(`User input (disabled): ${input}`);
-    return { responseText: "This is a static reply." };
+  const handleTaskComplete = (data) => {
+    if (data.isManualComplete || data.isTaskComplete) {
+        setIsTaskComplete(true);
+        
+        // 任务完成，直接打开总览
+        handleNextPage();
+    }
   };
 
-  const dummyOnDataExtracted = (data) => {
-    console.log("Data extraction (disabled). Received:", data);
+  const handleNextPage = () => {
+    completeStage(6); 
+    setIsSumOpen(true); // 打开总览 Page 16
   };
 
-  if (!selectedCard) {
+  const handleCloseSum = (entryPoint) => {
+    setIsSumOpen(false);
+    if (entryPoint === 'page15Next') {
+      setTimeout(() => {
+        navigate('/achieve'); // 跳转到 Page 17
+      }, 50); 
+    }
+  };
+
+  // 渲染逻辑
+  if (!designData.modeCard) {
     return null;
   }
+  
+  // 根据 Context 中的名称找到对应的卡片
+  const selectedCard = cards.find(card => card.name === designData.modeCard);
+  if (!selectedCard) return null;
+
+  // 构造 OverlayCard 需要的字段数据
+  const modeDetailsFields = [
+    { label: '策略 1', value: designData.modeDetails?.strategy1, placeholder: '待补充具体实现方式...' },
+    { label: '策略 2', value: designData.modeDetails?.strategy2, placeholder: '待补充具体实现方式...' },
+    { label: '策略 3', value: designData.modeDetails?.strategy3, placeholder: '待补充具体实现方式...' },
+  ];
+
 
   return (
     <div className={styles.container}>
       <div className={styles.leftPanel}>
-        <BranchSelector activeStageId={2} />
+        <BranchSelector />
       </div>
+
       <div className={styles.mainContent}>
         <div className={styles.cardDisplay}>
-          <div className={styles.card}>
-            {selectedCard.component}
-          </div>
+          {/* 渲染 OverlayCard 组件 */}
+          <OverlayCard 
+            backgroundImageUrl={selectedCard.image}
+            fields={modeDetailsFields}
+          />
         </div>
-        <button className={styles.nextButton} onClick={handleNextPage}>
+        <button 
+          className={styles.nextButton} 
+          onClick={handleNextPage}
+          disabled={!isTaskComplete} // 按钮在 AI 任务完成前禁用
+        >
           <NextButtonSVG />
         </button>
-        {/*
-          为了防止意外，最好在渲染 Page16_Sum 时也加上 isSumOpen 的判断
-          这样可以确保在 isSumOpen 为 false 时它一定不被渲染
-        */}
         {isSumOpen && (
           <Page16_Sum 
             isOpen={isSumOpen}
@@ -93,11 +183,14 @@ const Page15_2 = () => {
           />
         )}
       </div>
+
       <div className={styles.rightPanel}>
         <ChatDialog
-          initialBotMessage="你已选择用户画像，让我们来补充一些细节吧！"
-          onSendMessage={dummyOnSendMessage}
-          onDataExtracted={dummyOnDataExtracted}
+          key={initialBotMessage} 
+          initialBotMessage={initialBotMessage}
+          getAiResponse={handleSendMessage} 
+          onDataExtracted={handleDataExtracted}
+          onTaskComplete={handleTaskComplete}
         />
       </div>
     </div>

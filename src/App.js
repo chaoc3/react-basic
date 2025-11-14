@@ -39,7 +39,7 @@ function AppContent() {
     <>
       {/* 2. 路由部分，负责渲染背景里的主页面 */}
       <Routes>
-              <Route path="/" element={<Page6_User_1 />} />
+              <Route path="/" element={<Page14_User_1 />} />
               
               <Route path="/intro-2" element={<Page2Intro />} />
               <Route path="/target-user" element={<Page3_TargetUser />} />

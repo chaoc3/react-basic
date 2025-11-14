@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext';
-
+import { getAiResponse } from '../services/aiService'; 
 // PNG Asset Imports (卡片背面)
 import CardScenario1 from '../assets/卡片背面/Scenario-1-2.png';
 import CardScenario2 from '../assets/卡片背面/Scenario-2-2.png';
@@ -13,7 +13,7 @@ import CardScenario4 from '../assets/卡片背面/Scenario-4-2.png';
 import CardScenario5 from '../assets/卡片背面/Scenario-5-2.png';
 import CardScenario6 from '../assets/卡片背面/Scenario-6-2.png';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; 
-
+import OverlayCard from '../components/OverlayCard'; // 导入通用卡片组件
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
@@ -39,65 +39,99 @@ const Page9_Scenario_2 = () => {
   const [isTaskComplete, setIsTaskComplete] = useState(false);
   const [initialBotMessage, setInitialBotMessage] = useState("正在分析场景信息，请稍候...");
 
-  // --- 1. 模拟 AI 引导逻辑 (Page 7 的逻辑) ---
+  // --- 1. AI 引导逻辑 (Page 7 的逻辑) ---
   const startScenarioBuilding = useCallback(async () => {
-    // 确保我们有 Page 8 的数据
     if (designData.scenarioCard) {
-      // 实际应该调用 AI Service，这里使用 Dummy Message
-      setInitialBotMessage(`让我们一起来丰富 **${designData.scenarioCard}** 场景的细节吧！请告诉我：什么时候这种情况最容易出现？在哪里发生？当时通常还有谁在你身边？`);
+      const aiResult = await getAiResponse(
+        [], // 首次加载，空消息历史
+        'buildScenarioDetails', // 任务名称
+        { 
+          targetUser: designData.targetUser,
+          user: designData.user,
+          scenarioCard: designData.scenarioCard,
+          scenarioDetails: designData.scenarioDetails // 传递当前已有的细节
+        }
+      );
       
-      // 模拟预填写数据（如果需要）
-      // updateDesignData('scenarioDetails', { when: '早上', where: '厨房', who: '家人' });
+      setInitialBotMessage(aiResult.responseText);
       
-      // 暂时设置为 false，等待用户输入
-      setIsTaskComplete(false); 
+      if (aiResult.extractedData && aiResult.extractedData.scenarioDetails) {
+        updateDesignData('scenarioDetails', aiResult.extractedData.scenarioDetails);
+      }
+      
+      if (aiResult.isTaskComplete) {
+        setIsTaskComplete(true);
+      }
 
     } else {
       console.warn("Missing scenarioCard data, redirecting to /page8.");
       navigate('/page8');
     }
-  }, [designData.scenarioCard, navigate]);
+  }, [designData.scenarioCard, designData.targetUser, designData.user, designData.scenarioDetails, navigate, updateDesignData]);
 
   useEffect(() => {
     setActiveStageId(3); // Page 9 仍属于 Stage 3
     startScenarioBuilding();
   }, [setActiveStageId, startScenarioBuilding]);
 
-  // --- 2. Dummy AI 交互函数 (Page 7 的逻辑) ---
-  const dummyHandleSendMessage = async (userInput, currentMessages) => {
-    console.log(`User input (Scenario Details): ${userInput}`);
+  // --- 2. AI 交互函数 (Page 7 的逻辑) ---
+  const handleSendMessage = async (userInput, currentMessages) => {
+    const messagesForApi = [...currentMessages, { sender: 'user', text: userInput }];
     
-    // 模拟 AI 提取数据并返回
-    if (userInput.includes('早上') || userInput.includes('厨房')) {
-        // 模拟数据提取
-        const extractedData = { scenarioDetails: { when: '早上', where: '厨房', who: '家人' } };
-        updateDesignData('scenarioDetails', extractedData.scenarioDetails);
-        
-        // 模拟任务完成
-        setIsTaskComplete(true);
-        
-        return { 
-            responseText: "太棒了，我们已经确定了场景细节！点击下一步继续吧。",
-            extractedData: extractedData,
-            isTaskComplete: true
-        };
-    }
-    
-    return { 
-        responseText: "请告诉我更多关于时间、地点和人物的细节。",
-        extractedData: null,
-        isTaskComplete: false
-    };
+    const aiResult = await getAiResponse(
+      messagesForApi,
+      'buildScenarioDetails', // 任务名称
+      { 
+        targetUser: designData.targetUser,
+        user: designData.user,
+        scenarioCard: designData.scenarioCard,
+        scenarioDetails: designData.scenarioDetails // 传递当前已有的细节
+      }
+    );
+    return aiResult; 
   };
 
-  // --- 3. 任务完成和跳转逻辑 (Page 7 的逻辑) ---
-  const handleTaskComplete = (data) => {
+  // --- 3. 数据提取和任务完成逻辑 (Page 7 的逻辑) ---
+  const handleDataExtracted = (data) => {
+    if (data && data.scenarioDetails) {
+        const newlyExtractedDetails = data.scenarioDetails;
+        
+        // 1. 提取到新数据，合并到全局状态
+        updateDesignData('scenarioDetails', newlyExtractedDetails);
+        
+        // 2. 检查完整性
+        const requiredFields = ['when', 'where', 'who'];
+        
+        // 获取合并后的最新数据
+        const currentDetails = { 
+            ...designData.scenarioDetails, // 旧数据
+            ...newlyExtractedDetails      // 新数据
+        };
+        
+        // 检查所有字段是否都有非空值
+        const allFieldsCollected = requiredFields.every(field => 
+            currentDetails[field] != null && currentDetails[field].trim() !== ''
+        );
+        
+        // 3. 如果完整，则手动触发任务完成
+        if (allFieldsCollected) {
+            // 此时手动调用 handleTaskComplete，并传入一个信号
+            handleTaskComplete({ isManualComplete: true });
+        }
+    }
+  };
+
+    const handleTaskComplete = (data) => {
     console.log("AI has confirmed: scenario details task is complete.");
-    setIsTaskComplete(true);
     
-    setTimeout(() => {
-        handleNextPage();
-    }, 1500);
+    // 只有当 AI 返回 isTaskComplete: true 或我们手动触发时，才设置 isTaskComplete
+    if (data.isManualComplete || data.isTaskComplete) {
+        setIsTaskComplete(true);
+        
+        setTimeout(() => {
+            handleNextPage();
+        }, 1500);
+    }
   };
 
   const handleNextPage = () => {
@@ -110,9 +144,16 @@ const Page9_Scenario_2 = () => {
     return null;
   }
   
-  // 根据 Context 中的名称找到对应的卡片 ID，以便渲染 PNG
+  // 根据 Context 中的名称找到对应的卡片
   const selectedCard = cards.find(card => card.name === designData.scenarioCard);
   if (!selectedCard) return null;
+
+  // 构造 OverlayCard 需要的字段数据
+  const scenarioDetailsFields = [
+    { label: '时间', value: designData.scenarioDetails?.when, placeholder: '什么时候最容易出现？' },
+    { label: '地点', value: designData.scenarioDetails?.where, placeholder: '通常在哪里做这件事？' },
+    { label: '人物', value: designData.scenarioDetails?.who, placeholder: '当时通常还有谁在你身边？' },
+  ];
 
 
   return (
@@ -123,10 +164,11 @@ const Page9_Scenario_2 = () => {
 
       <div className={styles.mainContent}>
         <div className={styles.cardDisplay}>
-          {/* 渲染 PNG 卡片背面 */}
-          <div className={styles.card}>
-            {selectedCard.component}
-          </div>
+          {/* 使用 OverlayCard 组件 */}
+          <OverlayCard 
+            backgroundImageUrl={selectedCard.image}
+            fields={scenarioDetailsFields}
+          />
         </div>
         <button 
           className={styles.nextButton} 
@@ -141,9 +183,9 @@ const Page9_Scenario_2 = () => {
         <ChatDialog
           key={initialBotMessage} 
           initialBotMessage={initialBotMessage}
-          getAiResponse={dummyHandleSendMessage} // 使用 Dummy AI 函数
+          getAiResponse={handleSendMessage} 
+          onDataExtracted={handleDataExtracted}
           onTaskComplete={handleTaskComplete}
-          // onDataExtracted 可以在 dummyHandleSendMessage 内部直接调用 updateDesignData
         />
       </div>
     </div>
