@@ -74,24 +74,81 @@
   border-radius: 8px;
   padding: 1rem;
 }
-
+.dataContent {
+  background-color: rgba(255, 255, 255, 0);
+  border-radius: 15px; /* 圆角 */
+  padding: 10px 15px; /* 内边距 */
+  min-height: 38px; /* 最小高度，确保空框也有高度 */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  font-family: sans-serif;
+  font-size: 11px;
+  color: #333;
+}
 /* 
   *** 最重要的一步 ***
   现在你需要根据新的布局，重新调整下面的 padding 和 margin 值，
   让每个 section 的内容块，能精确地显示在背景图的对应位置上。
 */
-.section#design-target {
-  padding-top: 150px; /* 示例值: 调整这个来定位第一个内容块 */
+.designTargetArea {
+  position: absolute;
+  
+  /* ▼▼▼ 在这里调整整个 Design Target 区块的位置 ▼▼▼ */
+  top: 7.1%;   /* 示例值：距离顶部 10% */
+  left: 10%;  /* 示例值：距离左侧 12% */
+  width: 76%; /* 示例值：宽度占父容器的 76% */
+  /* ▲▲▲ 调整结束 ▲▲▲ */
+}
+.fieldGroup {
+  margin-bottom: 45px; /* 字段组之间的垂直间距 */
+}
+.fieldLabel {
+  display: block;
+  font-family: sans-serif;
+  font-size: 30px;
+  color: #888;
+  margin-bottom: 4px;
+  padding-left: 10px; /* 标签左侧留出一点空间 */
+}
+.dataField {
+  font-family: sans-serif;
+  font-size: 30px; /* 调整字体大小 */
+  color: #333;
+  margin-bottom: 12px; /* 调整行间距 */
+}
+.bottomFieldsContainer {
+  display: flex; /* 使用 Flexbox 将内部元素并排 */
+  gap: 20px;     /* 两个字段之间的水平间距 */
 }
 
-.section#user-details {
-  margin-top: 200px; /* 示例值: 调整这个来拉开与上一个块的距离 */
+/* 
+  新增：让 Flexbox 容器内的每个字段组占据相等的空间
+*/
+.halfWidth {
+  flex: 1; /* 每个元素占据可用空间的 1 份 */
 }
+
+/* 占位符样式 (保持不变) */
+.placeholder {
+  color: #999;
+  font-style: italic;
+}
+.dataField strong {
+  font-weight: bold;
+  margin-right: 10px; /* 调整标签和内容之间的间距 */
+}
+
+.placeholder {
+  color: #999;
+  font-style: italic;
+}
+
 
 /* 通用文本样式，保持不变 */
 .section h2 {
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 30px;
 }
 .section p, .section li {
   color: #555;

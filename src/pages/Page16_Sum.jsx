@@ -23,7 +23,10 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
   if (!isOpen) return null;
 
   // 这是一个辅助函数，用于渲染文本数据（您的原始代码）
-  const renderData = (data, placeholder = '尚未确定') => { /* ... 保持不变 ... */ };
+  const renderData = (data, placeholder = '尚未确定') => {
+    // 确保 data 存在且不为空字符串
+    return data && String(data).trim() !== '' ? data : <span className={styles.placeholder}>{placeholder}</span>;
+  };
 
   // --- ▼▼▼ 关键新增 ▼▼▼ ---
   // 4. 创建一个新的辅助函数，专门用于渲染已选择的卡片
@@ -66,12 +69,36 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
           {/* --- ▼▼▼ 关键修改：更新每个区块的内容 ▼▼▼ --- */}
 
           {/* Design Target Section (主要显示文本) */}
-          <div className={styles.section}>
-            <h3>Design Target</h3>
-            <p>这一部分明确你的设计方向...</p>
-            <div className={styles.dataField}>User: {renderData(designData.targetUser)}</div>
-            <div className={styles.dataField}>Painpoint: {renderData(designData.targetPainpoint)}</div>
-            <div className={styles.dataField}>Stage: {renderData(designData.targetStage)}</div>
+          <div className={`${styles.section} ${styles.designTargetArea}`}>
+            
+            {/* 第一行: User */}
+            <div className={styles.fieldGroup}>
+             
+              <div className={styles.dataContent}>
+                {renderData(designData.targetUser)}
+              </div>
+            </div>
+
+            {/* 第二行: Painpoint 和 Stage 的容器 */}
+            <div className={styles.bottomFieldsContainer}>
+              
+              {/* Painpoint */}
+              <div className={`${styles.fieldGroup} ${styles.halfWidth}`}>
+                
+                <div className={styles.dataContent}>
+                  {renderData(designData.targetPainpoint)}
+                </div>
+              </div>
+
+              {/* Stage */}
+              <div className={`${styles.fieldGroup} ${styles.halfWidth}`}>
+                
+                <div className={styles.dataContent}>
+                  {renderData(designData.targetStage)}
+                </div>
+              </div>
+
+            </div>
           </div>
 
           {/* User Section (现在要显示卡片) */}

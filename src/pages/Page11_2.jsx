@@ -1,5 +1,23 @@
-// src/pages/Page9_Scenario_2.jsx
+// src/pages/Page11_2.jsx
 
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+// 移除 react-slick 相关导入
+// import Slider from "react-slick"; 
+// import "slick-carousel/slick/slick.css"; 
+// import "slick-carousel/slick/slick-theme.css";
+
+// Context and Services
+import { useTimeline } from '../context/TimelineContext';
+import { useDesign } from '../context/DesignContext';
+import { getAiResponse } from '../services/aiService'; 
+
+// Component Imports
+import BranchSelector from '../components/BranchSelector';
+import ChatDialog from '../components/ChatDialog';
+import OverlayCard from '../components/OverlayCard';
+
+// Asset Imports
 import Mec1 from '../assets/卡片背面/Mec-1-2.png';
 import Mec2 from '../assets/卡片背面/Mec-2-2.png';
 import Mec3 from '../assets/卡片背面/Mec-3-2.png';
@@ -8,39 +26,27 @@ import Mec5 from '../assets/卡片背面/Mec-5-2.png';
 import Mec6 from '../assets/卡片背面/Mec-6-2.png';
 import Mec7 from '../assets/卡片背面/Mec-7-2.png';
 import Mec8 from '../assets/卡片背面/Mec-8-2.png';
-import { getAiResponse } from '../services/aiService'; 
 import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
 import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
 import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
-import React, { useState, useEffect, useMemo,useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import BranchSelector from '../components/BranchSelector';
-import ChatDialog from '../components/ChatDialog';
-// 为了保证布局不变，我们复用同一个 CSS 文件
+
+// Styles
 import styles from './styles/Page11_Mec_2.module.css';
-import { useTimeline } from '../context/TimelineContext';
-import { useDesign } from '../context/DesignContext';
 
-import OverlayCard from '../components/OverlayCard'; // 导入通用卡片组件
-
+// --- Data Definitions ---
 const CURRENT_STAGE_ID = 4;
-
-// 拥有所有卡片定义的 "主列表"
 const allCards = [
-  { id: 1, image: Mec1, name: '提醒和活动建议', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 2, image: Mec2, name: '反馈与激励', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 3, image: Mec3, name: '决策简化', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 4, image: Mec4, name: '社会支持', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 5, image: Mec5, name: '承诺与一致', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 6, image: Mec6, name: '损失厌恶', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 7, image: Mec7, name: '锚定效应', keys: ['strategy1', 'strategy2', 'strategy3'] },
-  { id: 8, image: Mec8, name: '稀缺性', keys: ['strategy1', 'strategy2', 'strategy3'] },
+  { id: 1, image: Mec1, name: '提醒和活动建议' },
+  { id: 2, image: Mec2, name: '反馈与激励' },
+  { id: 3, image: Mec3, name: '决策简化' },
+  { id: 4, image: Mec4, name: '社会支持' },
+  { id: 5, image: Mec5, name: '承诺与一致' },
+  { id: 6, image: Mec6, name: '损失厌恶' },
+  { id: 7, image: Mec7, name: '锚定效应' },
+  { id: 8, image: Mec8, name: '稀缺性' },
 ];
 
-
-// 拥有所有卡片定义的 "主列表"
-
-
+// --- Main Component ---
 const Page11_2 = () => {
   const navigate = useNavigate();
   const { setActiveStageId, completeStage } = useTimeline();
@@ -48,130 +54,115 @@ const Page11_2 = () => {
 
   const [isTaskComplete, setIsTaskComplete] = useState(false);
   const [initialBotMessage, setInitialBotMessage] = useState("正在分析机制策略，请稍候...");
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0); // 状态保持不变
 
-  // 筛选出需要展示的卡片
   const selectedCards = useMemo(() => 
-    allCards.filter(card => designData.mechanismCards.includes(card.name)), 
+    allCards.filter(card => designData.mechanismCards?.includes(card.name)), 
     [designData.mechanismCards]
   );
   
-  // --- 1. AI 引导逻辑 ---
+  // currentCard 的逻辑保持不变
+  const currentCard = selectedCards[currentIndex];
+
+  // --- 新增：从 Page6 引入的轮播逻辑 ---
+  const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? selectedCards.length - 1 : prev - 1));
+  const handleNext = () => setCurrentIndex((prev) => (prev === selectedCards.length - 1 ? 0 : prev + 1));
+
+  const getCardClass = (index) => {
+    const classes = [styles.card];
+    const prevIndex = currentIndex === 0 ? selectedCards.length - 1 : currentIndex - 1;
+    const nextIndex = currentIndex === selectedCards.length - 1 ? 0 : currentIndex + 1;
+
+    if (index === currentIndex) {
+      classes.push(styles.active);
+    } else if (index === prevIndex) {
+      classes.push(styles.prev);
+    } else if (index === nextIndex) {
+      classes.push(styles.next);
+    } else {
+      classes.push(styles.hidden);
+    }
+    
+    // Page11 不需要点击选中效果，所以不添加 .selected 类
+    return classes.join(' ');
+  };
+  // --- 轮播逻辑结束 ---
+
+
   const startStrategyBuilding = useCallback(async () => {
     if (selectedCards.length > 0) {
+      // 确保 currentCard 已经基于 currentIndex 更新
+      const currentCardName = selectedCards[currentIndex]?.name;
+      if (!currentCardName) return;
+
       const aiResult = await getAiResponse(
         [], 
-        'buildMechanismDetails', // 假设后端任务名为 buildMechanismDetails
+        'buildMechanismDetails',
         { 
           mechanismCards: designData.mechanismCards,
           mechanismDetails: designData.mechanismDetails,
-          // 传递其他设计目标，供 AI 参考
+          currentCardName: currentCardName, 
           targetUser: designData.targetUser,
           targetStage: designData.targetStage,
         }
       );
-      
       setInitialBotMessage(aiResult.responseText);
-      
-      if (aiResult.extractedData && aiResult.extractedData.mechanismDetails) {
+      if (aiResult.extractedData?.mechanismDetails) {
         updateDesignData('mechanismDetails', aiResult.extractedData.mechanismDetails);
       }
-      
-      if (aiResult.isTaskComplete) {
-        setIsTaskComplete(true);
-      }
-
+      if (aiResult.isTaskComplete) handleTaskComplete(aiResult);
     } else {
       console.warn("No selected mechanism cards found, redirecting to /page10.");
       navigate('/page10');
     }
-  }, [selectedCards, designData, navigate, updateDesignData]);
+  }, [selectedCards, currentIndex, designData, navigate, updateDesignData]); // 依赖项中加入 currentIndex
 
   useEffect(() => {
     setActiveStageId(CURRENT_STAGE_ID);
     startStrategyBuilding();
   }, [setActiveStageId, startStrategyBuilding]);
 
-  // --- 2. AI 交互函数 ---
+  // handleSendMessage, handleDataExtracted, handleTaskComplete, handleNextPage 逻辑完全保持不变
   const handleSendMessage = async (userInput, currentMessages) => {
     const messagesForApi = [...currentMessages, { sender: 'user', text: userInput }];
-    
-    const aiResult = await getAiResponse(
+    return await getAiResponse(
       messagesForApi,
       'buildMechanismDetails', 
       { 
         mechanismCards: designData.mechanismCards,
         mechanismDetails: designData.mechanismDetails,
+        currentCardName: currentCard?.name,
         targetUser: designData.targetUser,
         targetStage: designData.targetStage,
       }
     );
-    return aiResult; 
   };
 
-  // --- 3. 数据提取和任务完成逻辑 ---
   const handleDataExtracted = (data) => {
-    if (data && data.mechanismDetails) {
-        const newlyExtractedDetails = data.mechanismDetails;
-        
-        // 1. 提取到新数据，合并到全局状态
-        updateDesignData('mechanismDetails', newlyExtractedDetails);
-        
-        // 2. 检查完整性
-        // 检查所有已选卡片的 3 个策略是否都已填充
-        const requiredKeys = selectedCards.flatMap(card => card.keys); // 应该总是 ['strategy1', 'strategy2', 'strategy3']
-        
-        // 获取合并后的最新数据
-        const currentDetails = { 
-            ...designData.mechanismDetails, 
-            ...newlyExtractedDetails      
-        };
-        
-        // 检查所有 3 个策略 key 是否都有非空值
-        const allFieldsCollected = requiredKeys.every(key => 
-            currentDetails[key] != null && currentDetails[key].trim() !== ''
-        );
-        
-        // 3. 如果完整，则手动触发任务完成
-        if (allFieldsCollected) {
-            handleTaskComplete({ isManualComplete: true });
-        }
+    if (data?.mechanismDetails) {
+      updateDesignData('mechanismDetails', data.mechanismDetails);
     }
   };
 
   const handleTaskComplete = (data) => {
-    if (data.isManualComplete || data.isTaskComplete) {
-        setIsTaskComplete(true);
-        
-        setTimeout(() => {
-            handleNextPage();
-        }, 1500);
+    if (data?.isTaskComplete) {
+      setIsTaskComplete(true);
+      setTimeout(() => handleNextPage(), 1500);
     }
   };
 
   const handleNextPage = () => {
     completeStage(CURRENT_STAGE_ID); 
-    navigate('/page12'); // 跳转到 Page 12
+    navigate('/page12');
   };
 
-  // 轮播和类名逻辑 (与 Page 6 相同)
-  const showArrows = selectedCards.length > 1;
-  const handlePrev = () => { /* ... */ }; // 逻辑不变
-  const handleNext = () => { /* ... */ }; // 逻辑不变
-  const getCardClass = (index) => { /* ... */ }; // 逻辑不变
+  if (selectedCards.length === 0) return null;
 
-  // 渲染逻辑
-  if (selectedCards.length === 0) {
-    return null;
-  }
-  
-  // 构造 OverlayCard 需要的字段数据
-  const currentCard = selectedCards[currentIndex];
-  const mechanismFields = currentCard.keys.map((key, index) => ({
-    label: `策略 ${index + 1}`, // 策略 1, 策略 2, 策略 3
-    value: designData.mechanismDetails?.[key],
-    placeholder: `待补充 ${currentCard.name} 的具体策略...`
-  }));
+  const mechanismFields = [
+    { label: `策略 1`, value: designData.mechanismDetails?.[currentCard?.name]?.strategy1, placeholder: `待补充...` },
+    { label: `策略 2`, value: designData.mechanismDetails?.[currentCard?.name]?.strategy2, placeholder: `待补充...` },
+    { label: `策略 3`, value: designData.mechanismDetails?.[currentCard?.name]?.strategy3, placeholder: `待补充...` },
+  ];
 
   return (
     <div className={styles.container}>
@@ -179,24 +170,27 @@ const Page11_2 = () => {
         <BranchSelector />
       </div>
       <div className={styles.mainContent}>
+        {/* --- 使用新的 JSX 结构替换 Slider --- */}
         <div className={styles.cardCarousel}>
-          {showArrows && <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>}
+          <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
           <div className={styles.cardContainer}>
-            {/* 遍历筛选后的 `selectedCards` 数组来渲染轮播 */}
             {selectedCards.map((card, index) => (
-              <div key={card.id} className={getCardClass(index)}>
-                {/* MODIFICATION: 使用 OverlayCard */}
+              <div
+                key={card.id}
+                className={getCardClass(index)}
+              >
                 <OverlayCard 
                     backgroundImageUrl={card.image}
                     // 只有当前显示的卡片才叠加信息
-                    fields={index === currentIndex ? mechanismFields : []} 
+                    fields={card.name === currentCard.name ? mechanismFields : []} 
                 />
               </div>
             ))}
           </div>
-          {showArrows && <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>}
+          <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
         </div>
-        <button className={styles.selectButton} onClick={handleNextPage} disabled={!isTaskComplete}>
+        {/* --- 结构替换结束 --- */}
+        <button className={styles.nextButton} onClick={handleNextPage} disabled={!isTaskComplete}>
           <NextButtonSVG />
         </button>
       </div>

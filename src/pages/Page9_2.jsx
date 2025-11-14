@@ -23,12 +23,12 @@ import styles from './styles/Page9_Scenario_2.module.css';
 
 // 场景卡片数据 (用于展示 PNG)
 const cards = [
-  { id: 1, component: <img src={CardScenario1} alt="居家场景" className={styles.cardImage} />, name: '居家场景' },
-  { id: 2, component: <img src={CardScenario2} alt="工作场景" className={styles.cardImage} />, name: '工作场景' },
-  { id: 3, component: <img src={CardScenario3} alt="户外场景" className={styles.cardImage} />, name: '户外场景' },
-  { id: 4, component: <img src={CardScenario4} alt="医疗场景" className={styles.cardImage} />, name: '医疗场景' },
-  { id: 5, component: <img src={CardScenario5} alt="社区场景" className={styles.cardImage} />, name: '社区场景' },
-  { id: 6, component: <img src={CardScenario6} alt="多场景" className={styles.cardImage} />, name: '多场景' },
+  { id: 1, image: CardScenario1, name: '居家场景' },
+  { id: 2, image: CardScenario2, name: '工作场景' },
+  { id: 3, image: CardScenario3, name: '户外场景' },
+  { id: 4, image: CardScenario4, name: '医疗场景' },
+  { id: 5, image: CardScenario5, name: '社区场景' },
+  { id: 6, image: CardScenario6, name: '多场景' },
 ];
 
 const Page9_Scenario_2 = () => {
@@ -94,45 +94,21 @@ const Page9_Scenario_2 = () => {
   // --- 3. 数据提取和任务完成逻辑 (Page 7 的逻辑) ---
   const handleDataExtracted = (data) => {
     if (data && data.scenarioDetails) {
-        const newlyExtractedDetails = data.scenarioDetails;
-        
-        // 1. 提取到新数据，合并到全局状态
-        updateDesignData('scenarioDetails', newlyExtractedDetails);
-        
-        // 2. 检查完整性
-        const requiredFields = ['when', 'where', 'who'];
-        
-        // 获取合并后的最新数据
-        const currentDetails = { 
-            ...designData.scenarioDetails, // 旧数据
-            ...newlyExtractedDetails      // 新数据
-        };
-        
-        // 检查所有字段是否都有非空值
-        const allFieldsCollected = requiredFields.every(field => 
-            currentDetails[field] != null && currentDetails[field].trim() !== ''
-        );
-        
-        // 3. 如果完整，则手动触发任务完成
-        if (allFieldsCollected) {
-            // 此时手动调用 handleTaskComplete，并传入一个信号
-            handleTaskComplete({ isManualComplete: true });
-        }
+        // 提取到新数据，合并到全局状态
+        updateDesignData('scenarioDetails', data.scenarioDetails);
     }
   };
 
-    const handleTaskComplete = (data) => {
+  const handleTaskComplete = (data) => {
     console.log("AI has confirmed: scenario details task is complete.");
+    // 此时，data.isTaskComplete 应该为 true
+    setIsTaskComplete(true);
     
-    // 只有当 AI 返回 isTaskComplete: true 或我们手动触发时，才设置 isTaskComplete
-    if (data.isManualComplete || data.isTaskComplete) {
-        setIsTaskComplete(true);
-        
-        setTimeout(() => {
-            handleNextPage();
-        }, 1500);
-    }
+    setTimeout(() => {
+        handleNextPage();
+    }, 1500);
   };
+
 
   const handleNextPage = () => {
     completeStage(3); 

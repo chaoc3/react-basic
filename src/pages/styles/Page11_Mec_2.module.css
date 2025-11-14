@@ -33,17 +33,19 @@
   height: 20%;
 }
 
+/* --- 以下是来自 Page6 并已适配的轮播样式 --- */
+
 .cardCarousel {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 125%;
+  width: 125%; /* 保持 Page6 的宽度以获得更好的视觉效果 */
 }
 
 .cardContainer {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 600px; /* 调整高度以适应卡片内容 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -52,17 +54,12 @@
 
 .card {
   position: absolute;
-  cursor: pointer;
-  transition: transform 0.5s ease, opacity 0.4s ease, box-shadow 0.3s ease;
+  /* 移除了 cursor: pointer，因为这些卡片不可点击选择 */
+  transition: transform 0.5s ease, opacity 0.4s ease;
+  /* OverlayCard 组件本身会处理其内容的显示，这里不需要设置宽高 */
 }
 
-.card img,
-.card svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
+/* 卡片动画效果 */
 .active {
   transform: translateX(0) scale(1) rotate(0deg);
   opacity: 1;
@@ -81,20 +78,13 @@
   z-index: 5;
 }
 
-.card.selected {
-  box-shadow: 0 0 0 4px rgba(128, 128, 128, 0.5);
-}
-
-.card.selected.active {
-  transform: scale(1.03);
-}
-
 .hidden {
   transform: scale(0.5);
   opacity: 0;
   z-index: 1;
 }
 
+/* 为左右两侧的卡片添加灰色叠加层 */
 .prev::after,
 .next::after {
   content: '';
@@ -104,7 +94,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+  border-radius: 16px; /* 确保和卡片圆角一致 */
   z-index: 1;
   pointer-events: none;
 }
@@ -119,7 +109,11 @@
   height: 90%;
 }
 
-.selectButton {
+/* --- 轮播样式结束 --- */
+
+
+/* 页面原有的 Next 按钮样式保持不变 */
+.nextButton {
   background: transparent;
   border: none;
   padding: 0;
@@ -128,17 +122,16 @@
   transition: transform 0.2s ease-in-out, opacity 0.3s ease;
 }
 
-.selectButton:hover {
+.nextButton:hover {
   transform: scale(1.05);
 }
 
-.selectButton:disabled {
+.nextButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: scale(1);
 }
 
-.selectButton svg {
+.nextButton svg {
   display: block;
 }
-

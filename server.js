@@ -222,7 +222,16 @@ const taskConfigs = {
       completionMessage: '太棒了，我们已经完善了交互方式！点击下一步进入总览吧。',
       transform: (data) => ({ modeDetails: data }),
   },
-
+  generateFinalReport: {
+    toolName: null, // 不需要工具
+    completionMessage: '设计方案已生成。',
+    transform: (data) => ({ finalReport: data }), // 假设 AI 直接返回文本
+  },
+  buildMechanismDetails: {
+    toolName: 'extractMechanismDetails',
+    completionMessage: '太棒了，我们已经确定了助推策略！点击下一步继续吧。',
+    transform: (data) => ({ mechanismDetails: data }),
+},
 };
 
 // 定义不同任务的系统提示
@@ -261,7 +270,23 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         你的回复应该是引导性的，例如：“根据你‘${additionalData.targetUser}’的目标，我为你推荐了几个可能的用户画像。你可以看看左边的卡片，选择一个最符合你想法的。”
         保持友好和引导的语气。不要使用任何工具。不要使用 Markdown 格式`;
 
-
+        case 'buildMechanismDetails':
+          const currentCardName = additionalData.currentCardName || additionalData.mechanismCards[0];
+          
+          return `你是一个辅助设计方案的陪伴者。你的任务是引导用户为已选的助推机制，确定具体的策略。
+          
+          **【重要指令】在用户回答了任何一个策略后，你必须立即使用 \`extractMechanismDetails\` 工具来提取该信息。**
+          
+          已知信息如下：
+          - 已选助推机制: ${additionalData.mechanismCards.join('、')}
+          - **当前正在讨论的机制: ${currentCardName}**
+          - 当前已收集的策略: ${JSON.stringify(additionalData.mechanismDetails || {})}
+          
+          你的回复必须遵循以下原则：
+          1. **聚焦当前卡片**：你的提问必须是关于 **${currentCardName}** 的。
+          2. **逐一提问**：依次询问该机制的三个具体策略。
+          3. **提取信息**：在用户的每次回答后，**必须**使用 \`extractMechanismDetails\` 工具来提取对应的信息。
+          4. **完成对话**：当所有已选机制的所有策略都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了助推策略！点击下一步继续吧。”不要使用 Markdown 格式。`;
 
       case 'buildUserProfile': // Page 7 的任务
     // ----------------------------------------------------------------
@@ -354,7 +379,49 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
       2. **提取信息**：在用户的每次回答后，**必须**使用 \`extractModeDetails\` 工具来提取对应的信息。
       3. **完成对话**：当所有三个策略字段（strategy1, strategy2, strategy3）都被提取后，你的最终回复**必须**是：“太棒了，我们已经完善了交互方式！点击下一步进入总览吧。”不要使用 Markdown 格式。`;
 
-
+      case 'generateFinalReport':
+        // 格式化所有收集到的数据
+        const collectedData = {
+            '设计目标': {
+                '用户群体': additionalData.targetUser,
+                '核心痛点': additionalData.targetPainpoint,
+                '切入阶段': additionalData.targetStage,
+            },
+            '用户与场景': {
+                '用户画像': additionalData.user,
+                '画像细节': additionalData.userProfile,
+                '核心场景': additionalData.scenarioCard,
+                '场景细节': additionalData.scenarioDetails,
+            },
+            '助推策略': {
+                '核心机制': additionalData.mechanismCards,
+                '机制策略': additionalData.mechanismDetails,
+                '信息依据': additionalData.infoSourceCards,
+                '信息策略': additionalData.infoSourceDetails,
+                '交互方式': additionalData.modeCard,
+                '交互策略': additionalData.modeDetails,
+            }
+        };
+    
+        return `你是一个智能代理设计助手，你的任务是根据用户提供的所有设计决策，生成一份结构完整、逻辑清晰的“智能代理助推设计方案”报告。
+        
+        模块一：设计概述
+          用2-3句话概括：为谁设计？在什么场景下？想达到什么目标？
+        模块二：助推实施路径
+          描述助推如何发生：什么情况下触发？通过什么方式呈现给用户？具体如何影响用户行为？
+        模块三：预期效果与评估
+          说明如何判断设计是否成功：预期用户会有什么改变？用什么指标来衡量效果？
+        
+        **【数据来源】**
+        以下是用户在流程中确定的所有设计决策，你必须将这些信息整合到报告中：
+        ${JSON.stringify(collectedData, null, 2)}
+        
+        **【风格要求】**
+        1. 使用专业、清晰、友好的语气。
+        2. **必须使用 Markdown 格式**（标题、列表、粗体），以确保报告结构清晰。
+        3. 报告内容必须是连贯的叙述性文本，而不是简单地罗列 JSON 数据。
+        
+        请开始生成报告。`;
 
 
 
@@ -449,38 +516,122 @@ app.post('/chat', async (req, res) => {
               console.warn(`[BACKEND] 工具 ${name} 参数解析失败:`, parsedResult.error.flatten());
               continue;
             }
-            
+
             // ----------------------------------------------------------------
             // 关键修改：针对 buildUserProfile 任务的特殊处理
             // ----------------------------------------------------------------
             if (task === 'buildUserProfile') {
-                // 1. 获取当前已有的画像数据 (从前端传递的 additionalData 中获取)
-                const existingProfile = additionalData.userProfile || {}; 
-                
-                // 2. 合并新提取的数据和已有数据
-                const newlyExtractedData = parsedResult.data;
-                const mergedProfile = { ...existingProfile, ...newlyExtractedData };
-                
-                // 3. 检查是否所有字段都已填充
-                const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
-                // 检查所有字段在 mergedProfile 中是否都有非空值
-                const allFieldsCollected = requiredFields.every(field => 
-                    mergedProfile[field] != null && mergedProfile[field].trim() !== ''
-                );
+              const existingProfile = additionalData.userProfile || {}; 
+              const newlyExtractedData = parsedResult.data;
+              const mergedProfile = { ...existingProfile, ...newlyExtractedData };
+              
+              const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
+              const allFieldsCollected = requiredFields.every(field => 
+                  mergedProfile[field] != null && mergedProfile[field].trim() !== ''
+              );
 
-                // 4. 设置返回数据
-                // 返回当前轮次提取到的数据，前端会负责合并
-                extractedData = taskConfig.transform(newlyExtractedData); 
-                
-                // 5. 只有当所有字段都收集完毕时，才设置 isTaskComplete 为 true
-                isTaskComplete = allFieldsCollected; 
-                
-                // 如果任务完成，设置最终回复
-                if (isTaskComplete) {
-                    finalResponseText = taskConfig.completionMessage;
-                }
-                
+              extractedData = taskConfig.transform(newlyExtractedData); 
+              isTaskComplete = allFieldsCollected; 
+              
+              if (isTaskComplete) {
+                  finalResponseText = taskConfig.completionMessage;
+              } else {
+                  // 构造下一个引导问题
+                  const fieldMap = { 'age': '年龄段', 'sexual': '性别', 'edu': '教育背景', 'work': '职业类型', 'equip': '智能设备使用熟练度' };
+                  const nextMissingFieldKey = requiredFields.find(field => mergedProfile[field] == null || mergedProfile[field].trim() === '');
+                  const nextMissingFieldName = fieldMap[nextMissingFieldKey];
+                  finalResponseText = `好的，我已记录您的信息。接下来，我们来聊聊用户的**${nextMissingFieldName}**吧。`;
+              }
+          } 
+
+            else if (task === 'buildScenarioDetails') {
+              const existingDetails = additionalData.scenarioDetails || {};
+              const newlyExtractedData = parsedResult.data;
+              const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+
+              const requiredFields = ['when', 'where', 'who'];
+              const allFieldsCollected = requiredFields.every(field =>
+                  mergedDetails[field] != null && mergedDetails[field].trim() !== ''
+              );
+
+              extractedData = taskConfig.transform(newlyExtractedData);
+              isTaskComplete = allFieldsCollected;
+
+              if (isTaskComplete) {
+                  finalResponseText = taskConfig.completionMessage;
+              } else {
+                  // 构造下一个引导问题
+                  const fieldMap = { 'when': '时间', 'where': '地点', 'who': '人物' };
+                  const nextMissingFieldKey = requiredFields.find(field => mergedDetails[field] == null || mergedDetails[field].trim() === '');
+                  const nextMissingFieldName = fieldMap[nextMissingFieldKey];
+                  finalResponseText = `好的，我已记录您的信息。接下来，我们来聊聊场景的**${nextMissingFieldName}**吧。`;
+              }
+          }
+            else if (task === 'buildInfoSourceDetails') {
+              const existingDetails = additionalData.infoSourceDetails || {};
+              const newlyExtractedData = parsedResult.data;
+              const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+
+              // 假设需要收集所有三个策略
+              const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
+              const allFieldsCollected = requiredFields.every(field =>
+                  mergedDetails[field] != null && mergedDetails[field].trim() !== ''
+              );
+
+              extractedData = taskConfig.transform(newlyExtractedData);
+              isTaskComplete = allFieldsCollected;
+
+              if (isTaskComplete) {
+                  finalResponseText = taskConfig.completionMessage;
+              } else {
+                  // 构造下一个引导问题
+                  const nextMissingFieldKey = requiredFields.find(field => mergedDetails[field] == null || mergedDetails[field].trim() === '');
+                  finalResponseText = `好的，我已记录您的信息。接下来，请为下一个信息源提供具体的数据点。`;
+              }
+          }
+      
+      // 任务 4: buildModeDetails
+            else if (task === 'buildModeDetails') {
+              const existingDetails = additionalData.modeDetails || {};
+              const newlyExtractedData = parsedResult.data;
+              const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+
+              // 假设需要收集所有三个策略
+              const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
+              const allFieldsCollected = requiredFields.every(field =>
+                  mergedDetails[field] != null && mergedDetails[field].trim() !== ''
+              );
+
+              extractedData = taskConfig.transform(newlyExtractedData);
+              isTaskComplete = allFieldsCollected;
+
+              if (isTaskComplete) {
+                  finalResponseText = taskConfig.completionMessage;
+              } else {
+                  // 构造下一个引导问题
+                  const nextMissingFieldKey = requiredFields.find(field => mergedDetails[field] == null || mergedDetails[field].trim() === '');
+                  finalResponseText = `好的，我已记录您的信息。接下来，请为下一个交互方式提供具体的实现策略。`;
+              }
+          }
+          else if (task === 'buildMechanismDetails') {
+            const existingDetails = additionalData.mechanismDetails || {};
+            const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+            // The total number of strategies to collect depends on how many cards were selected
+            const totalRequiredStrategies = (additionalData.mechanismCards || []).length * 3;
+            // The number of collected strategies is the count of non-empty keys in the details object
+            const collectedStrategiesCount = Object.values(mergedDetails).filter(val => val != null && val.trim() !== '').length;
+            const allFieldsCollected = collectedStrategiesCount >= totalRequiredStrategies;
+
+            extractedData = taskConfig.transform(newlyExtractedData);
+            isTaskComplete = allFieldsCollected;
+
+            if (isTaskComplete) {
+                finalResponseText = taskConfig.completionMessage;
             } else {
+                finalResponseText = `好的，我已记录该策略。请继续为 **${additionalData.currentCardName}** 提供下一个策略，或者切换到其他卡片进行补充。`;
+            }
+        }
+            else {
                 // 其他任务（如 getTargetUser, getTargetPainpoint）保持原有的简单逻辑
                 extractedData = taskConfig.transform(parsedResult.data);
                 isTaskComplete = true;
