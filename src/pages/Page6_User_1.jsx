@@ -51,9 +51,21 @@ const Page6_User_1 = () => {
   const [selectedCardId, setSelectedCardId] = useState(null);
   const [initialBotMessage, setInitialBotMessage] = useState("正在思考如何为你推荐..."); // 初始加载消息
   // On component mount, set the current stage in the timeline to active
-  useEffect(() => {
-    setActiveStageId(2); // This page corresponds to Stage 2 in the timeline
-  }, [setActiveStageId]);
+useEffect(() => {
+  setActiveStageId(2); // This page corresponds to Stage 2 in the timeline
+}, [setActiveStageId]);
+
+useEffect(() => {
+  if (!designData.user) {
+    setSelectedCardId(null);
+    return;
+  }
+  const matchedCard = cards.find(card => card.name === designData.user);
+  if (matchedCard && matchedCard.id !== selectedCardId) {
+    setSelectedCardId(matchedCard.id);
+    setSingleCard(2, matchedCard.id);
+  }
+}, [designData.user, selectedCardId, setSingleCard]);
 
   const fetchRecommendation = async () => {
       if (designData.targetUser) {
@@ -69,19 +81,19 @@ const Page6_User_1 = () => {
       }
     };
   // Handles clicking on a card to select it
-  const handleCardClick = (cardId) => {
-    setSelectedCardId(cardId);
-    // Update the global state to reflect the selection for Stage 2
-    setSingleCard(2, cardId); 
-  };
+const handleCardClick = (cardId) => {
+  setSelectedCardId(cardId);
+  setSingleCard(2, cardId); 
+
+  const selectedCard = cards.find((card) => card.id === cardId);
+  if (selectedCard) {
+    updateDesignData('user', selectedCard.name);
+  }
+};
 
   // Handles navigation to the next page
   const handleNextPage = () => {
-    if (selectedCardId) {
-      const selectedCardName = cards.find(c => c.id === selectedCardId)?.name;
-      if (selectedCardName) {
-        updateDesignData('user', selectedCardName);
-      }
+  if (selectedCardId && designData.user) {
       // Mark Stage 2 as completed in the global state
       completeStage(2);
       // Navigate to Page 7, passing the selected card's ID

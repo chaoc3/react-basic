@@ -36,14 +36,14 @@ import styles from './styles/Page11_Mec_2.module.css';
 // --- Data Definitions ---
 const CURRENT_STAGE_ID = 4;
 const allCards = [
-  { id: 1, image: Mec1, name: '提醒和活动建议' },
+  { id: 1, image: Mec1, name: '情景感知提醒'  },
   { id: 2, image: Mec2, name: '反馈与激励' },
   { id: 3, image: Mec3, name: '决策简化' },
-  { id: 4, image: Mec4, name: '社会支持' },
-  { id: 5, image: Mec5, name: '承诺与一致' },
-  { id: 6, image: Mec6, name: '损失厌恶' },
-  { id: 7, image: Mec7, name: '锚定效应' },
-  { id: 8, image: Mec8, name: '稀缺性' },
+  { id: 4, image: Mec4, name: '社会影响' },
+  { id: 5, image: Mec5, name: '认知重建与反思'},
+  { id: 6, image: Mec6, name: '目标设定' },
+  { id: 7, image: Mec7, name: '激发好奇心' },
+  { id: 8, image: Mec8, name: '诱饵效应' },
 ];
 
 // --- Main Component ---
@@ -89,6 +89,33 @@ const Page11_2 = () => {
   // --- 轮播逻辑结束 ---
 
 
+  const mergeMechanismDetails = useCallback((details) => {
+    if (!details) return;
+    const cardName = currentCard?.name;
+    if (!cardName) {
+      updateDesignData('mechanismDetails', details);
+      return;
+    }
+    const isAlreadyKeyed = details[cardName];
+    const normalized = isAlreadyKeyed ? details : { [cardName]: details };
+    updateDesignData('mechanismDetails', normalized);
+  }, [currentCard, updateDesignData]);
+
+  const handleNextPage = useCallback(() => {
+    completeStage(CURRENT_STAGE_ID); 
+    navigate('/page12');
+  }, [completeStage, navigate]);
+
+  const handleTaskComplete = useCallback((data) => {
+    if (data?.mechanismDetails) {
+      mergeMechanismDetails(data.mechanismDetails);
+    }
+    if (data?.isTaskComplete) {
+      setIsTaskComplete(true);
+      setTimeout(() => handleNextPage(), 1500);
+    }
+  }, [mergeMechanismDetails, handleNextPage]);
+
   const startStrategyBuilding = useCallback(async () => {
     if (selectedCards.length > 0) {
       // 确保 currentCard 已经基于 currentIndex 更新
@@ -108,14 +135,14 @@ const Page11_2 = () => {
       );
       setInitialBotMessage(aiResult.responseText);
       if (aiResult.extractedData?.mechanismDetails) {
-        updateDesignData('mechanismDetails', aiResult.extractedData.mechanismDetails);
+        mergeMechanismDetails(aiResult.extractedData.mechanismDetails);
       }
       if (aiResult.isTaskComplete) handleTaskComplete(aiResult);
     } else {
       console.warn("No selected mechanism cards found, redirecting to /page10.");
       navigate('/page10');
     }
-  }, [selectedCards, currentIndex, designData, navigate, updateDesignData]); // 依赖项中加入 currentIndex
+  }, [selectedCards, currentIndex, designData, navigate, mergeMechanismDetails, handleTaskComplete]); // 依赖项中加入 currentIndex
 
   useEffect(() => {
     setActiveStageId(CURRENT_STAGE_ID);
@@ -140,28 +167,21 @@ const Page11_2 = () => {
 
   const handleDataExtracted = (data) => {
     if (data?.mechanismDetails) {
-      updateDesignData('mechanismDetails', data.mechanismDetails);
+      mergeMechanismDetails(data.mechanismDetails);
     }
   };
 
-  const handleTaskComplete = (data) => {
-    if (data?.isTaskComplete) {
-      setIsTaskComplete(true);
-      setTimeout(() => handleNextPage(), 1500);
-    }
-  };
-
-  const handleNextPage = () => {
-    completeStage(CURRENT_STAGE_ID); 
-    navigate('/page12');
-  };
+  const currentMechanismDetails = useMemo(() => {
+    if (!currentCard?.name) return {};
+    return designData.mechanismDetails?.[currentCard.name] || {};
+  }, [designData.mechanismDetails, currentCard]);
 
   if (selectedCards.length === 0) return null;
 
   const mechanismFields = [
-    { label: `策略 1`, value: designData.mechanismDetails?.[currentCard?.name]?.strategy1, placeholder: `待补充...` },
-    { label: `策略 2`, value: designData.mechanismDetails?.[currentCard?.name]?.strategy2, placeholder: `待补充...` },
-    { label: `策略 3`, value: designData.mechanismDetails?.[currentCard?.name]?.strategy3, placeholder: `待补充...` },
+    { label: `策略 1`, value: currentMechanismDetails?.strategy1 ?? '', placeholder: `待补充...` },
+    { label: `策略 2`, value: currentMechanismDetails?.strategy2 ?? '', placeholder: `待补充...` },
+    { label: `策略 3`, value: currentMechanismDetails?.strategy3 ?? '', placeholder: `待补充...` },
   ];
 
   return (

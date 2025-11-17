@@ -15,15 +15,16 @@ import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page10_Mec_1.module.css';
 import { useTimeline } from '../context/TimelineContext'; // 1. 导入 useTimeline Hook
+import { useDesign } from '../context/DesignContext';
 const cards = [
-  { id: 1, component: <Mec1 />, name: '慢病患者' },
-  { id: 2, component: <Mec2 />, name: '健康风险人群' },
-  { id: 3, component: <Mec3 />, name: '心理健康群体' },
-  { id: 4, component: <Mec4 />, name: '心理健康群体' },
-  { id: 5, component: <Mec5 />, name: '心理健康群体' },
-  { id: 6, component: <Mec6 />, name: '心理健康群体' },
-  { id: 7, component: <Mec7 />, name: '心理健康群体' },
-  { id: 8, component: <Mec8 />, name: '心理健康群体' },
+  { id: 1, component: <Mec1 />, name: '情景感知提醒' },
+  { id: 2, component: <Mec2 />, name: '反馈与激励' },
+  { id: 3, component: <Mec3 />, name: '决策简化' },
+  { id: 4, component: <Mec4 />, name: '社会影响' },
+  { id: 5, component: <Mec5 />, name: '认知重建与反思' },
+  { id: 6, component: <Mec6 />, name: '目标设定' },
+  { id: 7, component: <Mec7 />, name: '激发好奇心' },
+  { id: 8, component: <Mec8 />, name: '诱饵效应' },
 ];
 
 // 根据需求文档，这个阶段是第4个主节点
@@ -36,11 +37,20 @@ const [selectedCardIds, setSelectedCardIds] = useState([]);
 
 // 2. 从全局 Context 获取我们需要的函数
 const { setActiveStageId, selectCard, completeStage } = useTimeline();
+const { designData, updateDesignData } = useDesign();
 
 // 3. 当组件加载时，设置当前活动的时间轴阶段
 useEffect(() => {
   setActiveStageId(CURRENT_STAGE_ID);
 }, [setActiveStageId]);
+
+useEffect(() => {
+  const idsFromContext = cards
+    .filter(card => (designData.mechanismCards || []).includes(card.name))
+    .map(card => card.id)
+    .slice(0, maxSelections);
+  setSelectedCardIds(idsFromContext);
+}, [designData.mechanismCards, maxSelections]);
 
 const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
 const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
@@ -56,13 +66,20 @@ const handleCardClick = (cardId) => {
     return; // 阻止选择
   }
 
-  // 更新本地状态（您的原始逻辑是正确的）
+  // 更新本地状态以及 DesignContext
   setSelectedCardIds((prevSelectedIds) => {
+    let nextSelected;
     if (isCurrentlySelected) {
-      return prevSelectedIds.filter((id) => id !== cardId);
+      nextSelected = prevSelectedIds.filter((id) => id !== cardId);
     } else {
-      return [...prevSelectedIds, cardId];
+      nextSelected = [...prevSelectedIds, cardId];
     }
+    const selectedNames = nextSelected
+      .map((id) => cards.find((card) => card.id === id))
+      .filter(Boolean)
+      .map((card) => card.name);
+    updateDesignData('mechanismCards', selectedNames);
+    return nextSelected;
   });
 
   // 同步到全局状态，让时间轴更新
@@ -87,7 +104,7 @@ const handleNextPage = () => {
   // 5. 进入下一页时，标记当前阶段已完成
   if (selectedCardIds.length === maxSelections) { // 或者根据需求设置为 selectedCardIds.length === maxSelections
     completeStage(CURRENT_STAGE_ID);
-    navigate('/page11', { state: { selectedCardIds } });
+    navigate('/page11');
   }
 };
 
