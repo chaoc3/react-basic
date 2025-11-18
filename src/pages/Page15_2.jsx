@@ -11,7 +11,7 @@ import CardMod1 from '../assets/卡片背面/Mod-1-2.png';
 import CardMod2 from '../assets/卡片背面/Mod-2-2.png';
 import CardMod3 from '../assets/卡片背面/Mod-3-2.png';
 import CardMod4 from '../assets/卡片背面/Mod-4-2.png';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; 
+import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg'; 
 
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
@@ -173,7 +173,7 @@ const Page15_2 = () => {
           onClick={handleNextPage}
           disabled={!isTaskComplete} // 按钮在 AI 任务完成前禁用
         >
-          <NextButtonSVG />
+          <img src={NextButtonSVG} alt="下一步" />
         </button>
         {isSumOpen && (
           <Page16_Sum 

@@ -10,7 +10,7 @@ import { getAiResponse } from '../services/aiService'; // 导入 AI 服务
 import CardInfS1 from '../assets/卡片背面/InfS-1-2.png';
 import CardInfS2 from '../assets/卡片背面/InfS-2-2.png';
 import CardInfS3 from '../assets/卡片背面/InfS-3-2.png';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; 
+import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg'; 
 
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
@@ -165,7 +165,7 @@ const Page13_2 = () => {
           onClick={handleNextPage}
           disabled={!isTaskComplete} 
         >
-          <NextButtonSVG />
+          <img src={NextButtonSVG} alt="下一步" />
         </button>
       </div>
 

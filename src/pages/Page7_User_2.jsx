@@ -13,7 +13,7 @@ import ChatDialog from '../components/ChatDialog';
 import CardUser1Back from '../assets/卡片背面/User-1-2.png';
 import CardUser2Back from '../assets/卡片背面/User-2-2.png';
 import CardUser3Back from '../assets/卡片背面/User-3-2.png';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
+import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg';
 
 // CSS Module Import
 import styles from './styles/Page7_User_2.module.css';
@@ -156,7 +156,7 @@ const Page7_User_2 = () => {
           onClick={handleNextPage}
           disabled={!isTaskComplete} 
         >
-          <NextButtonSVG />
+          <img src={NextButtonSVG} alt="下一步" />
         </button>
       </div>
 

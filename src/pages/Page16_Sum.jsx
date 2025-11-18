@@ -31,25 +31,35 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
   // --- ▼▼▼ 关键新增 ▼▼▼ ---
   // 4. 创建一个新的辅助函数，专门用于渲染已选择的卡片
   const renderSelectedCards = (stageId) => {
-    const cardIdsSet = selectedCards[stageId]; // 获取这个阶段已选卡片的 Set
-
-    // 如果没有选择任何卡片，则显示占位符
+    const cardIdsSet = selectedCards[stageId];
+  
     if (!cardIdsSet || cardIdsSet.size === 0) {
       return <span className={styles.placeholder}>尚未选择</span>;
     }
-
-    // 将 Set 转换为数组，然后遍历渲染
+  
     return Array.from(cardIdsSet).map(cardId => {
-      // 从我们的资产库中查找对应的卡片组件
-      const CardComponent = cardAssets[stageId]?.[cardId];
+      // ▼▼▼ 主要修改区域 ▼▼▼
+  
+      // 1. 从资产库获取的是图片 URL，而不是组件
+      const cardImageUrl = cardAssets[stageId]?.[cardId];
       
-      if (!CardComponent) return null; // 如果找不到，则不渲染
-
+      // 如果找不到图片 URL，则不渲染
+      if (!cardImageUrl) {
+        console.warn(`Card asset not found for stageId: ${stageId}, cardId: ${cardId}`);
+        return null; 
+      }
+  
+      // 2. 返回一个 <img> 标签来显示 PNG 图片
       return (
         <div key={cardId} className={styles.summaryCard}>
-          {CardComponent}
+          <img 
+            src={cardImageUrl} 
+            alt={`已选卡片 ${cardId}`} 
+            className={styles.summaryCardImage} // 添加一个新类名用于样式控制
+          />
         </div>
       );
+      // ▲▲▲ 修改结束 ▲▲▲
     });
   };
   // --- ▲▲▲ 新增结束 ▲▲▲ ---

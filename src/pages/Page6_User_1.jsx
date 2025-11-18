@@ -7,13 +7,13 @@ import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import { useDesign } from '../context/DesignContext'; // 1. 导入 DesignContext
 import { getAiResponse } from '../services/aiService'; 
-// SVG Asset Imports
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg';
-import { ReactComponent as CardUser2 } from '../assets/卡片 - svg/卡片正面-选择页/User-2-1.svg';
-import { ReactComponent as CardUser3 } from '../assets/卡片 - svg/卡片正面-选择页/User-3-1.svg';
-import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
-import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
+// PNG Asset Imports（作为图片 URL 导入）
+import CardUser1 from '../assets/卡片/正面/User-1-1.png';
+import CardUser2 from '../assets/卡片/正面/User-2-1.png';
+import CardUser3 from '../assets/卡片/正面/User-3-1.png';
+import ArrowLeft from '../assets/网页素材/向左.svg';
+import ArrowRight from '../assets/网页素材/向右.svg';
+import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 
 // CSS Module Import
 import styles from './styles/Page6_User_1.module.css';
@@ -22,19 +22,19 @@ import styles from './styles/Page6_User_1.module.css';
 const cards = [
   { 
     id: 1, 
-    component: <CardUser1 />, 
+    src: CardUser1, 
     name: '慢病患者',
     description: '已确诊慢性疾病，需要长期自我管理与治疗依从性支持的人群。' 
   },
   { 
     id: 2, 
-    component: <CardUser2 />, 
+    src: CardUser2, 
     name: '健康风险人群',
     description: '具有较高健康风险因素（如不良生活习惯、家族病史），需要预防性干预和健康教育的人群。'
   },
   { 
     id: 3, 
-    component: <CardUser3 />, 
+    src: CardUser3, 
     name: '心理健康群体',
     description: '面临压力、焦虑等心理健康挑战，需要情绪支持和应对策略引导的人群。'
   },
@@ -143,7 +143,9 @@ const handleCardClick = (cardId) => {
 
       <div className={styles.mainContent}>
         <div className={styles.cardCarousel}>
-          <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            <img src={ArrowLeft} alt="上一张" />
+          </button>
           <div className={styles.cardContainer}>
             {cards.map((card, index) => (
               <div
@@ -151,18 +153,20 @@ const handleCardClick = (cardId) => {
                 className={getCardClass(index)}
                 onClick={() => handleCardClick(card.id)}
               >
-                {card.component}
+                <img src={card.src} alt={card.name} />
               </div>
             ))}
           </div>
-          <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
+          <button onClick={handleNext} className={styles.arrowButton}>
+            <img src={ArrowRight} alt="下一张" />
+          </button>
         </div>
         <button 
           className={styles.selectButton} 
           onClick={handleNextPage}
           disabled={!selectedCardId} // Button is disabled until a card is selected
         >
-          <SelectButtonSVG />
+          <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
 

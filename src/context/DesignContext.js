@@ -5,9 +5,9 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 // 1. 创建一个完整的模拟数据对象
 // 你可以根据需要修改这里的任何值来进行不同的测试
 const mockDesignData = {
-  targetUser: 'null',
-  targetPainpoint: 'null',
-  targetStage: 'null',
+  targetUser: null,
+  targetPainpoint: null,
+  targetStage: null,
   user: null, // 从 Page 6 选择的卡片
   userProfile: {
     age: null,

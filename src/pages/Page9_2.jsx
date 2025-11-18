@@ -12,7 +12,7 @@ import CardScenario3 from '../assets/卡片背面/Scenario-3-2.png';
 import CardScenario4 from '../assets/卡片背面/Scenario-4-2.png';
 import CardScenario5 from '../assets/卡片背面/Scenario-5-2.png';
 import CardScenario6 from '../assets/卡片背面/Scenario-6-2.png';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg'; 
+import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg'; 
 import OverlayCard from '../components/OverlayCard'; // 导入通用卡片组件
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
@@ -151,7 +151,7 @@ const Page9_Scenario_2 = () => {
           onClick={handleNextPage}
           disabled={!isTaskComplete} // 按钮在 AI 任务完成前禁用
         >
-          <NextButtonSVG />
+          <img src={NextButtonSVG} alt="下一步" />
         </button>
       </div>
 

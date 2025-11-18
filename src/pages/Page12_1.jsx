@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext'; 
 
-// SVG Asset Imports (卡片正面)
-import { ReactComponent as CardInfS1 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-1-1.svg';
-import { ReactComponent as CardInfS2 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-2-1.svg';
-import { ReactComponent as CardInfS3 } from '../assets/卡片 - svg/卡片正面-选择页/InfS-3-1.svg';
-import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
-import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
+// 临时使用 SVG（等待 PNG 文件）
+import CardInfS1 from '../assets/卡片 - svg/卡片正面-选择页/InfS-1-1.svg';
+import CardInfS2 from '../assets/卡片 - svg/卡片正面-选择页/InfS-2-1.svg';
+import CardInfS3 from '../assets/卡片 - svg/卡片正面-选择页/InfS-3-1.svg';
+import ArrowLeft from '../assets/网页素材/向左.svg';
+import ArrowRight from '../assets/网页素材/向右.svg';
+import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
@@ -20,9 +20,9 @@ import styles from './styles/Page12_InfS_1.module.css';
 
 // 场景卡片数据
 const cards = [
-  { id: 1, component: <CardInfS1 />, name: '自我数据' },
-  { id: 2, component: <CardInfS2 />, name: '他人影响' },
-  { id: 3, component: <CardInfS3 />, name: '专家干预' },
+  { id: 1, src: CardInfS1, name: '自我数据' },
+  { id: 2, src: CardInfS2, name: '他人影响' },
+  { id: 3, src: CardInfS3, name: '专家干预' },
 ];
 
 const Page12_1 = () => {
@@ -108,7 +108,9 @@ const Page12_1 = () => {
       </div>
       <div className={styles.mainContent}>
         <div className={styles.cardCarousel}>
-          <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            <img src={ArrowLeft} alt="上一张" />
+          </button>
           <div className={styles.cardContainer}>
             {cards.map((card, index) => (
                 <div
@@ -116,15 +118,17 @@ const Page12_1 = () => {
                 className={getCardClass(index)}
                 onClick={() => handleCardClick(card.id)}
               >
-                {card.component}
+                <img src={card.src} alt={card.name} />
               </div>
             ))}
           </div>
-          <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
+          <button onClick={handleNext} className={styles.arrowButton}>
+            <img src={ArrowRight} alt="下一张" />
+          </button>
         </div>
         <button className={styles.selectButton} onClick={handleNextPage}
         disabled={selectedCardIds.length === 0}>
-          <SelectButtonSVG />
+          <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
       <div className={styles.rightPanel}>

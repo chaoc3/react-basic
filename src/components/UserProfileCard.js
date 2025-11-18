@@ -2,16 +2,16 @@
 
 import React from 'react';
 import styles from './UserProfileCard.module.css'; // 我们会创建这个 CSS 文件
-import { ReactComponent as CardUser1 } from '../assets/卡片 - svg/卡片正面-选择页/User-1-1.svg'; // 举例
+import CardUser1 from '../assets/卡片/正面/User-1-1.png'; // 举例（URL）
 
 // 这是一个简单的映射，实际项目中可以更复杂
-const cardComponents = {
-  '慢病患者': <CardUser1 />,
+const cardImages = {
+  '慢病患者': CardUser1,
   // ... 其他卡片
 };
 
 const UserProfileCard = ({ profileData, cardName }) => {
-  const CardComponent = cardComponents[cardName] || <div />;
+  const cardSrc = cardImages[cardName];
 
   // 辅助函数，用于显示数据或占位符
   const renderField = (value, placeholder) => {
@@ -22,7 +22,7 @@ const UserProfileCard = ({ profileData, cardName }) => {
     <div className={styles.cardContainer}>
       {/* 背景卡片 */}
       <div className={styles.backgroundCard}>
-        {CardComponent}
+        {cardSrc && <img src={cardSrc} alt={cardName} />}
       </div>
       
       {/* 浮动的信息层 */}

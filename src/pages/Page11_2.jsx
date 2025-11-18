@@ -26,9 +26,9 @@ import Mec5 from '../assets/卡片背面/Mec-5-2.png';
 import Mec6 from '../assets/卡片背面/Mec-6-2.png';
 import Mec7 from '../assets/卡片背面/Mec-7-2.png';
 import Mec8 from '../assets/卡片背面/Mec-8-2.png';
-import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
-import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import { ReactComponent as NextButtonSVG } from '../assets/页面剩余素材/Next按钮.svg';
+import ArrowLeft from '../assets/网页素材/向左.svg';
+import ArrowRight from '../assets/网页素材/向右.svg';
+import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg';
 
 // Styles
 import styles from './styles/Page11_Mec_2.module.css';
@@ -192,7 +192,9 @@ const Page11_2 = () => {
       <div className={styles.mainContent}>
         {/* --- 使用新的 JSX 结构替换 Slider --- */}
         <div className={styles.cardCarousel}>
-          <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            <img src={ArrowLeft} alt="上一张" />
+          </button>
           <div className={styles.cardContainer}>
             {selectedCards.map((card, index) => (
               <div
@@ -207,11 +209,13 @@ const Page11_2 = () => {
               </div>
             ))}
           </div>
-          <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
+          <button onClick={handleNext} className={styles.arrowButton}>
+            <img src={ArrowRight} alt="下一张" />
+          </button>
         </div>
         {/* --- 结构替换结束 --- */}
         <button className={styles.nextButton} onClick={handleNextPage} disabled={!isTaskComplete}>
-          <NextButtonSVG />
+          <img src={NextButtonSVG} alt="下一步" />
         </button>
       </div>
       <div className={styles.rightPanel}>

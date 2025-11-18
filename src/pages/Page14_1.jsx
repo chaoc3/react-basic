@@ -5,14 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext'; 
 
-// SVG Asset Imports (卡片正面)
-import { ReactComponent as CardMod1 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-1-1.svg';
-import { ReactComponent as CardMod2 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-2-1.svg';
-import { ReactComponent as CardMod3 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-3-1.svg';
-import { ReactComponent as CardMod4 } from '../assets/卡片 - svg/卡片正面-选择页/Mod-4-1.svg';
-import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
-import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
+// PNG Asset Imports (卡片正面，作为图片 URL)
+import CardMod1 from '../assets/卡片/正面/Mod-1-1.png';
+import CardMod2 from '../assets/卡片/正面/Mod-2-1.png';
+import CardMod3 from '../assets/卡片/正面/Mod-3-1.png';
+import CardMod4 from '../assets/卡片/正面/Mod-4-1.png';
+import ArrowLeft from '../assets/网页素材/向左.svg';
+import ArrowRight from '../assets/网页素材/向右.svg';
+import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
@@ -20,10 +20,10 @@ import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page14_Mod_1.module.css';
 
 const cards = [
-  { id: 1, component: <CardMod1 />, name: '文本交互' },
-  { id: 2, component: <CardMod2 />, name: '语言交互' },
-  { id: 3, component: <CardMod3 />, name: '视觉交互' },
-  { id: 4, component: <CardMod4 />, name: '多模态交互'}
+  { id: 1, src: CardMod1, name: '文本交互' },
+  { id: 2, src: CardMod2, name: '语言交互' },
+  { id: 3, src: CardMod3, name: '视觉交互' },
+  { id: 4, src: CardMod4, name: '多模态交互'}
 ];
 
 const Page14_User_1 = () => {
@@ -103,7 +103,9 @@ const Page14_User_1 = () => {
       </div>
       <div className={styles.mainContent}>
         <div className={styles.cardCarousel}>
-          <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            <img src={ArrowLeft} alt="上一张" />
+          </button>
           <div className={styles.cardContainer}>
             {cards.map((card, index) => (
                 <div
@@ -111,15 +113,17 @@ const Page14_User_1 = () => {
                 className={getCardClass(index)}
                 onClick={() => handleCardClick(card.id)}
               >
-                {card.component}
+                <img src={card.src} alt={card.name} />
               </div>
             ))}
           </div>
-          <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
+          <button onClick={handleNext} className={styles.arrowButton}>
+            <img src={ArrowRight} alt="下一张" />
+          </button>
         </div>
         <button className={styles.selectButton} onClick={handleNextPage}
         disabled={!selectedCardId}>
-          <SelectButtonSVG />
+          <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
       <div className={styles.rightPanel}>

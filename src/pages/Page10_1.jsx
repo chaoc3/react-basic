@@ -1,14 +1,14 @@
-import { ReactComponent as Mec1 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-1-1.svg';
-import { ReactComponent as Mec2 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-2-1.svg';
-import { ReactComponent as Mec3 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-3-1.svg';
-import { ReactComponent as Mec4 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-4-1.svg';
-import { ReactComponent as Mec5 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-5-1.svg';
-import { ReactComponent as Mec6 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-6-1.svg';
-import { ReactComponent as Mec7 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-7-1.svg';
-import { ReactComponent as Mec8 } from '../assets/卡片 - svg/卡片正面-选择页/Mec-8-1.svg';
-import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
-import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
+import Mec1 from '../assets/卡片/正面/Mec-1-1.png';
+import Mec2 from '../assets/卡片/正面/Mec-2-1.png';
+import Mec3 from '../assets/卡片/正面/Mec-3-1.png';
+import Mec4 from '../assets/卡片/正面/Mec-4-1.png';
+import Mec5 from '../assets/卡片/正面/Mec-5-1.png';
+import Mec6 from '../assets/卡片/正面/Mec-6-1.png';
+import Mec7 from '../assets/卡片/正面/Mec-7-1.png';
+import Mec8 from '../assets/卡片/正面/Mec-8-1.png';
+import ArrowLeft from '../assets/网页素材/向左.svg';
+import ArrowRight from '../assets/网页素材/向右.svg';
+import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BranchSelector from '../components/BranchSelector';
@@ -17,14 +17,14 @@ import styles from './styles/Page10_Mec_1.module.css';
 import { useTimeline } from '../context/TimelineContext'; // 1. 导入 useTimeline Hook
 import { useDesign } from '../context/DesignContext';
 const cards = [
-  { id: 1, component: <Mec1 />, name: '情景感知提醒' },
-  { id: 2, component: <Mec2 />, name: '反馈与激励' },
-  { id: 3, component: <Mec3 />, name: '决策简化' },
-  { id: 4, component: <Mec4 />, name: '社会影响' },
-  { id: 5, component: <Mec5 />, name: '认知重建与反思' },
-  { id: 6, component: <Mec6 />, name: '目标设定' },
-  { id: 7, component: <Mec7 />, name: '激发好奇心' },
-  { id: 8, component: <Mec8 />, name: '诱饵效应' },
+  { id: 1, src: Mec1, name: '情景感知提醒' },
+  { id: 2, src: Mec2, name: '反馈与激励' },
+  { id: 3, src: Mec3, name: '决策简化' },
+  { id: 4, src: Mec4, name: '社会影响' },
+  { id: 5, src: Mec5, name: '认知重建与反思' },
+  { id: 6, src: Mec6, name: '目标设定' },
+  { id: 7, src: Mec7, name: '激发好奇心' },
+  { id: 8, src: Mec8, name: '诱饵效应' },
 ];
 
 // 根据需求文档，这个阶段是第4个主节点
@@ -121,7 +121,9 @@ return (
     <div className={styles.mainContent}>
       {/* ... (轮播和按钮的 JSX 保持不变) ... */}
       <div className={styles.cardCarousel}>
-        <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
+        <button onClick={handlePrev} className={styles.arrowButton}>
+          <img src={ArrowLeft} alt="上一张" />
+        </button>
         <div className={styles.cardContainer}>
           {cards.map((card, index) => (
             <div
@@ -129,18 +131,20 @@ return (
               className={getCardClass(index)}
               onClick={() => handleCardClick(card.id)}
             >
-              {card.component}
+              <img src={card.src} alt={card.name} />
             </div>
           ))}
         </div>
-        <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
+        <button onClick={handleNext} className={styles.arrowButton}>
+          <img src={ArrowRight} alt="下一张" />
+        </button>
       </div>
       <button
         className={styles.selectButton}
         onClick={handleNextPage}
         disabled={selectedCardIds.length !== maxSelections} // 或者根据需求设置为 !== maxSelections
       >
-        <SelectButtonSVG />
+        <img src={SelectButtonSVG} alt="下一步" />
       </button>
     </div>
     <div className={styles.rightPanel}>

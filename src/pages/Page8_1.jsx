@@ -5,16 +5,16 @@ import { useNavigate } from 'react-router-dom';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext'; 
 
-// SVG Asset Imports (卡片正面)
-import { ReactComponent as CardScenario1 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-1-1.svg';
-import { ReactComponent as CardScenario2 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-2-1.svg';
-import { ReactComponent as CardScenario3 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-3-1.svg';
-import { ReactComponent as CardScenario4 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-4-1.svg';
-import { ReactComponent as CardScenario5 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-5-1.svg';
-import { ReactComponent as CardScenario6 } from '../assets/卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
-import { ReactComponent as ArrowLeft } from '../assets/网页素材/向左.svg';
-import { ReactComponent as ArrowRight } from '../assets/网页素材/向右.svg';
-import { ReactComponent as SelectButtonSVG } from '../assets/页面剩余素材/Page68101214按钮.svg';
+// PNG Asset Imports (卡片正面，作为图片 URL)
+import CardScenario1 from '../assets/卡片/正面/Scenario-1-1.png';
+import CardScenario2 from '../assets/卡片/正面/Scenario-2-1.png';
+import CardScenario3 from '../assets/卡片/正面/Scenario-3-1.png';
+import CardScenario4 from '../assets/卡片/正面/Scenario-4-1.png';
+import CardScenario5 from '../assets/卡片/正面/Scenario-5-1.png';
+import CardScenario6 from '../assets/卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
+import ArrowLeft from '../assets/网页素材/向左.svg';
+import ArrowRight from '../assets/网页素材/向右.svg';
+import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
@@ -23,12 +23,12 @@ import styles from './styles/Page8_Scenario_1.module.css'; // 假设样式文件
 
 // 场景卡片数据
 const cards = [
-  { id: 1, component: <CardScenario1 />, name: '居家场景' },
-  { id: 2, component: <CardScenario2 />, name: '工作场景' },
-  { id: 3, component: <CardScenario3 />, name: '户外场景' },
-  { id: 4, component: <CardScenario4 />, name: '医疗场景' },
-  { id: 5, component: <CardScenario5 />, name: '社区场景' },
-  { id: 6, component: <CardScenario6 />, name: '多场景' }
+  { id: 1, src: CardScenario1, name: '居家场景' },
+  { id: 2, src: CardScenario2, name: '工作场景' },
+  { id: 3, src: CardScenario3, name: '户外场景' },
+  { id: 4, src: CardScenario4, name: '医疗场景' },
+  { id: 5, src: CardScenario5, name: '社区场景' },
+  { id: 6, src: CardScenario6, name: '多场景' }
 ];
 
 const Page8_1 = () => {
@@ -106,7 +106,9 @@ const Page8_1 = () => {
       </div>
       <div className={styles.mainContent}>
         <div className={styles.cardCarousel}>
-          <button onClick={handlePrev} className={styles.arrowButton}><ArrowLeft /></button>
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            <img src={ArrowLeft} alt="上一张" />
+          </button>
           <div className={styles.cardContainer}>
             {cards.map((card, index) => (
                 <div
@@ -114,15 +116,17 @@ const Page8_1 = () => {
                 className={getCardClass(index)}
                 onClick={() => handleCardClick(card.id)}
               >
-                {card.component}
+                <img src={card.src} alt={card.name} />
               </div>
             ))}
           </div>
-          <button onClick={handleNext} className={styles.arrowButton}><ArrowRight /></button>
+          <button onClick={handleNext} className={styles.arrowButton}>
+            <img src={ArrowRight} alt="下一张" />
+          </button>
         </div>
         <button className={styles.selectButton} onClick={handleNextPage}
         disabled={!selectedCardId}>
-          <SelectButtonSVG />
+          <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
       <div className={styles.rightPanel}>
