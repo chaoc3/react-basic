@@ -13,7 +13,7 @@ import CardScenario2 from './卡片/正面/Scenario-2-1.png';
 import CardScenario3 from './卡片/正面/Scenario-3-1.png';
 import CardScenario4 from './卡片/正面/Scenario-4-1.png';
 import CardScenario5 from './卡片/正面/Scenario-5-1.png';
-import CardScenario6 from './卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
+import CardScenario6 from './卡片/正面/Scenario-6-1.png';
 
 // --- Stage 4: Mechanism Cards ---
 import CardMec1 from './卡片/正面/Mec-1-1.png';
@@ -27,9 +27,9 @@ import CardMec8 from './卡片/正面/Mec-8-1.png';
 
 // --- Stage 5: Info Source Cards ---
 // 临时使用 SVG（等待 PNG 文件）
-import CardInfS1 from './卡片 - svg/卡片正面-选择页/InfS-1-1.svg';
-import CardInfS2 from './卡片 - svg/卡片正面-选择页/InfS-2-1.svg';
-import CardInfS3 from './卡片 - svg/卡片正面-选择页/InfS-3-1.svg';
+import CardInfS1 from './卡片/正面/InfS-1-1.png';
+import CardInfS2 from './卡片/正面/InfS-2-1.png';
+import CardInfS3 from './卡片/正面/InfS-3-1.png';
 
 // --- Stage 6: Mode Cards ---
 import CardMod1 from './卡片/正面/Mod-1-1.png';

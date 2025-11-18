@@ -6,9 +6,9 @@ import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext'; 
 
 // 临时使用 SVG（等待 PNG 文件）
-import CardInfS1 from '../assets/卡片 - svg/卡片正面-选择页/InfS-1-1.svg';
-import CardInfS2 from '../assets/卡片 - svg/卡片正面-选择页/InfS-2-1.svg';
-import CardInfS3 from '../assets/卡片 - svg/卡片正面-选择页/InfS-3-1.svg';
+import CardInfS1 from '../assets/卡片/正面/InfS-1-1.png';
+import CardInfS2 from '../assets/卡片/正面/InfS-2-1.png';
+import CardInfS3 from '../assets/卡片/正面/InfS-3-1.png';
 import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';

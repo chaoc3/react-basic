@@ -11,7 +11,7 @@ import CardScenario2 from '../assets/卡片/正面/Scenario-2-1.png';
 import CardScenario3 from '../assets/卡片/正面/Scenario-3-1.png';
 import CardScenario4 from '../assets/卡片/正面/Scenario-4-1.png';
 import CardScenario5 from '../assets/卡片/正面/Scenario-5-1.png';
-import CardScenario6 from '../assets/卡片 - svg/卡片正面-选择页/Scenario-6-1.svg';
+import CardScenario6 from '../assets/卡片/正面/Scenario-6-1.png';
 import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
