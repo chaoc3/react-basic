@@ -30,7 +30,7 @@ const getAiResponse = async (userInput, currentMessages) => {
   console.log("2. [FRONTEND] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
 
   try {
-    const response = await fetch('/api/chat', {
+    const response = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),

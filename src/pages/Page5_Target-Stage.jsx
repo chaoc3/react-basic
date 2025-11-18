@@ -30,7 +30,7 @@ const getAiResponseForStage = async (userInput, currentMessages) => {
 
   try {
     // API 请求部分保持不变
-    const response = await fetch('/api/chat', {
+    const response = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),

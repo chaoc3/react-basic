@@ -6,7 +6,7 @@ import { z } from 'zod';
 import 'dotenv/config';
 
 const app = express();
-const port = 3001;
+//const port = 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -694,6 +694,8 @@ app.post('/chat', async (req, res) => {
     }
   });
 
-app.listen(port, () => {
+/* app.listen(port, () => {
   console.log(`✅ Backend server is running at http://localhost:${port}`);
-});
+}); */
+
+export default app;
