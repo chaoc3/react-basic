@@ -73,7 +73,7 @@ function App() {
   return (
     <TimelineProvider>
       <DesignProvider>
-        <Router basename="/react-basic">
+        <Router>
           <AppContent />
         </Router>
       </DesignProvider>
