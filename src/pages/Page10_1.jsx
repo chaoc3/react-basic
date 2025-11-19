@@ -134,16 +134,18 @@ const Page10_Mec_1 = () => {
   return (
     <div className={styles.container}>
       <div className={styles.leftPanel}>
+        {/* BranchSelector 现在会自动从 Context 获取状态并正确显示多选的子节点 */}
         <BranchSelector />
       </div>
       <div className={styles.mainContent}>
+        {/* ... (轮播和按钮的 JSX 保持不变) ... */}
         <div className={styles.cardCarousel}>
           <button onClick={handlePrev} className={styles.arrowButton}>
             <img src={ArrowLeft} alt="上一张" />
           </button>
           <div className={styles.cardContainer}>
             {cards.map((card, index) => (
-                <div
+              <div
                 key={card.id}
                 className={getCardClass(index)}
                 onClick={() => handleCardClick(card.id)}
@@ -156,16 +158,19 @@ const Page10_Mec_1 = () => {
             <img src={ArrowRight} alt="下一张" />
           </button>
         </div>
-        <button className={styles.selectButton} onClick={handleNextPage}
-        disabled={selectedCardIds.length === 0}>
+        <button
+          className={styles.selectButton}
+          onClick={handleNextPage}
+          disabled={!selectedCardId}
+        >
           <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
       <div className={styles.rightPanel}>
         <ChatDialog
-          key={initialBotMessage}
-          initialBotMessage={initialBotMessage}
-          getAiResponse={dummyGetAiResponse}
+          initialBotMessage="对话功能当前为UI展示模式。"
+          onSendMessage={dummyOnSendMessage}
+          onDataExtracted={dummyOnDataExtracted}
         />
       </div>
     </div>
