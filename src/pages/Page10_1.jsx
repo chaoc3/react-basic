@@ -31,7 +31,7 @@ const cards = [
 // 根据需求文档，这个阶段是第4个主节点
 const CURRENT_STAGE_ID = 4; 
 
-const Page10_Mec_1 = () => {
+const Page10_1 = () => {
   const navigate = useNavigate();
   
   // Get state management functions from the global TimelineContext
@@ -47,16 +47,23 @@ useEffect(() => {
 }, [setActiveStageId]);
 
 useEffect(() => {
-  if (!designData.user) {
+  const mechanismNames = Array.isArray(designData.mechanismCards)
+    ? designData.mechanismCards
+    : designData.mechanismCards
+      ? [designData.mechanismCards]
+      : [];
+
+  if (mechanismNames.length === 0) {
     setSelectedCardId(null);
     return;
   }
-  const matchedCard = cards.find(card => card.name === designData.user);
+
+  const matchedCard = cards.find(card => card.name === mechanismNames[0]);
   if (matchedCard && matchedCard.id !== selectedCardId) {
     setSelectedCardId(matchedCard.id);
-    setSingleCard(2, matchedCard.id);
+    setSingleCard(CURRENT_STAGE_ID, matchedCard.id);
   }
-}, [designData.user, selectedCardId, setSingleCard]);
+}, [designData.mechanismCards, selectedCardId, setSingleCard]);
 
 useEffect(() => {
   const fetchRecommendation = async () => {
@@ -87,7 +94,7 @@ useEffect(() => {
   // Handles clicking on a card to select it
 const handleCardClick = (cardId) => {
   setSelectedCardId(cardId);
-  setSingleCard(2, cardId); 
+  setSingleCard(CURRENT_STAGE_ID, cardId); 
 
   const selectedCard = cards.find((card) => card.id === cardId);
   if (selectedCard) {
@@ -97,9 +104,15 @@ const handleCardClick = (cardId) => {
 
   // Handles navigation to the next page
   const handleNextPage = () => {
-  if (selectedCardId && designData.mechanismCards) {
+  const mechanismNames = Array.isArray(designData.mechanismCards)
+    ? designData.mechanismCards
+    : designData.mechanismCards
+      ? [designData.mechanismCards]
+      : [];
+
+  if (selectedCardId && mechanismNames.length > 0) {
       // Mark Stage 2 as completed in the global state
-      completeStage(4);
+      completeStage(CURRENT_STAGE_ID);
       // Navigate to Page 7, passing the selected card's ID
       navigate('/page11');
     }
@@ -178,13 +191,11 @@ const handleCardClick = (cardId) => {
         <ChatDialog
           key={initialBotMessage} // 使用 key 来强制重新渲染
           initialBotMessage={initialBotMessage}
-          // 关键修改：将 onSendMessage 替换为 getAiResponse
           getAiResponse={dummyGetAiResponse} 
-          // 这个页面不提取数据
         />
       </div>
     </div>
   );
 };
 
-export default Page10_Mec_1;
+export default Page10_1;

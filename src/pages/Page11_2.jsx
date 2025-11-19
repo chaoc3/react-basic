@@ -44,7 +44,6 @@ const allCards = [
   { id: 8, image: Mec8, name: '诱饵效应' },
 ];
 
-// --- Main Component ---
 const Page11_2 = () => {
   const navigate = useNavigate();
   const { setActiveStageId, completeStage } = useTimeline();
@@ -53,74 +52,77 @@ const Page11_2 = () => {
   const [isTaskComplete, setIsTaskComplete] = useState(false);
   const [initialBotMessage, setInitialBotMessage] = useState("正在分析机制策略，请稍候...");
 
-  // 查找当前选中的卡片（单个展示，不再使用轮播）
   const selectedCard = allCards.find(card => card.name === designData.mechanismCards);
-
-
-  const mergeMechanismDetails = useCallback((details) => {
-    if (!details) return;
-    const cardName = selectedCard?.name;
-    if (!cardName) {
-      updateDesignData('mechanismDetails', details);
-      return;
-    }
-    const isAlreadyKeyed = details[cardName];
-    const normalized = isAlreadyKeyed ? details : { [cardName]: details };
-    updateDesignData('mechanismDetails', normalized);
-  }, [selectedCard, updateDesignData]);
+  
+  // --- 核心修改：直接从 designData 读取扁平对象 ---
+  const currentMechanismDetails = designData.mechanismDetails || {};
 
   const handleNextPage = useCallback(() => {
     completeStage(CURRENT_STAGE_ID); 
     navigate('/page12');
   }, [completeStage, navigate]);
 
+  // 任务完成时的回调
   const handleTaskComplete = useCallback((data) => {
+    console.log("AI has confirmed: mechanism details task is complete.");
+    // 即使任务完成，也可能返回最终的数据，我们需要更新它
     if (data?.mechanismDetails) {
-      mergeMechanismDetails(data.mechanismDetails);
+        // 这里的 data.mechanismDetails 是一个完整的扁平对象
+        // DesignContext 会执行合并，但因为后端返回的是完整对象，所以结果是正确的
+        updateDesignData('mechanismDetails', data.mechanismDetails);
     }
-    if (data?.isTaskComplete) {
-      setIsTaskComplete(true);
-      setTimeout(() => handleNextPage(), 1500);
-    }
-  }, [mergeMechanismDetails, handleNextPage]);
+    setIsTaskComplete(true);
+    
+    setTimeout(() => {
+        handleNextPage();
+    }, 1500);
+  }, [updateDesignData, handleNextPage]);
 
+  // 页面加载时启动对话
   const startStrategyBuilding = useCallback(async () => {
     if (selectedCard) {
       const aiResult = await getAiResponse(
         [], 
         'buildMechanismDetails',
         { 
-          mechanismCards: designData.mechanismCards,
+          // 发送扁平的 mechanismDetails
           mechanismDetails: designData.mechanismDetails,
-          currentCardName: selectedCard.name, 
+          // 仍然发送 currentCardName 作为上下文
+          currentCardName: selectedCard.name,
+          // 其他上下文...
           targetUser: designData.targetUser,
           targetStage: designData.targetStage,
         }
       );
+      
       setInitialBotMessage(aiResult.responseText);
+      
       if (aiResult.extractedData?.mechanismDetails) {
-        mergeMechanismDetails(aiResult.extractedData.mechanismDetails);
+        // 后端返回的是完整的扁平对象，直接更新
+        updateDesignData('mechanismDetails', aiResult.extractedData.mechanismDetails);
       }
-      if (aiResult.isTaskComplete) handleTaskComplete(aiResult);
+      if (aiResult.isTaskComplete) {
+        // 调用 handleTaskComplete 来处理跳转等逻辑
+        handleTaskComplete(aiResult.extractedData);
+      }
     } else {
       console.warn("No selected mechanism card found, redirecting to /page10.");
       navigate('/page10');
     }
-  }, [selectedCard, designData, navigate, mergeMechanismDetails, handleTaskComplete]);
+  }, [designData, selectedCard, navigate, updateDesignData, handleTaskComplete]);
 
   useEffect(() => {
     setActiveStageId(CURRENT_STAGE_ID);
     startStrategyBuilding();
   }, [setActiveStageId, startStrategyBuilding]);
 
-  // handleSendMessage, handleDataExtracted, handleTaskComplete, handleNextPage 逻辑完全保持不变
+  // 发送用户消息
   const handleSendMessage = async (userInput, currentMessages) => {
     const messagesForApi = [...currentMessages, { sender: 'user', text: userInput }];
     return await getAiResponse(
       messagesForApi,
       'buildMechanismDetails', 
       { 
-        mechanismCards: designData.mechanismCards,
         mechanismDetails: designData.mechanismDetails,
         currentCardName: selectedCard?.name,
         targetUser: designData.targetUser,
@@ -129,23 +131,21 @@ const Page11_2 = () => {
     );
   };
 
+  // 提取到新数据时的回调
   const handleDataExtracted = (data) => {
     if (data?.mechanismDetails) {
-      mergeMechanismDetails(data.mechanismDetails);
+      console.log("Extracted new mechanism details:", data.mechanismDetails);
+      // 后端返回的是完整的扁平对象，直接更新
+      updateDesignData('mechanismDetails', data.mechanismDetails);
     }
   };
-
-  const currentMechanismDetails = useMemo(() => {
-    if (!selectedCard?.name) return {};
-    return designData.mechanismDetails?.[selectedCard.name] || {};
-  }, [designData.mechanismDetails, selectedCard]);
 
   if (!selectedCard) return null;
 
   const mechanismFields = [
-    { label: `策略 1`, value: currentMechanismDetails?.strategy1 ?? '', placeholder: `待补充...` },
-    { label: `策略 2`, value: currentMechanismDetails?.strategy2 ?? '', placeholder: `待补充...` },
-    { label: `策略 3`, value: currentMechanismDetails?.strategy3 ?? '', placeholder: `待补充...` },
+    { label: `策略 1`, value: String(currentMechanismDetails?.strategy1 ?? ''), placeholder: `待补充...` },
+    { label: `策略 2`, value: String(currentMechanismDetails?.strategy2 ?? ''), placeholder: `待补充...` },
+    { label: `策略 3`, value: String(currentMechanismDetails?.strategy3 ?? ''), placeholder: `待补充...` },
   ];
 
   return (
@@ -155,7 +155,6 @@ const Page11_2 = () => {
       </div>
       <div className={styles.mainContent}>
         <div className={styles.cardDisplay}>
-          {/* 渲染卡片背面 PNG */}
           <OverlayCard 
             backgroundImageUrl={selectedCard.image}
             fields={mechanismFields}

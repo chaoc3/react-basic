@@ -38,68 +38,58 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 };
  */
 const mockDesignData = {
-  targetUser: '年轻上班族',
-  targetPainpoint: '工作压力大，缺乏时间进行健康管理',
-  targetStage: '健康意识初步形成阶段',
-  user: {
-    id: 1,
-    name: '张小明',
-    type: '职场新人',
-    description: '25岁，互联网公司产品经理，工作繁忙但注重健康'
+  "targetUser": "年轻上班族",
+  "targetPainpoint": "工作压力大，缺乏时间进行健康管理",
+  "targetStage": "健康意识初步形成阶段",
+  "user": "张小明",
+  "userProfile": {
+    "age": "25",
+    "sexual": "男",
+    "edu": "本科",
+    "work": "互联网产品经理",
+    "equip": "智能手机、智能手表"
   },
-  userProfile: {
-    age: 25,
-    sexual: '男',
-    edu: '本科',
-    work: '互联网产品经理',
-    equip: '智能手机、智能手表',
+  "scenarioCard": "工作日健康管理",
+  "scenarioDetails": {
+    "when": "工作日晚上8点后",
+    "where": "家中或健身房",
+    "who": "独自或与朋友一起",
+    "situation": "下班后疲惫，需要放松和锻炼"
   },
-  scenarioCard: {
-    id: 3,
-    title: '工作日健康管理',
-    description: '上班族在工作日的健康维护场景'
-  },
-  scenarioDetails: {
-    when: '工作日晚上8点后',
-    where: '家中或健身房',
-    who: '独自或与朋友一起',
-    situation: '下班后疲惫，需要放松和锻炼'
-  },
-  mechanismCards: [
-    {
-      id: 1,
-      name: '游戏化激励',
-      type: '激励机制'
-    },
-    {
-      id: 2, 
-      name: '社交互动',
-      type: '社交机制'
-    }
+/*   "mechanismCards": [
+    "共情反馈"
   ],
-  mechanismDetails: {
-    strategy1: '通过积分和徽章系统激励用户坚持运动',
-    strategy2: '添加好友互动和排行榜功能增强社交动力',
-    strategy3: '设置阶段性目标和小奖励保持用户参与度',
-  },
-  infoSourceCards: [
+  "mechanismDetails": {
+    
+      "strategy1": "在每日总结中加入情感化语言，强调系统理解用户的疲惫和努力。",
+      "strategy2": "推送同龄人或同岗位用户的鼓励性反馈，营造“有人懂你”的氛围。",
+      "strategy3": "当用户连续完成任务时，提供个性化的语音/图文安慰与庆祝。"
+    
+  }, */
+  "mechanismCards":[
+
   ],
-  infoSourceDetails: {    
-    strategy1: '通过智能设备自动收集运动数据和生理指标',
-    strategy2: '定期推送问卷调查收集用户主观感受',
-    strategy3: '记录用户行为模式和使用习惯',
+  "mechanismDetails": {
+    "strategy1":null,
+    "strategy2":null,
+    "strategy3":null,
   },
-  modeCard: {
-    id: 1,
-    name: '个性化推荐模式',
-    description: '基于用户数据提供个性化健康建议'
+  "infoSourceCards": [
+    "自我数据",
+    "他人影响"
+  ],
+  "infoSourceDetails": {
+    "strategy1": "记录穿戴设备上传的睡眠时长、步数、心率",
+    "strategy2": "邀请同事/朋友轻量化打分或留言，反馈用户状态",
+    "strategy3": ""
   },
-  modeDetails: {
-    algorithm: '协同过滤推荐',
-    frequency: '每日更新',
-    customization: '支持手动调整推荐强度',
-  },
-};
+  "modeCard": "个性化推荐模式",
+  "modeDetails": {
+    "strategy1": "协同过滤 + 时间分段推荐",
+    "strategy2": "每日晚间推送简短提示卡片",
+    "strategy3": "允许用户手动调整推荐强度"
+  }
+}
 
 
 // 2. Create the context

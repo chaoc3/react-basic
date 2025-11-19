@@ -56,7 +56,7 @@ extractModeDetails: z.object({
     strategy3: z.string().optional().describe('第三个交互方式的具体描述，例如 "视觉化图表"'),
 }),
 extractMechanismDetails: z.object({
-    cardName: z.string().optional().describe('当前正在讨论的助推机制名称'),
+    
     strategy1: z.string().optional().describe('第一个策略的具体做法'),
     strategy2: z.string().optional().describe('第二个策略的具体做法'),
     strategy3: z.string().optional().describe('第三个策略的具体做法'),
@@ -194,14 +194,13 @@ extractModeDetails: {
       parameters: {
         type: 'object',
         properties: {
-          // --- 新增这一行 ---
-          cardName: { type: 'string', description: '当前正在讨论的助推机制卡片的名称' },
+
           strategy1: { type: 'string', description: '第一个策略' },
           strategy2: { type: 'string', description: '第二个策略' },
           strategy3: { type: 'string', description: '第三个策略' },
         },
         // --- 确保 cardName 是必须的 ---
-        required: ['cardName'], 
+        
       },
     },
   },
@@ -340,7 +339,7 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
           **【重要指令】调用工具时，必须使用 \`cardName\` 参数来指明当前讨论的机制是 "${currentCardName}"。**
          
           已知信息如下：
-          - 已选助推机制: ${additionalData.mechanismCards.join('、')}
+          - 已选助推机制: ${additionalData.mechanismCards}
           - **当前正在讨论的机制: ${currentCardName}**
           - 当前已收集的策略: ${JSON.stringify(additionalData.mechanismDetails || {})}
           
@@ -709,9 +708,10 @@ app.post('/chat', async (req, res) => {
 
               // 假设需要收集所有三个策略
               const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
-              const allFieldsCollected = requiredFields.every(field =>
-                  mergedDetails[field] != null && mergedDetails[field].trim() !== ''
-              );
+              const allFieldsCollected = requiredFields.every(field => {
+                const value = mergedProfile[field];
+                return typeof value === 'string' && value.trim() !== '';
+              });
 
               extractedData = taskConfig.transform(newlyExtractedData);
               isTaskComplete = allFieldsCollected;
@@ -748,28 +748,34 @@ app.post('/chat', async (req, res) => {
                   finalResponseText = `好的，我已记录您的信息。接下来，请为下一个交互方式提供具体的实现策略。`;
               }
           }
-        else if (task === 'buildMechanismDetails') {
-          const existingDetails = additionalData.modeDetails || {};
-          const newlyExtractedData = parsedResult.data;
-          const mergedDetails = { ...existingDetails, ...newlyExtractedData };
-
-          // 假设需要收集所有三个策略
-          const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
-          const allFieldsCollected = requiredFields.every(field =>
-              mergedDetails[field] != null && mergedDetails[field].trim() !== ''
-          );
-
-          extractedData = taskConfig.transform(newlyExtractedData);
-          isTaskComplete = allFieldsCollected;
-
-          if (isTaskComplete) {
+          else if (task === 'buildMechanismDetails') {
+            // 1. 获取已有的扁平策略对象
+            const existingDetails = additionalData.mechanismDetails || {};
+            
+            // 2. 获取 AI 新提取的策略数据
+            const newlyExtractedData = parsedResult.data; // e.g., { strategy1: "..." }
+  
+            // 3. 直接将新旧策略合并成一个新的扁平对象
+            const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+  
+            // 4. 判断任务是否完成
+            const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
+            const allFieldsCollected = requiredFields.every(field => {
+              const value = mergedDetails[field];
+              return typeof value === 'string' && value.trim() !== '';
+            });
+  
+            // 5. 准备返回数据 (返回的是扁平对象)
+            extractedData = { mechanismDetails: mergedDetails };
+            isTaskComplete = allFieldsCollected;
+  
+            // 6. 构造回复
+            if (isTaskComplete) {
               finalResponseText = taskConfig.completionMessage;
-          } else {
-              // 构造下一个引导问题
-              const nextMissingFieldKey = requiredFields.find(field => mergedDetails[field] == null || mergedDetails[field].trim() === '');
-              finalResponseText = `好的，我已记录您的信息。接下来，请为下一个交互方式提供具体的实现策略。`;
+            } else {
+              finalResponseText = `好的，已记录。我们还需要补充其他策略。`;
+            }
           }
-      }
             else {
                 // 其他任务（如 getTargetUser, getTargetPainpoint）保持原有的简单逻辑
                 extractedData = taskConfig.transform(parsedResult.data);
