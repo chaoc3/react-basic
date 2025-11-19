@@ -16,6 +16,7 @@ import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page10_Mec_1.module.css';
 import { useTimeline } from '../context/TimelineContext'; // 1. 导入 useTimeline Hook
 import { useDesign } from '../context/DesignContext';
+import { getAiResponse } from '../services/aiService';
 const cards = [
   { id: 1, src: Mec1, name: '情景感知提醒' },
   { id: 2, src: Mec2, name: '反馈与激励' },
@@ -30,132 +31,144 @@ const cards = [
 // 根据需求文档，这个阶段是第4个主节点
 const CURRENT_STAGE_ID = 4; 
 
-const Page10_1 = ({ maxSelections = 3 }) => { // 需求文档中是多选，这里可以设为3或更多
-const navigate = useNavigate();
-const [currentIndex, setCurrentIndex] = useState(0);
-const [selectedCardIds, setSelectedCardIds] = useState([]);
+const Page10_Mec_1 = () => {
+  const navigate = useNavigate();
+  const { setActiveStageId, setMultipleCards, completeStage } = useTimeline(); // Use setMultipleCards
+  const { designData, updateDesignData } = useDesign();
 
-// 2. 从全局 Context 获取我们需要的函数
-const { setActiveStageId, selectCard, completeStage } = useTimeline();
-const { designData, updateDesignData } = useDesign();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  // --- MODIFICATION 1: State for multi-select and recommendations ---
+  const [selectedCardIds, setSelectedCardIds] = useState([]);
+  const [recommendedCardNames, setRecommendedCardNames] = useState([]);
+  const [initialBotMessage, setInitialBotMessage] = useState("正在为你生成助推策略推荐...");
 
-// 3. 当组件加载时，设置当前活动的时间轴阶段
-useEffect(() => {
-  setActiveStageId(CURRENT_STAGE_ID);
-}, [setActiveStageId]);
+  // --- MODIFICATION 2: Call AI for recommendations ---
+  useEffect(() => {
+    setActiveStageId(CURRENT_STAGE_ID);
 
-useEffect(() => {
-  const idsFromContext = cards
-    .filter(card => (designData.mechanismCards || []).includes(card.name))
-    .map(card => card.id)
-    .slice(0, maxSelections);
-  setSelectedCardIds(idsFromContext);
-}, [designData.mechanismCards, maxSelections]);
+    const fetchRecommendations = async () => {
+      // Ensure all required data is present
+      if (designData.targetUser && designData.user && designData.scenarioCard) {
+        try {
+          const aiResult = await getAiResponse(
+            [],
+            'recommendMechanisms',
+            { ...designData } // Pass all existing design data
+          );
+          
+          setInitialBotMessage(aiResult.responseText);
 
-const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
-const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
+          // Check for extracted data from the tool
+          if (aiResult.extractedData && aiResult.extractedData.recommendedCards) {
+            setRecommendedCardNames(aiResult.extractedData.recommendedCards);
+          }
 
-const handleCardClick = (cardId) => {
-  // 4. 在处理本地状态的同时，调用全局状态函数
-  const isCurrentlySelected = selectedCardIds.includes(cardId);
+        } catch (error) {
+          console.error("获取 AI 机制推荐失败:", error);
+          setInitialBotMessage("抱歉，推荐服务暂时无法连接。请直接从左侧选择。");
+        }
+      } else {
+        setInitialBotMessage("请先完成前面的步骤，然后选择助推机制。");
+      }
+    };
 
-  // 在更新状态前检查是否会超出最大选择数
-  if (!isCurrentlySelected && selectedCardIds.length >= maxSelections) {
-    console.log(`You can only select up to ${maxSelections} cards.`);
-    // 可以加一个用户提示，比如 toast
-    return; // 阻止选择
-  }
+    fetchRecommendations();
+  }, [setActiveStageId, designData]); // Depend on the whole designData object
 
-  // 更新本地状态以及 DesignContext
-  setSelectedCardIds((prevSelectedIds) => {
-    let nextSelected;
-    if (isCurrentlySelected) {
-      nextSelected = prevSelectedIds.filter((id) => id !== cardId);
+  // --- MODIFICATION 3: Handle multi-card clicks ---
+  const handleCardClick = (cardId) => {
+    const newSelectedIds = [...selectedCardIds];
+    const cardIndex = newSelectedIds.indexOf(cardId);
+
+    if (cardIndex > -1) {
+      newSelectedIds.splice(cardIndex, 1); // Deselect if already selected
     } else {
-      nextSelected = [...prevSelectedIds, cardId];
+      newSelectedIds.push(cardId); // Select if not selected
     }
-    const selectedNames = nextSelected
-      .map((id) => cards.find((card) => card.id === id))
-      .filter(Boolean)
-      .map((card) => card.name);
+
+    setSelectedCardIds(newSelectedIds);
+    setMultipleCards(CURRENT_STAGE_ID, newSelectedIds); // Update timeline context
+
+    // Update design context with names
+    const selectedNames = cards
+      .filter(card => newSelectedIds.includes(card.id))
+      .map(card => card.name);
     updateDesignData('mechanismCards', selectedNames);
-    return nextSelected;
-  });
+  };
 
-  // 同步到全局状态，让时间轴更新
-  selectCard(CURRENT_STAGE_ID, cardId);
-};
+  // --- MODIFICATION 4: Update getCardClass to show recommendations and multi-select ---
+  const getCardClass = (index) => {
+    const card = cards[index];
+    const classes = [styles.card];
+    // ... (carousel logic for active, prev, next remains the same)
+    const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
+    const nextIndex = currentIndex === cards.length - 1 ? 0 : currentIndex + 1;
+    if (index === currentIndex) classes.push(styles.active);
+    else if (index === prevIndex) classes.push(styles.prev);
+    else if (index === nextIndex) classes.push(styles.next);
+    else classes.push(styles.hidden);
 
-// ... (getCardClass 逻辑保持不变) ...
-const getCardClass = (index) => {
-  const cardId = cards[index].id;
-  const classes = [styles.card];
-  const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
-  const nextIndex = currentIndex === cards.length - 1 ? 0 : currentIndex + 1;
-  if (index === currentIndex) classes.push(styles.active);
-  else if (index === prevIndex) classes.push(styles.prev);
-  else if (index === nextIndex) classes.push(styles.next);
-  else classes.push(styles.hidden);
-  if (selectedCardIds.includes(cardId)) classes.push(styles.selected);
-  return classes.join(' ');
-};
+    // Highlight recommended cards
+    if (recommendedCardNames.includes(card.name)) {
+      classes.push(styles.recommended);
+    }
+    
+    // Highlight selected cards
+    if (selectedCardIds.includes(card.id)) {
+      classes.push(styles.selected);
+    }
+    return classes.join(' ');
+  };
 
-const handleNextPage = () => {
-  // 5. 进入下一页时，标记当前阶段已完成
-  if (selectedCardIds.length === maxSelections) { // 或者根据需求设置为 selectedCardIds.length === maxSelections
-    completeStage(CURRENT_STAGE_ID);
-    navigate('/page11');
-  }
-};
+  const handleNextPage = () => {
+    if (selectedCardIds.length > 0) {
+      completeStage(CURRENT_STAGE_ID);
+      navigate('/page11');
+    }
+  };
+  
+  const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
+  const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
+  const dummyGetAiResponse = async (input) => ({ responseText: "请在左侧选择卡片后点击下方的按钮继续。" });
 
-// ... (dummy functions 保持不变) ...
-const dummyOnSendMessage = async (input) => { /* ... */ };
-const dummyOnDataExtracted = (data) => { /* ... */ };
-
-return (
-  <div className={styles.container}>
-    <div className={styles.leftPanel}>
-      {/* BranchSelector 现在会自动从 Context 获取状态并正确显示多选的子节点 */}
-      <BranchSelector />
-    </div>
-    <div className={styles.mainContent}>
-      {/* ... (轮播和按钮的 JSX 保持不变) ... */}
-      <div className={styles.cardCarousel}>
-        <button onClick={handlePrev} className={styles.arrowButton}>
-          <img src={ArrowLeft} alt="上一张" />
-        </button>
-        <div className={styles.cardContainer}>
-          {cards.map((card, index) => (
-            <div
-              key={card.id}
-              className={getCardClass(index)}
-              onClick={() => handleCardClick(card.id)}
-            >
-              <img src={card.src} alt={card.name} />
-            </div>
-          ))}
+  return (
+    <div className={styles.container}>
+      <div className={styles.leftPanel}>
+        <BranchSelector />
+      </div>
+      <div className={styles.mainContent}>
+        <div className={styles.cardCarousel}>
+          {/* ... (carousel buttons) ... */}
+          <div className={styles.cardContainer}>
+            {cards.map((card, index) => (
+              <div
+                key={card.id}
+                className={getCardClass(index)}
+                onClick={() => handleCardClick(card.id)}
+              >
+                <img src={card.src} alt={card.name} />
+              </div>
+            ))}
+          </div>
+          {/* ... (carousel buttons) ... */}
         </div>
-        <button onClick={handleNext} className={styles.arrowButton}>
-          <img src={ArrowRight} alt="下一张" />
+        <button
+          className={styles.selectButton}
+          onClick={handleNextPage}
+          disabled={selectedCardIds.length === 0} // Disable if no cards are selected
+        >
+          <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
-      <button
-        className={styles.selectButton}
-        onClick={handleNextPage}
-        disabled={selectedCardIds.length !== maxSelections} // 或者根据需求设置为 !== maxSelections
-      >
-        <img src={SelectButtonSVG} alt="下一步" />
-      </button>
+      <div className={styles.rightPanel}>
+        <ChatDialog
+          key={initialBotMessage}
+          initialBotMessage={initialBotMessage}
+          getAiResponse={dummyGetAiResponse}
+        />
+      </div>
     </div>
-    <div className={styles.rightPanel}>
-      <ChatDialog
-        initialBotMessage="对话功能当前为UI展示模式。"
-        onSendMessage={dummyOnSendMessage}
-        onDataExtracted={dummyOnDataExtracted}
-      />
-    </div>
-  </div>
-);
+  );
 };
 
-export default Page10_1;
+export default Page10_Mec_1;

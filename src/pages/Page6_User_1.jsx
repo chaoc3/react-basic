@@ -67,19 +67,34 @@ useEffect(() => {
   }
 }, [designData.user, selectedCardId, setSingleCard]);
 
+useEffect(() => {
   const fetchRecommendation = async () => {
-      if (designData.targetUser) {
+    // 确保前置数据存在
+    if (designData.targetUser) {
+      try {
         const aiResult = await getAiResponse(
           [], // 初始对话历史为空
-          'recommendUserGroup', // 任务名称
-          { targetUser: designData.targetUser } // 传入 Target-User
+          'recommendUserGroup', // 后端定义的任务名称
+          { // 传入所有相关信息以获得更好的推荐
+            targetUser: designData.targetUser,
+            targetPainpoint: designData.targetPainpoint,
+            targetStage: designData.targetStage,
+          }
         );
-        setInitialBotMessage(aiResult.responseText); // 更新 ChatDialog 的初始消息
-      } else {
-        // 如果没有 targetUser，提供一个默认消息
-        setInitialBotMessage("让我们一起确定你的设计对象吧！请在左侧选择一个用户画像。");
+        // 将 AI 的回复设置为聊天机器人的初始消息
+        setInitialBotMessage(aiResult.responseText);
+      } catch (error) {
+        console.error("获取 AI 推荐失败:", error);
+        setInitialBotMessage("抱歉，推荐服务暂时无法连接。请直接从左侧选择一个用户画像。");
       }
-    };
+    } else {
+      // 如果缺少前置数据，则提供默认引导
+      setInitialBotMessage("让我们一起确定你的设计对象吧！请在左侧选择一个用户画像。");
+    }
+  };
+
+  fetchRecommendation();
+}, [designData.targetUser, designData.targetPainpoint, designData.targetStage]); // 依赖项确保在数据加载后执行
   // Handles clicking on a card to select it
 const handleCardClick = (cardId) => {
   setSelectedCardId(cardId);

@@ -61,7 +61,12 @@ extractMechanismDetails: z.object({
     strategy2: z.string().optional().describe('第二个策略的具体做法'),
     strategy3: z.string().optional().describe('第三个策略的具体做法'),
 }),
+extractRecommendedCards: z.object({
+  recommendedCards: z.array(z.string()).describe('An array of exactly three recommended card names.'),
+}),
+
 };
+
 
 const toolDefinitions = {
   extractUserInfo: {
@@ -200,6 +205,24 @@ extractModeDetails: {
       },
     },
   },
+  extractRecommendedCards: {
+    type: 'function',
+    function: {
+      name: 'extractRecommendedCards',
+      description: 'Extract the names of the three recommended mechanism cards.',
+      parameters: {
+        type: 'object',
+        properties: {
+          recommendedCards: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'An array of exactly three recommended card names, e.g., ["反馈与激励", "社会影响", "目标设定"]',
+          },
+        },
+        required: ['recommendedCards'],
+      },
+    },
+  },
 
 };
 
@@ -255,6 +278,13 @@ const taskConfigs = {
     toolName: 'extractMechanismDetails',
     completionMessage: '太棒了，我们已经确定了助推策略！点击下一步继续吧。',
     transform: (data) => ({ mechanismDetails: data }),
+},
+recommendScenario: { // For Page 8
+  toolName: null, // No tool needed, just text
+},
+recommendMechanisms: { // For Page 10
+  toolName: 'extractRecommendedCards',
+  transform: (data) => ({ recommendedCards: data.recommendedCards }),
 },
 };
 
@@ -447,11 +477,59 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         3. 报告内容必须是连贯的叙述性文本，而不是简单地罗列 JSON 数据。
         
         请开始生成报告。`;
+        
+
+      case 'recommendUserGroup': // Page 6 的任务
+        // --- 修改开始 ---
+        // 构建一个更详细的上下文描述字符串
+        let context = `用户的设计目标是帮助“${additionalData.targetUser}”`;
+        if (additionalData.targetPainpoint) {
+            context += `，解决“${additionalData.targetPainpoint}”这个问题`;
+        }
+        if (additionalData.targetStage) {
+            context += `，并且聚焦在“${additionalData.targetStage}”`;
+        }
+        context += '。';
+
+        return `你是一个辅助设计方案的陪伴者。你的任务是基于用户之前确定的设计目标，向他们推荐一个合适的用户群体。
+        ${context}
+        你的回复应该是简短、友好且引导性的，鼓励用户从左边的卡片中选择。例如：“根据你的设计目标，我为你推荐了几个可能的用户画像。你可以看看左边的卡片，选择一个最符合你想法的。”
+        **不要**详细分析每个卡片，你的任务只是引出选择。
+        保持友好和引导的语气。不要使用任何工具。不要使用 Markdown 格式。`;
 
 
+        case 'recommendScenario':
+        return `你是一个辅助设计方案的陪伴者。你的任务是基于用户已经确定的用户画像，为他们推荐一个最相关的核心场景。
 
+        已知信息如下：
+        - 设计目标: "${additionalData.targetUser}"
+        - 用户画像: "${additionalData.user}"
+        - 画像细节: ${JSON.stringify(additionalData.userProfile)}
 
+        可推荐的场景卡片有：'居家场景', '工作场景', '户外场景', '医疗场景', '社区场景', '多场景'。
 
+        你的回复应该是简短、友好且引导性的，鼓励用户从左边的卡片中选择一个。
+        例如：“考虑到用户是‘${additionalData.user}’，并且他们的核心痛点与日常生活紧密相关，我建议我们可以从‘居家场景’开始构思。请在左侧选择你认为最合适的场景。”
+        **不要**使用任何工具。你的回复就是最终的引导语。`;
+
+      // --- NEW CASE FOR PAGE 10 ---
+      case 'recommendMechanisms':
+        return `你是一个专业的数字健康设计师。你的任务是根据用户至今为止的所有设计决策，为他们推荐三个最有效、最匹配的助推机制。
+
+        已知信息如下：
+        - 设计目标: "${additionalData.targetUser}"
+        - 用户画像: "${additionalData.user}" (${JSON.stringify(additionalData.userProfile)})
+        - 核心场景: "${additionalData.scenarioCard}" (${JSON.stringify(additionalData.scenarioDetails)})
+
+        可推荐的助推机制卡片有：'情景感知提醒', '反馈与激励', '决策简化', '社会影响', '认知重建与反思', '目标设定', '激发好奇心', '诱饵效应'。
+
+        你的任务分为两步：
+        1.  **生成对话**: 生成一段友好的对话，解释你为什么推荐这三个机制。简要说明每个机制如何与用户的画像和场景相结合。
+        2.  **调用工具**: **必须**使用 \`extractRecommendedCards\` 工具，将你推荐的**三个机制的完整名称**以数组的形式提取出来。
+
+        例如，你的回复应该是这样的（对话 + 工具调用）：
+        "根据用户的居家场景和他们需要长期坚持的目标，我为你推荐了'反馈与激励'、'目标设定'和'社会影响'这三个策略。'目标设定'可以帮助他们建立清晰的计划，'反馈与激励'能提供持续的动力，而'社会影响'则能通过家人朋友的支持来巩固效果。请在左侧选择你最认可的机制吧。"
+        [工具调用: extractRecommendedCards(recommendedCards: ["反馈与激励", "目标设定", "社会影响"])]`;
 
 
 

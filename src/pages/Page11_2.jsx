@@ -26,8 +26,6 @@ import Mec5 from '../assets/卡片背面/Mec-5-2.png';
 import Mec6 from '../assets/卡片背面/Mec-6-2.png';
 import Mec7 from '../assets/卡片背面/Mec-7-2.png';
 import Mec8 from '../assets/卡片背面/Mec-8-2.png';
-import ArrowLeft from '../assets/网页素材/向左.svg';
-import ArrowRight from '../assets/网页素材/向右.svg';
 import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg';
 
 // Styles
@@ -54,44 +52,14 @@ const Page11_2 = () => {
 
   const [isTaskComplete, setIsTaskComplete] = useState(false);
   const [initialBotMessage, setInitialBotMessage] = useState("正在分析机制策略，请稍候...");
-  const [currentIndex, setCurrentIndex] = useState(0); // 状态保持不变
 
-  const selectedCards = useMemo(() => 
-    allCards.filter(card => designData.mechanismCards?.includes(card.name)), 
-    [designData.mechanismCards]
-  );
-  
-  // currentCard 的逻辑保持不变
-  const currentCard = selectedCards[currentIndex];
-
-  // --- 新增：从 Page6 引入的轮播逻辑 ---
-  const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? selectedCards.length - 1 : prev - 1));
-  const handleNext = () => setCurrentIndex((prev) => (prev === selectedCards.length - 1 ? 0 : prev + 1));
-
-  const getCardClass = (index) => {
-    const classes = [styles.card];
-    const prevIndex = currentIndex === 0 ? selectedCards.length - 1 : currentIndex - 1;
-    const nextIndex = currentIndex === selectedCards.length - 1 ? 0 : currentIndex + 1;
-
-    if (index === currentIndex) {
-      classes.push(styles.active);
-    } else if (index === prevIndex) {
-      classes.push(styles.prev);
-    } else if (index === nextIndex) {
-      classes.push(styles.next);
-    } else {
-      classes.push(styles.hidden);
-    }
-    
-    // Page11 不需要点击选中效果，所以不添加 .selected 类
-    return classes.join(' ');
-  };
-  // --- 轮播逻辑结束 ---
+  // 查找当前选中的卡片（单个展示，不再使用轮播）
+  const selectedCard = allCards.find(card => card.name === designData.mechanismCards);
 
 
   const mergeMechanismDetails = useCallback((details) => {
     if (!details) return;
-    const cardName = currentCard?.name;
+    const cardName = selectedCard?.name;
     if (!cardName) {
       updateDesignData('mechanismDetails', details);
       return;
@@ -99,7 +67,7 @@ const Page11_2 = () => {
     const isAlreadyKeyed = details[cardName];
     const normalized = isAlreadyKeyed ? details : { [cardName]: details };
     updateDesignData('mechanismDetails', normalized);
-  }, [currentCard, updateDesignData]);
+  }, [selectedCard, updateDesignData]);
 
   const handleNextPage = useCallback(() => {
     completeStage(CURRENT_STAGE_ID); 
@@ -117,18 +85,14 @@ const Page11_2 = () => {
   }, [mergeMechanismDetails, handleNextPage]);
 
   const startStrategyBuilding = useCallback(async () => {
-    if (selectedCards.length > 0) {
-      // 确保 currentCard 已经基于 currentIndex 更新
-      const currentCardName = selectedCards[currentIndex]?.name;
-      if (!currentCardName) return;
-
+    if (selectedCard) {
       const aiResult = await getAiResponse(
         [], 
         'buildMechanismDetails',
         { 
           mechanismCards: designData.mechanismCards,
           mechanismDetails: designData.mechanismDetails,
-          currentCardName: currentCardName, 
+          currentCardName: selectedCard.name, 
           targetUser: designData.targetUser,
           targetStage: designData.targetStage,
         }
@@ -139,10 +103,10 @@ const Page11_2 = () => {
       }
       if (aiResult.isTaskComplete) handleTaskComplete(aiResult);
     } else {
-      console.warn("No selected mechanism cards found, redirecting to /page10.");
+      console.warn("No selected mechanism card found, redirecting to /page10.");
       navigate('/page10');
     }
-  }, [selectedCards, currentIndex, designData, navigate, mergeMechanismDetails, handleTaskComplete]); // 依赖项中加入 currentIndex
+  }, [selectedCard, designData, navigate, mergeMechanismDetails, handleTaskComplete]);
 
   useEffect(() => {
     setActiveStageId(CURRENT_STAGE_ID);
@@ -158,7 +122,7 @@ const Page11_2 = () => {
       { 
         mechanismCards: designData.mechanismCards,
         mechanismDetails: designData.mechanismDetails,
-        currentCardName: currentCard?.name,
+        currentCardName: selectedCard?.name,
         targetUser: designData.targetUser,
         targetStage: designData.targetStage,
       }
@@ -172,11 +136,11 @@ const Page11_2 = () => {
   };
 
   const currentMechanismDetails = useMemo(() => {
-    if (!currentCard?.name) return {};
-    return designData.mechanismDetails?.[currentCard.name] || {};
-  }, [designData.mechanismDetails, currentCard]);
+    if (!selectedCard?.name) return {};
+    return designData.mechanismDetails?.[selectedCard.name] || {};
+  }, [designData.mechanismDetails, selectedCard]);
 
-  if (selectedCards.length === 0) return null;
+  if (!selectedCard) return null;
 
   const mechanismFields = [
     { label: `策略 1`, value: currentMechanismDetails?.strategy1 ?? '', placeholder: `待补充...` },
@@ -190,30 +154,13 @@ const Page11_2 = () => {
         <BranchSelector />
       </div>
       <div className={styles.mainContent}>
-        {/* --- 使用新的 JSX 结构替换 Slider --- */}
-        <div className={styles.cardCarousel}>
-          <button onClick={handlePrev} className={styles.arrowButton}>
-            <img src={ArrowLeft} alt="上一张" />
-          </button>
-          <div className={styles.cardContainer}>
-            {selectedCards.map((card, index) => (
-              <div
-                key={card.id}
-                className={getCardClass(index)}
-              >
-                <OverlayCard 
-                    backgroundImageUrl={card.image}
-                    // 只有当前显示的卡片才叠加信息
-                    fields={card.name === currentCard.name ? mechanismFields : []} 
-                />
-              </div>
-            ))}
-          </div>
-          <button onClick={handleNext} className={styles.arrowButton}>
-            <img src={ArrowRight} alt="下一张" />
-          </button>
+        <div className={styles.cardDisplay}>
+          {/* 渲染卡片背面 PNG */}
+          <OverlayCard 
+            backgroundImageUrl={selectedCard.image}
+            fields={mechanismFields}
+          />
         </div>
-        {/* --- 结构替换结束 --- */}
         <button className={styles.nextButton} onClick={handleNextPage} disabled={!isTaskComplete}>
           <img src={NextButtonSVG} alt="下一步" />
         </button>

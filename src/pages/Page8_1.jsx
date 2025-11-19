@@ -15,7 +15,7 @@ import CardScenario6 from '../assets/卡片/正面/Scenario-6-1.png';
 import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
-
+import { getAiResponse } from '../services/aiService';
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
@@ -42,15 +42,35 @@ const Page8_1 = () => {
   
   // --- 1. 模拟 AI 推荐逻辑 (Page 6 的逻辑) ---
   useEffect(() => {
-    setActiveStageId(3); // Page 8 对应 Stage 3
-    // 模拟 AI 推荐，基于 Target-User 和 User 字段
-    if (designData.targetUser && designData.user) {
-        // 实际应该调用 AI Service，这里使用 Dummy Message
-        setInitialBotMessage(`根据你选择的 ${designData.user} 和目标 ${designData.targetUser}，我为你推荐了几个场景。请在左侧选择一个。`);
-    } else {
-        setInitialBotMessage("请先完成前面的步骤，然后选择一个场景卡片。");
-    }
-  }, [setActiveStageId, designData.targetUser, designData.user]);
+    setActiveStageId(3);
+    
+    const fetchRecommendation = async () => {
+      if (designData.targetUser && designData.user) {
+        try {
+          const aiResult = await getAiResponse(
+            [], // No chat history needed for initial recommendation
+            'recommendScenario', // The new task we defined in the backend
+            {
+              targetUser: designData.targetUser,
+              user: designData.user,
+              userProfile: designData.userProfile,
+            }
+          );
+          setInitialBotMessage(aiResult.responseText);
+        } catch (error) {
+          console.error("获取 AI 场景推荐失败:", error);
+          setInitialBotMessage("抱歉，推荐服务暂时无法连接。请直接从左侧选择一个场景。");
+        }
+      } else {
+        // Fallback if previous data is missing
+        setInitialBotMessage("请先完成用户画像步骤，然后选择一个场景卡片。");
+        // Optional: redirect if data is missing
+        // navigate('/page6');
+      }
+    };
+
+    fetchRecommendation();
+  }, [setActiveStageId, designData.targetUser, designData.user, designData.userProfile]);
 
   // --- 2. UI 交互逻辑 (Page 6 的逻辑) ---
   const handleCardClick = (cardId) => {

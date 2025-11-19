@@ -223,7 +223,7 @@
 .mechanismCardArea {
   top: 53%;
   left: 12%;
-  width: 400px; /* 比如这个区域可以更宽以容纳更多卡片 */
+  width: 800px; /* 比如这个区域可以更宽以容纳更多卡片 */
 }
 
 .infoSourceCardArea {

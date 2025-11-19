@@ -79,8 +79,16 @@
   z-index: 5;
 }
 
+.card.recommended {
+  box-shadow: 0 0 20px 8px rgba(76, 175, 80, 0.7); /* A green glow effect */
+  /* Or you can use a border */
+  /* border: 4px solid #4CAF50; */
+}
+
 .card.selected {
-  box-shadow: 0 0 0 4px rgba(128, 128, 128, 0.5);
+  transform: translateY(-10px) scale(1.05);
+  border: 4px solid #2196F3; /* Blue border for selected items */
+  box-shadow: 0 15px 25px rgba(33, 150, 243, 0.4);
 }
 
 .card.selected.active {
