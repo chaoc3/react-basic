@@ -17,7 +17,7 @@ import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import styles from './styles/Page12_InfS_1.module.css'; 
-
+import { getAiResponse } from '../services/aiService';
 // 场景卡片数据
 const cards = [
   { id: 1, src: CardInfS1, name: '自我数据' },
@@ -28,78 +28,91 @@ const cards = [
 const Page12_1 = () => {
   
   const navigate = useNavigate();
-  const { setActiveStageId, setSingleCard, completeStage } = useTimeline();
+  const { setActiveStageId, setMultipleCards, completeStage } = useTimeline(); // 使用 setMultipleCards
   const { designData, updateDesignData } = useDesign();
   
   const [currentIndex, setCurrentIndex] = useState(0);
-  // MODIFICATION 1: 状态改为数组，支持多选
-  const [selectedCardIds, setSelectedCardIds] = useState([]); 
-  const [initialBotMessage, setInitialBotMessage] = useState("正在思考如何为你推荐信息源..."); 
+  const [selectedCardIds, setSelectedCardIds] = useState([]);
+  // --- 2. 新增状态来存储 AI 推荐的卡片 ---
+  const [recommendedCardNames, setRecommendedCardNames] = useState([]);
+  const [initialBotMessage, setInitialBotMessage] = useState("正在为你推荐信息源..."); 
   
+  // --- 3. 使用 useEffect 调用 AI ---
   useEffect(() => {
-    setActiveStageId(5); // Page 12 对应 Stage 5
-    // 模拟 AI 推荐，基于 Target-Stage 和 Mec 字段
-    if (designData.targetStage && designData.mechanismCards.length > 0) {
-        setInitialBotMessage(`根据你选择的机制和目标，我为你推荐了几个信息源。请在左侧选择至少一个卡片。`);
-    } else {
-        setInitialBotMessage("请先完成前面的步骤，然后选择至少一个信息源卡片。");
-    }
-  }, [setActiveStageId, designData.targetStage, designData.mechanismCards]);
+    setActiveStageId(5);
+    
+    const fetchRecommendations = async () => {
+      if (designData.mechanismCards && designData.mechanismCards.length > 0) {
+        try {
+          const aiResult = await getAiResponse(
+            [],
+            'recommendInfoSources',
+            { ...designData } // 传递所有上下文数据
+          );
+          setInitialBotMessage(aiResult.responseText);
+          if (aiResult.extractedData && aiResult.extractedData.recommendedCards) {
+            setRecommendedCardNames(aiResult.extractedData.recommendedCards);
+          }
+        } catch (error) {
+          console.error("获取 AI 信息源推荐失败:", error);
+          setInitialBotMessage("抱歉，推荐服务暂时无法连接。请直接从左侧选择。");
+        }
+      } else {
+        setInitialBotMessage("请先完成前面的步骤，然后选择信息源。");
+      }
+    };
+    fetchRecommendations();
+  }, [setActiveStageId, designData]);
 
-  // --- 2. UI 交互逻辑 (多选) ---
   const handleCardClick = (cardId) => {
-    // 切换选中状态
-    setSelectedCardIds(prev => 
-      prev.includes(cardId) 
-        ? prev.filter(id => id !== cardId) 
-        : [...prev, cardId]
-    );
-    // Timeline 只记录第一个选中的卡片
-    setSingleCard(5, cardId); 
+    const newSelectedIds = [...selectedCardIds];
+    const cardIndex = newSelectedIds.indexOf(cardId);
+    if (cardIndex > -1) {
+      newSelectedIds.splice(cardIndex, 1);
+    } else {
+      newSelectedIds.push(cardId);
+    }
+    setSelectedCardIds(newSelectedIds);
+    setMultipleCards(5, newSelectedIds); // 更新 Timeline
   };
 
   const handleNextPage = () => {
     if (selectedCardIds.length > 0) {
-      // 关键：保存选中的信息源名称数组到 Context
       const selectedNames = cards
         .filter(c => selectedCardIds.includes(c.id))
         .map(c => c.name);
-      
       updateDesignData('infoSourceCards', selectedNames);
-      
       completeStage(5);
-      navigate('/page13'); // 跳转到 Page 13
+      navigate('/page13');
     }
   };
 
-  // 轮播和类名逻辑 (与 Page 6 相同)
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
   
+  // --- 4. 更新 getCardClass 以高亮推荐和选中的卡片 ---
   const getCardClass = (index) => {
+    const card = cards[index];
     const classes = [styles.card];
+    // ... (轮播逻辑不变)
     const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
     const nextIndex = currentIndex === cards.length - 1 ? 0 : currentIndex + 1;
+    if (index === currentIndex) classes.push(styles.active);
+    else if (index === prevIndex) classes.push(styles.prev);
+    else if (index === nextIndex) classes.push(styles.next);
+    else classes.push(styles.hidden);
 
-    if (index === currentIndex) {
-      classes.push(styles.active);
-    } else if (index === prevIndex) {
-      classes.push(styles.prev);
-    } else if (index === nextIndex) {
-      classes.push(styles.next);
-    } else {
-      classes.push(styles.hidden);
+    if (recommendedCardNames.includes(card.name)) {
+      classes.push(styles.recommended); // 高亮推荐
     }
-    
-    // Add 'selected' class if the card is the chosen one
-    if (selectedCardIds === cards[index].id) {
-      classes.push(styles.selected);
+    if (selectedCardIds.includes(card.id)) {
+      classes.push(styles.selected); // 高亮选中
     }
     return classes.join(' ');
   };
 
-  // --- 3. Dummy AI 函数 ---
   const dummyGetAiResponse = async (input) => ({ responseText: "请在左侧选择至少一张卡片后点击下方的按钮继续。" });
+
 
   return (
     <div className={styles.container}>

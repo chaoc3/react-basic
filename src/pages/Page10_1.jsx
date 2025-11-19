@@ -138,10 +138,12 @@ const Page10_Mec_1 = () => {
       </div>
       <div className={styles.mainContent}>
         <div className={styles.cardCarousel}>
-          {/* ... (carousel buttons) ... */}
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            <img src={ArrowLeft} alt="上一张" />
+          </button>
           <div className={styles.cardContainer}>
             {cards.map((card, index) => (
-              <div
+                <div
                 key={card.id}
                 className={getCardClass(index)}
                 onClick={() => handleCardClick(card.id)}
@@ -150,13 +152,12 @@ const Page10_Mec_1 = () => {
               </div>
             ))}
           </div>
-          {/* ... (carousel buttons) ... */}
+          <button onClick={handleNext} className={styles.arrowButton}>
+            <img src={ArrowRight} alt="下一张" />
+          </button>
         </div>
-        <button
-          className={styles.selectButton}
-          onClick={handleNextPage}
-          disabled={selectedCardIds.length === 0} // Disable if no cards are selected
-        >
+        <button className={styles.selectButton} onClick={handleNextPage}
+        disabled={selectedCardIds.length === 0}>
           <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>

@@ -140,6 +140,11 @@ const Page13_2 = () => {
         value: designData.infoSourceDetails?.[card.key], // 从 details 中获取对应的值
         placeholder: '待补充可追踪数据点...'
     }));
+  const infoSourceField = [
+    { label: '可以追踪的数据点', value: designData.infoSourceDetails?.strategy1, placeholder: '可以追踪的数据点' },
+    { label: '可以追踪的数据点', value: designData.infoSourceDetails?.strategy2, placeholder: '可以追踪的数据点' },
+    { label: '可以追踪的数据点', value: designData.infoSourceDetails?.strategy3, placeholder: '可以追踪的数据点' },
+  ];
 
   // 渲染所有已选中的卡片 (多选卡片需要特殊布局，这里只渲染第一个作为示例)
   const firstSelectedCard = cards.find(card => designData.infoSourceCards.includes(card.name));
@@ -157,7 +162,7 @@ const Page13_2 = () => {
           {/* 渲染第一个选中的卡片，并叠加所有已选信息源的细节 */}
           <OverlayCard 
             backgroundImageUrl={firstSelectedCard.image}
-            fields={infoSourceFields}
+            fields={infoSourceField}
           />
         </div>
         <button 

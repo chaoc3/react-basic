@@ -286,6 +286,13 @@ recommendMechanisms: { // For Page 10
   toolName: 'extractRecommendedCards',
   transform: (data) => ({ recommendedCards: data.recommendedCards }),
 },
+recommendInfoSources: {
+  toolName: 'extractRecommendedCards', // 复用 Page 10 的工具，因为它也是推荐多个卡片
+  transform: (data) => ({ recommendedCards: data.recommendedCards }),
+},
+recommendMode: {
+  toolName: null, // 不需要工具，AI 直接生成推荐文本
+},
 };
 
 // 定义不同任务的系统提示
@@ -532,7 +539,38 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         [工具调用: extractRecommendedCards(recommendedCards: ["反馈与激励", "目标设定", "社会影响"])]`;
 
 
+      case 'recommendInfoSources':
+        return `你是一位数字疗法设计师。你的任务是根据用户的所有设计决策，推荐最合适的 **1到2个** 信息源，以支持他们选择的助推机制。
 
+        已知信息如下：
+        - 设计目标: "${additionalData.targetUser}"
+        - 核心痛点: "${additionalData.targetPainpoint}"
+        - 用户画像: "${additionalData.user}" (${JSON.stringify(additionalData.userProfile)})
+        - 核心场景: "${additionalData.scenarioCard}" (${JSON.stringify(additionalData.scenarioDetails)})
+        - 已选助推机制: ${additionalData.mechanismCards.join('、')}
+
+        可推荐的信息源卡片有：'自我数据', '他人影响', '专家干预'。
+
+        你的任务分为两步：
+        1.  **生成对话**: 生成一段友好的对话，解释你为什么推荐这几个信息源。
+        2.  **调用工具**: **必须**使用 \`extractRecommendedCards\` 工具，将你推荐的 **1到2个** 信息源的完整名称以数组的形式提取出来。`;
+
+      // --- 为 Page 14 新增的 Prompt ---
+      case 'recommendMode':
+        return `你是一位人机交互专家。你的任务是根据用户至今为止的所有设计决策，为他们推荐 **一个最匹配** 的交互模态。
+
+        已知信息如下：
+        - 设计目标: "${additionalData.targetUser}"
+        - 用户画像与设备熟练度: ${JSON.stringify(additionalData.userProfile)}
+        - 核心场景: "${additionalData.scenarioCard}" (${JSON.stringify(additionalData.scenarioDetails)})
+        - 已选助推机制: ${additionalData.mechanismCards.join('、')}
+        - 已选信息源: ${additionalData.infoSourceCards.join('、')}
+
+        可推荐的交互模态卡片有：'文本交互', '语言交互', '视觉交互', '多模态交互'。
+
+        你的回复应该是**一段简短、友好、引导性**的对话。直接在对话中点明你推荐的交互模态，并用一句话解释原因。
+        例如：“考虑到用户需要在‘${additionalData.scenarioCard}’中快速获取‘${additionalData.infoSourceCards[0]}’信息，我推荐使用‘视觉交互’，因为它最直观高效。请在左侧选择你认为最合适的交互方式。”
+        **不要**使用任何工具。`;
 
 
 
