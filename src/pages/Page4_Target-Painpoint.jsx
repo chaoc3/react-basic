@@ -6,21 +6,21 @@ import styles from './styles/Page3_Target-User.module.css';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
-import backgroundForPage from '../assets/页面剩余素材/Page345页面.svg';
+import backgroundForPage from '../assets/背景带文字/Page4-Target-Painpoint.svg';
 import { useDesign } from '../context/DesignContext'; 
 
 // 为 Page4 创建一个专门的 API 调用函数
 const getAiResponseForPainpoint = async (userInput, currentMessages) => {
   console.log("1. [FRONTEND-P4] 开始调用 getAiResponseForPainpoint...");
 
-  // 消息历史处理：将当前用户输入添加到消息列表
   const messagesForApi = currentMessages.map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'assistant',
     content: msg.text,
   }));
-  messagesForApi.push({ role: 'user', content: userInput });
+  // 既然使用了 Vercel AI SDK 模式的 ChatDialog，这里通常不需要手动 push 用户输入，
+  // 除非你的 ChatDialog 实现有特殊逻辑。为了保险起见保持原样：
+  // messagesForApi.push({ role: 'user', content: userInput });
 
-  // 关键修改：将 task 设置为 'getTargetPainpoint'
   const requestBody = {
     messages: messagesForApi,
     task: 'getTargetPainpoint' 
@@ -29,7 +29,6 @@ const getAiResponseForPainpoint = async (userInput, currentMessages) => {
   console.log("2. [FRONTEND-P4] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
 
   try {
-    // API 请求部分保持不变
     const response = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -45,7 +44,6 @@ const getAiResponseForPainpoint = async (userInput, currentMessages) => {
     const data = await response.json();
     console.log("4. [FRONTEND-P4] 成功解析 JSON:", data);
     
-    // 返回完整的响应对象，包括 isTaskComplete
     return data;
 
   } catch (error) {
@@ -64,24 +62,19 @@ const Page4_TargetPainpoint = () => {
   const { updateDesignData } = useDesign(); 
   const [isTaskComplete, setIsTaskComplete] = useState(false);
 
-  // MODIFICATION START: 实现 handleTaskComplete
   const handleTaskComplete = (data) => {
     console.log("P4 任务完成，准备跳转。提取到的数据:", data);
     
-    // 1. 更新全局状态 (使用后端返回的 targetPainpoint 字段)
     if (data && data.targetPainpoint) {
       updateDesignData('targetPainpoint', data.targetPainpoint);
-      setIsTaskComplete(true); // 标记任务完成，启用按钮
+      setIsTaskComplete(true); 
     }
 
-    // 2. 延迟跳转，给用户阅读反馈的时间
     setTimeout(() => {
-      navigate('/target-stage'); // 跳转到下一页 Page5
-    }, 1500); // 延迟1.5秒
+      navigate('/target-stage'); 
+    }, 1500); 
   };
-  // MODIFICATION END
   
-  // 备用跳转函数
   const handleNext = () => {
     navigate('/target-stage'); 
   };
@@ -90,24 +83,19 @@ const Page4_TargetPainpoint = () => {
     <div className={styles.pageContainer} style={{ backgroundImage: `url(${backgroundForPage})` }}>
       <BranchSelector />
       <div className={styles.mainContent}>
-        {/* MODIFICATION START: 更新气泡标题和提示词以匹配需求文档 Page 3 */}
-        <div className={styles.titleBubble}>
-          <p style={{ fontWeight: 'bold' }}>让我们一起确定你的设计目标吧!</p>
-          <p>你希望这个智能代理去改变的健康问题是什么？可以用一句话告诉我你的设计发现或痛点。</p>
-        </div>
-        {/* MODIFICATION END */}
+        
+        {/* 已删除 titleBubble */}
+
         <div className={styles.chatWrapper}>
           <ChatDialog 
-            // MODIFICATION: 统一属性名为 getAiResponse
             getAiResponse={getAiResponseForPainpoint} 
-            // MODIFICATION: 传入新的回调函数
             onTaskComplete={handleTaskComplete} 
-            // 初始消息应与气泡中的第二个 p 标签一致
-            initialBotMessage="你希望这个智能代理协助的助推机制想改变的问题是什么？"
+            // 建议：既然删除了气泡，这里的初始消息可以稍微丰富一点，包含之前的提示信息
+            initialBotMessage="你希望这个智能代理去改变的健康问题是什么？可以用一句话告诉我你的设计发现或痛点。"
           />
         </div>
       </div>
-      {/* 按钮现在由 handleTaskComplete 自动触发跳转，这里作为备用 */}
+      
       <ArrowButton onClick={handleNext} disabled={!isTaskComplete} />
     </div>
   );

@@ -410,36 +410,77 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         4. **完成对话**：当所有三个字段（when, where, who）都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了场景细节！点击下一步继续吧。”不要使用 Markdown 格式。`;
 
 
-      case 'buildInfoSourceDetails':
-    // ... (提示词逻辑需要根据 Mec-1, Mec-2, Mec-3 字段来动态生成，这里简化)
-        return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定每个已选信息源的具体可追踪数据点。
-        
-        **【重要指令】在用户回答了任何一个数据点后，你必须立即使用 \`extractInfoSourceDetails\` 工具来提取该信息。**
-        
-        已知信息如下：
-        - 已选信息源: ${additionalData.infoSourceCards.join('、')}
-        - 当前已收集的数据点: ${JSON.stringify(additionalData.infoSourceDetails || {})}
-        
-        你的回复必须遵循以下原则：
-        1. **逐一提问**：针对每个已选信息源，询问用户希望追踪的具体数据点。
-        2. **提取信息**：在用户的每次回答后，**必须**使用 \`extractInfoSourceDetails\` 工具来提取对应的信息。
-        3. **完成对话**：当所有已选信息源的数据点都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了信息依据！点击下一步继续吧。”不要使用 Markdown 格式。`;
+        case 'buildInfoSourceDetails':
+          // 获取用户选择的那张唯一卡片的名字
+          const currentCard = additionalData.infoSourceCards && additionalData.infoSourceCards.length > 0 
+              ? additionalData.infoSourceCards[0] 
+              : '选定的信息源';
+  
+          return `你是一个辅助设计方案的陪伴者。
+          
+          **【任务目标】**
+          用户选择了信息源：“${currentCard}”。
+          你的任务是引导用户为这个信息源提供 **3个具体的、不同的可追踪数据点**。
+          
+          **【已知信息】**
+          - 当前信息源: ${currentCard}
+          - 当前已收集的数据点: ${JSON.stringify(additionalData.infoSourceDetails || {})}
+          
+          **【对话策略】**
+          1. **逐一询问**：不要一次性问三个问题。
+             - 如果是一个空对象，请问第一个核心数据点。
+             - 如果已有 strategy1，请问第二个补充数据点。
+             - 如果已有 strategy1 和 strategy2，请问最后一个数据点。
+          2. **提取规则**：
+             - 用户的第1个回答 -> 提取为 \`strategy1\`
+             - 用户的第2个回答 -> 提取为 \`strategy2\`
+             - 用户的第3个回答 -> 提取为 \`strategy3\`
+          3. **完成条件**：只有当 strategy1, strategy2, strategy3 全都不为空时，你的最终回复才是：“太棒了，我们已经确定了所有信息依据！点击下一步继续吧。”
+          
+          请保持专业且引导性强的语气。`;
 
-      case 'buildModeDetails':
-    // ... (提示词逻辑需要根据 Mod 字段来动态生成，这里简化)
-      return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定已选交互模态的具体实现方式。
-      
-      **【重要指令】在用户回答了任何一个实现方式后，你必须立即使用 \`extractModeDetails\` 工具来提取该信息。**
-      
-      已知信息如下：
-      - 已选交互模态: ${additionalData.modeCard}
-      - 当前已收集的实现方式: ${JSON.stringify(additionalData.modeDetails || {})}
-      
-      你的回复必须遵循以下原则：
-      1. **逐一提问**：针对已选模态，询问用户希望如何具体实现（例如：文本交互的具体内容）。
-      2. **提取信息**：在用户的每次回答后，**必须**使用 \`extractModeDetails\` 工具来提取对应的信息。
-      3. **完成对话**：当所有三个策略字段（strategy1, strategy2, strategy3）都被提取后，你的最终回复**必须**是：“太棒了，我们已经完善了交互方式！点击下一步进入总览吧。”不要使用 Markdown 格式。`;
+        case 'buildModeDetails':
+        const currentMode = additionalData.modeCard || '选定的交互方式';
+        const existingModeDetails = additionalData.modeDetails || {};
+        
+        // 1. 动态判断当前缺少哪个策略 (逻辑前置，减轻 AI 负担)
+        let nextFieldToFill = 'strategy1';
+        let nextFieldDescription = '第一个核心策略（具体实现方式）';
+        
+        if (existingModeDetails.strategy1) {
+            nextFieldToFill = 'strategy2';
+            nextFieldDescription = '第二个策略（如频率、触发时机或其他补充）';
+        }
+        if (existingModeDetails.strategy2) {
+            nextFieldToFill = 'strategy3';
+            nextFieldDescription = '第三个策略（如反馈机制或更多细节）';
+        }
+        
+        // 如果全满了
+        if (existingModeDetails.strategy1 && existingModeDetails.strategy2 && existingModeDetails.strategy3) {
+             return `你是一个专家。所有策略都已收集完毕。
+             请直接回复：“太棒了，我们已经完善了交互方式！点击下一步进入总览吧。”
+             不要调用任何工具。`;
+        }
 
+        return `你是一个严谨的数据提取助手。
+        
+        **【当前状态】**
+        - 交互模态: "${currentMode}"
+        - 已收集策略: ${JSON.stringify(existingModeDetails)}
+        - **当前目标**: 必须提取用户的输入作为 **\`${nextFieldToFill}\`**。
+        
+        **【你的行动准则】**
+        1. 用户刚才的回答 **就是** \`${nextFieldToFill}\` 的内容。
+        2. **必须立即** 使用工具 \`extractModeDetails\`，并将内容赋值给 \`${nextFieldToFill}\` 参数。
+        3. **严禁** 仅在回复中说“已记录”，而不调用工具。没有工具调用 = 任务失败。
+        
+        **【回复示例】**
+        (假设用户说“每天晚上8点推送”)
+        工具调用: extractModeDetails({ ${nextFieldToFill}: "每天晚上8点推送" })
+        回复文本: "好的，已记录为${nextFieldDescription}。接下来..."
+        
+        现在，请处理用户的输入，并提取为 \`${nextFieldToFill}\`。`;
       case 'generateFinalReport':
         // 格式化所有收集到的数据
         const collectedData = {
@@ -701,53 +742,77 @@ app.post('/chat', async (req, res) => {
                 finalResponseText = '好的，我已记录您的信息。请继续补充下一个场景细节。';
               }
           }
-            else if (task === 'buildInfoSourceDetails') {
-              const existingDetails = additionalData.infoSourceDetails || {};
-              const newlyExtractedData = parsedResult.data;
-              const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+          else if (task === 'buildInfoSourceDetails') {
+            const existingDetails = additionalData.infoSourceDetails || {};
+            const newlyExtractedData = parsedResult.data;
+            
+            // 1. 合并数据
+            const mergedDetails = { ...existingDetails, ...newlyExtractedData };
 
-              // 假设需要收集所有三个策略
-              const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
-              const allFieldsCollected = requiredFields.every(field => {
-                const value = mergedProfile[field];
-                return typeof value === 'string' && value.trim() !== '';
-              });
+            // 2. 【核心逻辑】针对单张卡片，必须填满这三个槽位
+            const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
 
-              extractedData = taskConfig.transform(newlyExtractedData);
-              isTaskComplete = allFieldsCollected;
+            // 3. 检查完整性 (使用 mergedDetails，修复之前的 mergedProfile 报错)
+            const allFieldsCollected = requiredFields.every(field => {
+              const value = mergedDetails[field];
+              return typeof value === 'string' && value.trim() !== '';
+            });
 
-              if (isTaskComplete) {
-                  finalResponseText = taskConfig.completionMessage;
-              } else {
-                  // 构造下一个引导问题
-                  const nextMissingFieldKey = requiredFields.find(field => mergedDetails[field] == null || mergedDetails[field].trim() === '');
-                  finalResponseText = `好的，我已记录您的信息。接下来，请为下一个信息源提供具体的数据点。`;
-              }
-          }
+            extractedData = { infoSourceDetails: mergedDetails };
+            isTaskComplete = allFieldsCollected;
+
+            if (isTaskComplete) {
+                finalResponseText = taskConfig.completionMessage;
+            } else {
+                // 4. 简单的进度反馈
+                // 计算当前已填写的数量
+                let filledCount = 0;
+                if (mergedDetails.strategy1) filledCount++;
+                if (mergedDetails.strategy2) filledCount++;
+                if (mergedDetails.strategy3) filledCount++;
+
+                // 如果 AI 没有返回文本（通常不会发生，因为 Prompt 会生成），兜底回复
+                if (!finalResponseText) {
+                    finalResponseText = `好的，已记录第 ${filledCount} 个点。请继续告诉我下一个具体的数据点是什么？`;
+                }
+            }
+        }
       
       // 任务 4: buildModeDetails
-            else if (task === 'buildModeDetails') {
-              const existingDetails = additionalData.modeDetails || {};
-              const newlyExtractedData = parsedResult.data;
-              const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+      else if (task === 'buildModeDetails') {
+        const existingDetails = additionalData.modeDetails || {};
+        const newlyExtractedData = parsedResult.data;
+        
+        // 1. 合并数据
+        const mergedDetails = { ...existingDetails, ...newlyExtractedData };
 
-              // 假设需要收集所有三个策略
-              const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
-              const allFieldsCollected = requiredFields.every(field =>
-                  mergedDetails[field] != null && mergedDetails[field].trim() !== ''
-              );
+        // 2. 【强制检查】必须填满 3 个策略
+        const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
+        
+        // 3. 检查完整性 (注意使用 mergedDetails，不要用 mergedProfile)
+        const allFieldsCollected = requiredFields.every(field => 
+            mergedDetails[field] != null && mergedDetails[field].trim() !== ''
+        );
 
-              extractedData = taskConfig.transform(newlyExtractedData);
-              isTaskComplete = allFieldsCollected;
+        extractedData = { modeDetails: mergedDetails };
+        isTaskComplete = allFieldsCollected;
 
-              if (isTaskComplete) {
-                  finalResponseText = taskConfig.completionMessage;
-              } else {
-                  // 构造下一个引导问题
-                  const nextMissingFieldKey = requiredFields.find(field => mergedDetails[field] == null || mergedDetails[field].trim() === '');
-                  finalResponseText = `好的，我已记录您的信息。接下来，请为下一个交互方式提供具体的实现策略。`;
-              }
-          }
+        if (isTaskComplete) {
+            finalResponseText = taskConfig.completionMessage;
+        } else {
+            // 4. 构造进度提示
+            let filledCount = 0;
+            if (mergedDetails.strategy1) filledCount++;
+            if (mergedDetails.strategy2) filledCount++;
+            if (mergedDetails.strategy3) filledCount++;
+            
+            // 如果 AI 没有返回引导语，兜底回复
+            if (!finalResponseText) {
+                const currentMode = additionalData.modeCard || '交互方式';
+                finalResponseText = `好的，已记录 ${filledCount}/3 个策略。针对${currentMode}，下一个具体的实现细节是什么？`;
+            }
+        }
+    }
           else if (task === 'buildMechanismDetails') {
             // 1. 获取已有的扁平策略对象
             const existingDetails = additionalData.mechanismDetails || {};

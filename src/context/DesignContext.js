@@ -38,7 +38,25 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 };
  */
 const mockDesignData = {
-  "targetUser": "年轻上班族",
+  "targetUser":null ,
+  "targetPainpoint": null,
+  "targetStage":null ,
+  "user": null,
+  "userProfile": {
+    "age":null ,
+    "sexual":null ,
+    "edu": null,
+    "work":null ,
+    "equip": null
+  },
+  "scenarioCard":null ,
+  "scenarioDetails": {
+    "when":null,
+    "where": null,
+    "who":null ,
+    "situation": null
+  }, 
+/*   "targetUser": "年轻上班族",
   "targetPainpoint": "工作压力大，缺乏时间进行健康管理",
   "targetStage": "健康意识初步形成阶段",
   "user": "张小明",
@@ -55,7 +73,7 @@ const mockDesignData = {
     "where": "家中或健身房",
     "who": "独自或与朋友一起",
     "situation": "下班后疲惫，需要放松和锻炼"
-  },
+  }, */
 /*   "mechanismCards": [
     "共情反馈"
   ],
@@ -74,21 +92,35 @@ const mockDesignData = {
     "strategy2":null,
     "strategy3":null,
   },
-  "infoSourceCards": [
-    "自我数据",
-    "他人影响"
+/*   "infoSourceCards": [
+
   ],
   "infoSourceDetails": {
     "strategy1": "记录穿戴设备上传的睡眠时长、步数、心率",
     "strategy2": "邀请同事/朋友轻量化打分或留言，反馈用户状态",
     "strategy3": ""
+  }, */
+  "infoSourceCards": [
+
+  ],
+  "infoSourceDetails": {
+    "strategy1": null,
+    "strategy2": null,
+    "strategy3": null
   },
-  "modeCard": "个性化推荐模式",
+/*   "modeCard": "个性化推荐模式",
   "modeDetails": {
     "strategy1": "协同过滤 + 时间分段推荐",
     "strategy2": "每日晚间推送简短提示卡片",
     "strategy3": "允许用户手动调整推荐强度"
+  }, */
+  "modeCard": null,
+  "modeDetails": {
+    "strategy1": null,
+    "strategy2": null,
+    "strategy3": null
   }
+
 }
 
 

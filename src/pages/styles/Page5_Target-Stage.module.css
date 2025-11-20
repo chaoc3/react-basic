@@ -1,81 +1,52 @@
-/* src/pages/styles/Page4_Target-Painpoint.module.css */
-/* 这里的内容和 Page3_Target-User.module.css 基本一致 */
+/* src/pages/styles/Page3_Target-User.module.css */
 
 .pageContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100vw;
-    height: 100vh;
-    padding: 50px;
-    background-color: #f0f2f5;
-    box-sizing: border-box;
-  }
-  
-  .timelineContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .timelineItem {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .timelineSvgActive {
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-  }
-  
-  .timelineSvgInactive {
-    width: 100%;
-    height: 100%;
-    background-color: #B3B3B3;
-    opacity: 0.8;
-    border-radius: 50%;
-  }
-  
-  .chatContainer {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 50px;
-    height: 300px;
-    background-color: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
-  
-  .llmOutput {
-    padding: 20px;
-    color: #333;
-    font-size: 1.2rem;
-    text-align: center;
-  }
-  
-  .arrowContainer {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-  }
-  
-  .arrowSvg {
-    width: 50px;
-    height: 50px;
-    background-color: black;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-  }
+  /* 尺寸和布局 */
+  width: 100vw;
+  height: 100vh;
+  padding: 50px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+
+  /* 背景图片通用设置 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* 
+  主要内容区，这是一个不可见的容器
+  它的作用是作为一个坐标系，让聊天框可以相对于它进行精确定位
+*/
+.mainContent {
+  position: relative;
+  /* 保持原有的尺寸定位 */
+  width: 91vw;
+  height: 80vh;
+  left: 8vw;
+}
+
+/* --- 删除 .titleBubble 相关的样式 --- */
+
+/* 
+  聊天框容器样式
+  保持不变：高度80%，宽度95%，固定在底部
+*/
+.chatWrapper {
+  position: absolute;
+  bottom: 0vh; /* 保持底部对齐 */
+  left: 39%;
+  transform: translateX(-50%);
+  width: 95%; 
+  height: 80%; /* 保持高度不变 */
+}
+
+/* 确保 ArrowButton 不受影响 */
+.pageContainer > :global(.arrow-button-class) {
+  position: absolute;
+  right: 50px;
+  bottom: 40vh;
+}

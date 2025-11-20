@@ -16,49 +16,37 @@
   background-position: center;
   background-repeat: no-repeat;
 }
+
 /* 
   主要内容区，这是一个不可见的容器
-  它的作用是作为一个坐标系，让气泡文字和聊天框可以相对于它进行精确定位
+  它的作用是作为一个坐标系，让聊天框可以相对于它进行精确定位
 */
 .mainContent {
   position: relative;
-  /* 这些尺寸需要根据您的背景图片进行微调 */
+  /* 保持原有的尺寸定位 */
   width: 91vw;
   height: 80vh;
   left: 8vw;
 }
 
-/* 新增：用于放置在背景气泡中的标题 */
-.titleBubble {
-  position: absolute;
-  top: 0vh; /* 从 mainContent 顶部向下 90px */
-  left: 42%;
-  transform: translateX(-50%);
-  width: 80%;
-  text-align: left;
-  padding: 0 20px;
-  color: #3f3f3f; /* 调整为更柔和的黑色 */
-  font-size: 1rem;
-  line-height: 1.7;
-}
+/* --- 删除 .titleBubble 相关的样式 --- */
 
 /* 
-  修改：聊天框容器样式
-  这是解决您问题的核心：我们给它一个固定的高度和宽度，并用绝对定位
+  聊天框容器样式
+  保持不变：高度80%，宽度95%，固定在底部
 */
 .chatWrapper {
   position: absolute;
-  bottom: 0vh; /* 从 mainContent 底部向上 80px */
+  bottom: 0vh; /* 保持底部对齐 */
   left: 39%;
   transform: translateX(-50%);
-  width: 95%; /* 宽度占 mainContent 的 88% */
-  height: 80%; /* 【关键】设置一个固定的高度 */
+  width: 95%; 
+  height: 80%; /* 保持高度不变 */
 }
 
-/* 确保 ArrowButton 不受影响 (如果它不是用 position: absolute 的话) */
-.pageContainer > :global(.arrow-button-class) { /* 替换为 ArrowButton 的实际类名 */
+/* 确保 ArrowButton 不受影响 */
+.pageContainer > :global(.arrow-button-class) {
   position: absolute;
   right: 50px;
   bottom: 40vh;
 }
-
