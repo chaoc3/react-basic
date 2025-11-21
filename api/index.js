@@ -275,9 +275,10 @@ const taskConfigs = {
   },
   buildMechanismDetails: {
     toolName: 'extractMechanismDetails',
-    completionMessage: '太棒了，我们已经确定了助推策略！点击下一步继续吧。',
-    transform: (data) => ({ mechanismDetails: data }),
-},
+    // 注意：这里的 completionMessage 只是兜底，主要逻辑在 Prompt 中控制
+    completionMessage: '当前卡片的策略已完善。', 
+    transform: (data) => ({ mechanismDetails: data }), // 返回扁平数据，前端负责挂载到对应卡片下
+  },
 recommendScenario: { // For Page 8
   toolName: null, // No tool needed, just text
 },
@@ -292,6 +293,7 @@ recommendInfoSources: {
 recommendMode: {
   toolName: null, // 不需要工具，AI 直接生成推荐文本
 },
+
 };
 
 // 定义不同任务的系统提示
@@ -331,24 +333,52 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         保持友好和引导的语气。不要使用任何工具。不要使用 Markdown 格式`;
 
         case 'buildMechanismDetails':
-          const currentCardName = additionalData.currentCardName || additionalData.mechanismCards[0];
-          
-          return `你是一个辅助设计方案的陪伴者。你的任务是引导用户为已选的助推机制，确定具体的策略。
-          
-          **【重要指令】在用户回答了任何一个策略后，你必须立即使用 \`extractMechanismDetails\` 工具来提取该信息。**
-          **【重要指令】调用工具时，必须使用 \`cardName\` 参数来指明当前讨论的机制是 "${currentCardName}"。**
+      // 获取当前正在编辑的卡片名称
+      const currentCardName = additionalData.currentCardName;
+      // 获取该卡片已有的详情 (前端传来的 additionalData.mechanismDetails 应该是整个大对象)
+      const allDetails = additionalData.mechanismDetails || {};
+      const currentCardDetails = allDetails[currentCardName] || {};
+
+      // 计算缺失的策略
+      const strategies = ['strategy1', 'strategy2', 'strategy3'];
+      const filledCount = strategies.filter(k => currentCardDetails[k]).length;
+      const missingStrategies = strategies.filter(k => !currentCardDetails[k]);
+      
+      // 判断当前卡片是否完成
+      const isCurrentCardComplete = filledCount === 3;
+
+      if (isCurrentCardComplete) {
+         return `你是一个辅助设计助手。
+         **当前状态**：用户正在编辑助推机制卡片 **“${currentCardName}”**。
+         **检测结果**：该卡片的3个策略 **都已填写完毕**。
          
-          已知信息如下：
-          - 已选助推机制: ${additionalData.mechanismCards}
-          - **当前正在讨论的机制: ${currentCardName}**
-          - 当前已收集的策略: ${JSON.stringify(additionalData.mechanismDetails || {})}
-          
-          你的回复必须遵循以下原则：
-          1. **聚焦当前卡片**：你的提问必须是关于 **${currentCardName}** 的。
-          2. **逐一提问**：依次询问该机制的三个具体策略。
-          3. **提取信息**：在用户的每次回答后，**必须**使用 \`extractMechanismDetails\` 工具，并正确传入 \`cardName\`。
-          4. **完成对话**：当所有已选机制的所有策略都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了助推策略！点击下一步继续吧。”不要使用 Markdown 格式。`;
-          
+         你的任务：
+         1. 简短地夸奖用户完成得很好。
+         2. 提醒用户：“这张卡片的内容已经完善了，你可以点击左右箭头切换到其他卡片继续填写，或者如果所有卡片都完成了，点击下一步。”
+         3. **不要**再调用工具。`;
+      }
+
+      return `你是一个辅助设计方案的陪伴者。
+      
+      **【当前任务】**
+      用户选择了助推机制：**“${currentCardName}”**。
+      你需要引导用户为这张卡片补充具体的执行策略。
+      
+      **【已知进度】**
+      - 当前卡片: ${currentCardName}
+      - 已收集策略: ${JSON.stringify(currentCardDetails)}
+      - 还需要收集: ${missingStrategies.join('、')}
+      
+      **【对话策略】**
+      1. **聚焦当前卡片**：你的所有提问必须紧扣 **“${currentCardName}”** 这个机制。
+      2. **循序渐进**：
+         - 如果是第一次提问，请问：“对于${currentCardName}，你打算采取的第一个具体做法是什么？”
+         - 如果已有部分策略，请针对缺失的部分提问（例如：“好的，那第二个策略呢？”）。
+      3. **提取信息**：
+         - 用户回答后，**必须立即**使用 \`extractMechanismDetails\` 工具。
+         - 将提取的内容对应到 \`strategy1\`, \`strategy2\` 或 \`strategy3\` 中（填补空缺）。
+      
+      请开始引导用户。`;
       case 'buildUserProfile': // Page 7 的任务
     // ----------------------------------------------------------------
     // 关键修改：移除固定流程，强调根据缺失字段提问

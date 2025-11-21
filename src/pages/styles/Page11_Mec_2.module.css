@@ -14,7 +14,7 @@
   background-repeat: no-repeat;
 }
 
-.leftPanel {
+.leftPanel{
   width: 15%;
   height: 90%;
 }
@@ -30,40 +30,97 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  margin: -100px auto;
-  padding: 0 0;
-  bottom: 0%;
+  height: 20%;
 }
 
-.cardDisplay {
+/* --- 以下是来自 Page6 并已适配的轮播样式 --- */
+
+.cardCarousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 125%; /* 保持 Page6 的宽度以获得更好的视觉效果 */
+}
+
+.cardContainer {
+  position: relative;
+  width: 100%;
+  height: 600px; /* 调整高度以适应卡片内容 */
   display: flex;
   justify-content: center;
-  align-items: normal;
-  flex-grow: 1;
-  width: 100%;
-  top: 20%;
-  margin-top: 19vh;
+  align-items: center;
+  bottom: -15%;
 }
 
 .card {
-  width: 40%;
-  max-width: 460px;
+  position: absolute;
+  /* 移除了 cursor: pointer，因为这些卡片不可点击选择 */
+  transition: transform 0.5s ease, opacity 0.4s ease;
+  /* OverlayCard 组件本身会处理其内容的显示，这里不需要设置宽高 */
 }
 
-.card img {
+
+
+/* 卡片动画效果 */
+.active {
+  transform: translateX(0) scale(1) rotate(0deg);
+  opacity: 1;
+  z-index: 10;
+}
+
+.prev {
+  transform: translateX(-50%) scale(0.85) rotate(-10deg);
+  opacity: 1;
+  z-index: 5;
+}
+
+.next {
+  transform: translateX(50%) scale(0.85) rotate(10deg);
+  opacity: 1;
+  z-index: 5;
+}
+
+.hidden {
+  transform: scale(0.5);
+  opacity: 0;
+  z-index: 1;
+}
+
+/* 为左右两侧的卡片添加灰色叠加层 */
+.prev::after,
+.next::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 16px; /* 确保和卡片圆角一致 */
+  z-index: 1;
+  pointer-events: none;
 }
 
+.arrowButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1rem;
+  z-index: 20;
+  width: 120%;
+  height: 90%;
+}
+
+/* --- 轮播样式结束 --- */
+
+
+/* 页面原有的 Next 按钮样式保持不变 */
 .nextButton {
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  margin-top: 0;
+  margin-top: 2rem;
   transition: transform 0.2s ease-in-out, opacity 0.3s ease;
 }
 
@@ -71,7 +128,12 @@
   transform: scale(1.05);
 }
 
+.nextButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
 .nextButton svg {
   display: block;
 }
-
