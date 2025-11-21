@@ -43,7 +43,7 @@
   flex-grow: 1;
   width: 100%;
   top: 20%;
-  margin-top: 32vh;
+  margin-top: 19vh;
 }
 
 .card {
@@ -63,7 +63,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  margin-top: 2rem;
+  margin-top: 0;
   transition: transform 0.2s ease-in-out, opacity 0.3s ease;
 }
 
