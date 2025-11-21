@@ -90,9 +90,8 @@ const Page13_2 = () => {
         updateDesignData('infoSourceDetails', newlyExtractedDetails);
         
         // 2. 检查完整性
-        const requiredKeys = cards
-            .filter(card => designData.infoSourceCards.includes(card.name))
-            .map(card => card.key); // 找出所有已选卡片对应的 key (strategy1, strategy2...)
+        // 【修改点】：不再根据卡片动态获取 key，而是强制要求 3 个策略点
+        const requiredKeys = ['strategy1', 'strategy2', 'strategy3'];
         
         // 获取合并后的最新数据
         const currentDetails = { 
@@ -100,7 +99,7 @@ const Page13_2 = () => {
             ...newlyExtractedDetails      
         };
         
-        // 检查所有已选信息源对应的 key 是否都有非空值
+        // 检查 strategy1, strategy2, strategy3 是否都有值
         const allFieldsCollected = requiredKeys.every(key => 
             currentDetails[key] != null && currentDetails[key].trim() !== ''
         );
