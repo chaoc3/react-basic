@@ -3,12 +3,13 @@
 import React from 'react';
 import styles from './styles/Page16_Sum.module.css';
 import background from '../assets/页面剩余素材/Page6-展开页面.svg';
-import closeIcon from '../assets/页面剩余素材/Page16按钮.svg';
+import closeIcon from '../assets/页面剩余素材/总结页面关闭按钮.png';
 
 // --- ▼▼▼ 关键修改 ▼▼▼ ---
 import { useDesign } from '../context/DesignContext'; 
 import { useTimeline } from '../context/TimelineContext'; // 1. 导入 Timeline Hook
 import { cardAssets } from '../assets/cardAssets'; // 2. 导入我们创建的卡片资产库
+import OverlayCard from '../components/OverlayCard'; // 3. 导入 OverlayCard 组件
 // --- ▲▲▲ 修改结束 ▲▲▲ ---
 
 const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
@@ -29,7 +30,67 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
   };
 
   // --- ▼▼▼ 关键新增 ▼▼▼ ---
-  // 4. 创建一个新的辅助函数，专门用于渲染已选择的卡片
+  // 4. 卡片名称映射（根据 cardId 获取卡片名称）
+  const getCardName = (stageId, cardId) => {
+    const cardNameMap = {
+      2: { 1: '慢病患者', 2: '健康风险人群', 3: '心理健康群体' }, // User
+      3: { 1: '居家场景', 2: '工作场景', 3: '户外场景', 4: '医疗场景', 5: '社区场景', 6: '多场景' }, // Scenario
+      4: { 1: '情景感知提醒', 2: '共情反馈', 3: '决策引导', 4: '社会存在', 5: '反思促进', 6: '动态目标重建', 7: '叙事化探索', 8: '诱饵效应' }, // Mechanism (names aligned with Page11)
+      5: { 1: '自我数据', 2: '他人影响', 3: '专家干预' }, // Info Source
+      6: { 1: '文本交互', 2: '语言交互', 3: '视觉交互', 4: '多模态交互' }, // Mode
+    };
+    return cardNameMap[stageId]?.[cardId] || null;
+  };
+
+  // 5. 根据 stageId 和 cardName 获取对应的字段配置
+  const getFieldsForStage = (stageId, cardName = null) => {
+    switch (stageId) {
+      case 2: // User
+        return [
+          { label: '年龄', value: designData.userProfile?.age, placeholder: '待补充...' },
+          { label: '性别', value: designData.userProfile?.sexual, placeholder: '待补充...' },
+          { label: '教育背景', value: designData.userProfile?.edu, placeholder: '待补充...' },
+          { label: '职业类型', value: designData.userProfile?.work, placeholder: '待补充...' },
+          { label: '设备熟练度', value: designData.userProfile?.equip, placeholder: '待补充...' },
+        ];
+      case 3: // Scenario
+        return [
+          { label: '时间', value: designData.scenarioDetails?.when, placeholder: '什么时候最容易出现？' },
+          { label: '地点', value: designData.scenarioDetails?.where, placeholder: '通常在哪里做这件事？' },
+          { label: '人物', value: designData.scenarioDetails?.who, placeholder: '当时通常还有谁在你身边？' },
+        ];
+      case 4: // Mechanism - 需要根据卡片名称获取对应的详细信息
+        if (cardName && designData.mechanismDetails?.[cardName]) {
+          const cardDetails = designData.mechanismDetails[cardName];
+          return [
+            { label: '策略 1', value: cardDetails.strategy1, placeholder: '待补充...' },
+            { label: '策略 2', value: cardDetails.strategy2, placeholder: '待补充...' },
+            { label: '策略 3', value: cardDetails.strategy3, placeholder: '待补充...' },
+          ];
+        }
+        return [
+          { label: '策略 1', value: null, placeholder: '待补充...' },
+          { label: '策略 2', value: null, placeholder: '待补充...' },
+          { label: '策略 3', value: null, placeholder: '待补充...' },
+        ];
+      case 5: // Info Source
+        return [
+          { label: '可以追踪的数据点', value: designData.infoSourceDetails?.strategy1, placeholder: '可以追踪的数据点' },
+          { label: '可以追踪的数据点', value: designData.infoSourceDetails?.strategy2, placeholder: '可以追踪的数据点' },
+          { label: '可以追踪的数据点', value: designData.infoSourceDetails?.strategy3, placeholder: '可以追踪的数据点' },
+        ];
+      case 6: // Mode
+        return [
+          { label: '策略 1', value: designData.modeDetails?.strategy1, placeholder: '待补充...' },
+          { label: '策略 2', value: designData.modeDetails?.strategy2, placeholder: '待补充...' },
+          { label: '策略 3', value: designData.modeDetails?.strategy3, placeholder: '待补充...' },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  // 6. 创建一个新的辅助函数，专门用于渲染已选择的卡片（使用 OverlayCard）
   const renderSelectedCards = (stageId) => {
     const cardIdsSet = selectedCards[stageId];
   
@@ -38,9 +99,7 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
     }
   
     return Array.from(cardIdsSet).map(cardId => {
-      // ▼▼▼ 主要修改区域 ▼▼▼
-  
-      // 1. 从资产库获取的是图片 URL，而不是组件
+      // 从资产库获取图片 URL
       const cardImageUrl = cardAssets[stageId]?.[cardId];
       
       // 如果找不到图片 URL，则不渲染
@@ -48,18 +107,22 @@ const Page16_Sum = ({ isOpen, onClose, entryPoint }) => {
         console.warn(`Card asset not found for stageId: ${stageId}, cardId: ${cardId}`);
         return null; 
       }
+
+      // 获取卡片名称（用于 Mechanism 等需要根据卡片名称获取详细信息的 stage）
+      const cardName = getCardName(stageId, cardId);
+      
+      // 获取该 stage 和卡片对应的字段配置
+      const fields = getFieldsForStage(stageId, cardName);
   
-      // 2. 返回一个 <img> 标签来显示 PNG 图片
+      // 使用 OverlayCard 组件来显示卡片和叠加信息
       return (
         <div key={cardId} className={styles.summaryCard}>
-          <img 
-            src={cardImageUrl} 
-            alt={`已选卡片 ${cardId}`} 
-            className={styles.summaryCardImage} // 添加一个新类名用于样式控制
+          <OverlayCard 
+            backgroundImageUrl={cardImageUrl}
+            fields={fields}
           />
         </div>
       );
-      // ▲▲▲ 修改结束 ▲▲▲
     });
   };
   // --- ▲▲▲ 新增结束 ▲▲▲ ---

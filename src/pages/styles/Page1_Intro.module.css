@@ -10,7 +10,7 @@
   .backgroundImage {
     width: 100%;
     height: 100%;
-    object-fit: fill; /* 保持SVG的宽高比，同时填满容器 */
+    object-fit: cover; /* 保持SVG的宽高比，同时填满容器 */
   }
   
   /* “Next”按钮的样式 */

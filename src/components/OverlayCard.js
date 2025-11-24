@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styles from './OverlayCard.module.css'; 
+import { useDesign } from '../context/DesignContext';
 
 /**
  * 通用叠加信息卡片组件
@@ -12,7 +13,21 @@ import styles from './OverlayCard.module.css';
  * @param {string} props.fields[].value - 字段的值 (例如: profileData.age)
  * @param {string} props.fields[].placeholder - 字段为空时的占位符
  */
-const OverlayCard = ({ backgroundImageUrl, fields }) => {
+const OverlayCard = ({ backgroundImageUrl, fields = [], cardName = null }) => {
+  const { designData } = useDesign();
+
+  // 如果传入了 cardName 且在 designData 中存在 mechanismDetails，则优先使用该数据
+  let displayFields = fields;
+  if (cardName) {
+    const details = designData?.mechanismDetails?.[cardName];
+    if (details) {
+      displayFields = [
+        { label: '策略 1', value: details.strategy1 ?? '', placeholder: '待补充...' },
+        { label: '策略 2', value: details.strategy2 ?? '', placeholder: '待补充...' },
+        { label: '策略 3', value: details.strategy3 ?? '', placeholder: '待补充...' },
+      ];
+    }
+  }
   
   // 辅助函数，用于显示数据或占位符
   const renderField = (value, placeholder) => {
@@ -31,7 +46,7 @@ const OverlayCard = ({ backgroundImageUrl, fields }) => {
       
       {/* 浮动的信息层 */}
       <div className={styles.overlayInfo}>
-        {fields.map((field, index) => (
+        {displayFields.map((field, index) => (
           <div key={index} className={styles.field}>
             <strong>{field.label}:</strong> {renderField(field.value, field.placeholder)}
           </div>

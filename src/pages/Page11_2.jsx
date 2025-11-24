@@ -28,12 +28,12 @@ const CURRENT_STAGE_ID = 4;
 
 const allCards = [
   { id: 1, image: Mec1, name: '情景感知提醒' },
-  { id: 2, image: Mec2, name: '反馈与激励' },
-  { id: 3, image: Mec3, name: '决策简化' },
-  { id: 4, image: Mec4, name: '社会影响' },
-  { id: 5, image: Mec5, name: '认知重建与反思' },
-  { id: 6, image: Mec6, name: '目标设定' },
-  { id: 7, image: Mec7, name: '激发好奇心' },
+  { id: 2, image: Mec2, name: '共情反馈' },
+  { id: 3, image: Mec3, name: '决策引导' },
+  { id: 4, image: Mec4, name: '社会存在' },
+  { id: 5, image: Mec5, name: '反思促进' },
+  { id: 6, image: Mec6, name: '动态目标重建' },
+  { id: 7, image: Mec7, name: '叙事化探索' },
   { id: 8, image: Mec8, name: '诱饵效应' },
 ];
 
@@ -112,18 +112,23 @@ const Page11_2 = () => {
   // 5. 【核心逻辑】处理数据提取
   const handleDataExtracted = (data) => {
     // 只有当后端返回了 mechanismDetails 时才处理
+    // 后端返回格式：{ mechanismDetails: { [cardName]: { strategy1, strategy2, strategy3 } } }
     if (data?.mechanismDetails && currentCard) {
       console.log("前端接收到提取数据:", data.mechanismDetails);
       
-      // 获取旧数据
-      const existingDetails = designData.mechanismDetails?.[currentCard.name] || {};
-      // 合并新数据
-      const mergedDetails = { ...existingDetails, ...data.mechanismDetails };
-      
-      // 更新 Context -> 这会触发 currentCardDetails 更新 -> 触发 OverlayCard 更新
-      updateDesignData('mechanismDetails', {
-        [currentCard.name]: mergedDetails
-      });
+      // 后端返回的是以卡片名为key的对象，获取当前卡片的数据
+      const cardDetails = data.mechanismDetails[currentCard.name];
+      if (cardDetails) {
+        // 获取旧数据
+        const existingDetails = designData.mechanismDetails?.[currentCard.name] || {};
+        // 合并新数据
+        const mergedDetails = { ...existingDetails, ...cardDetails };
+        
+        // 更新 Context -> 这会触发 currentCardDetails 更新 -> 触发 OverlayCard 更新
+        updateDesignData('mechanismDetails', {
+          [currentCard.name]: mergedDetails
+        });
+      }
     }
   };
 
@@ -209,9 +214,10 @@ const Page11_2 = () => {
             {selectedCards.map((card, index) => (
               <div key={card.id} className={getCardClass(index)}>
                 <OverlayCard 
-                    backgroundImageUrl={card.image}
-                    // 只有当前正中间的卡片才显示输入框
-                    fields={index === currentIndex ? mechanismFields : []} 
+                  backgroundImageUrl={card.image}
+                  cardName={card.name}
+                  // 只有当前正中间的卡片才显示输入框（作为编辑入口），但 OverlayCard 优先使用 cardName 对应的 mechanismDetails
+                  fields={index === currentIndex ? mechanismFields : []} 
                 />
               </div>
             ))}

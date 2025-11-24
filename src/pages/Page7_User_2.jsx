@@ -54,7 +54,9 @@ const Page7_User_2 = () => {
         'buildUserProfile', 
         { 
           targetUser: designData.targetUser,
-          user: designData.user 
+          user: designData.user,
+          // 将当前已有的画像数据传给后端，方便后端判断哪些字段缺失
+          userProfile: designData.userProfile || {}
         }
       );
       
@@ -74,6 +76,7 @@ const Page7_User_2 = () => {
     }
   }, [designData.targetUser, designData.user, navigate, updateDesignData]);
 
+
   useEffect(() => {
     setActiveStageId(2); 
     startProfileBuilding();
@@ -90,9 +93,13 @@ const Page7_User_2 = () => {
         targetUser: designData.targetUser,
         user: designData.user,
         // 关键修改：将当前已有的画像数据也传给后端，供后端判断是否收集完毕
-        userProfile: designData.userProfile 
+        userProfile: designData.userProfile || {}
       }
     );
+    // 如果后端在回复中带来了提取到的用户画像数据，立即合并到 Context
+    if (aiResult?.extractedData?.userProfile) {
+      updateDesignData('userProfile', aiResult.extractedData.userProfile);
+    }
     return aiResult; 
 };
 

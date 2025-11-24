@@ -335,6 +335,8 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         case 'buildMechanismDetails':
       // 获取当前正在编辑的卡片名称
       const currentCardName = additionalData.currentCardName;
+      // 获取所有选择的卡片
+      const allMechanismCards = Array.isArray(additionalData.mechanismCards) ? additionalData.mechanismCards : [];
       // 获取该卡片已有的详情 (前端传来的 additionalData.mechanismDetails 应该是整个大对象)
       const allDetails = additionalData.mechanismDetails || {};
       const currentCardDetails = allDetails[currentCardName] || {};
@@ -347,21 +349,50 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
       // 判断当前卡片是否完成
       const isCurrentCardComplete = filledCount === 3;
 
-      if (isCurrentCardComplete) {
+      // 检查所有卡片的完成状态
+      const cardsStatus = allMechanismCards.map(cardName => {
+        const cardDetails = allDetails[cardName] || {};
+        const cardFilledCount = strategies.filter(k => cardDetails[k] && cardDetails[k].trim() !== '').length;
+        return {
+          name: cardName,
+          isComplete: cardFilledCount === 3,
+          filledCount: cardFilledCount
+        };
+      });
+      const incompleteCards = cardsStatus.filter(c => !c.isComplete);
+      const allCardsComplete = incompleteCards.length === 0;
+
+      if (isCurrentCardComplete && allCardsComplete) {
          return `你是一个辅助设计助手。
-         **当前状态**：用户正在编辑助推机制卡片 **“${currentCardName}”**。
-         **检测结果**：该卡片的3个策略 **都已填写完毕**。
+         **当前状态**：用户正在编辑助推机制卡片 **"${currentCardName}"**。
+         **检测结果**：
+         - 当前卡片的3个策略 **都已填写完毕**。
+         - 所有选择的卡片（${allMechanismCards.join('、')}）的策略都已完善。
          
          你的任务：
          1. 简短地夸奖用户完成得很好。
-         2. 提醒用户：“这张卡片的内容已经完善了，你可以点击左右箭头切换到其他卡片继续填写，或者如果所有卡片都完成了，点击下一步。”
+         2. 提醒用户："太棒了！所有卡片的策略都已完善，你可以点击下一步继续了。"
          3. **不要**再调用工具。`;
+      }
+
+      if (isCurrentCardComplete) {
+        return `你是一个辅助设计助手。
+        **当前状态**：用户正在编辑助推机制卡片 **"${currentCardName}"**。
+        **检测结果**：该卡片的3个策略 **都已填写完毕**。
+        
+        **其他卡片状态**：
+        ${incompleteCards.map(c => `- ${c.name}: 已完成 ${c.filledCount}/3 个策略`).join('\n')}
+        
+        你的任务：
+        1. 简短地夸奖用户完成得很好。
+        2. 提醒用户："当前卡片已完成。你还可以切换到其他卡片继续完善策略，或者如果所有卡片都完成了，点击下一步。"
+        3. **不要**再调用工具。`;
       }
 
       return `你是一个辅助设计方案的陪伴者。
       
       **【当前任务】**
-      用户选择了助推机制：**“${currentCardName}”**。
+      用户选择了助推机制：**"${currentCardName}"**。
       你需要引导用户为这张卡片补充具体的执行策略。
       
       **【已知进度】**
@@ -369,59 +400,83 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
       - 已收集策略: ${JSON.stringify(currentCardDetails)}
       - 还需要收集: ${missingStrategies.join('、')}
       
+      **【所有卡片状态】**
+      ${cardsStatus.map(c => `- ${c.name}: ${c.isComplete ? '已完成' : `已完成 ${c.filledCount}/3 个策略`}`).join('\n')}
+      
       **【对话策略】**
-      1. **聚焦当前卡片**：你的所有提问必须紧扣 **“${currentCardName}”** 这个机制。
+      1. **聚焦当前卡片**：你的所有提问必须紧扣 **"${currentCardName}"** 这个机制。
       2. **循序渐进**：
-         - 如果是第一次提问，请问：“对于${currentCardName}，你打算采取的第一个具体做法是什么？”
-         - 如果已有部分策略，请针对缺失的部分提问（例如：“好的，那第二个策略呢？”）。
+         - 如果是第一次提问，请问："对于${currentCardName}，你打算采取的第一个具体做法是什么？"
+         - 如果已有部分策略，请针对缺失的部分提问（例如："好的，那第二个策略呢？"）。
       3. **提取信息**：
          - 用户回答后，**必须立即**使用 \`extractMechanismDetails\` 工具。
          - 将提取的内容对应到 \`strategy1\`, \`strategy2\` 或 \`strategy3\` 中（填补空缺）。
       
       请开始引导用户。`;
       case 'buildUserProfile': // Page 7 的任务
-    // ----------------------------------------------------------------
-    // 关键修改：移除固定流程，强调根据缺失字段提问
-    // ----------------------------------------------------------------
-        const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
-        const existingProfile = additionalData.userProfile || {};
-        
-        // 找出缺失的字段
-        const missingFields = requiredFields.filter(field => 
-            existingProfile[field] == null || existingProfile[field].trim() === ''
-        );
-        
-        let nextQuestionInstruction = '';
-        if (missingFields.length > 0) {
-            // 引导 AI 提问第一个缺失的字段
-            const nextMissingField = missingFields[0];
-            const fieldMap = {
-                'age': '年龄段',
-                'sexual': '性别',
-                'edu': '教育背景',
-                'work': '职业类型',
-                'equip': '智能设备使用熟练度'
-            };
-            nextQuestionInstruction = `你必须根据当前缺失的字段，向用户提出下一个问题。当前缺失的字段有：${missingFields.map(f => fieldMap[f]).join('、')}。你的下一个问题必须是关于**${fieldMap[nextMissingField]}**的。`;
-        } else {
-            nextQuestionInstruction = `所有信息已收集完毕。你的最终回复必须是：“非常好，我们已经为用户建立了详细的画像！点击下一步继续我们的设计之旅吧。”`;
-        }
+      const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
+      // 确保 existingProfile 是一个对象，防止 undefined 报错
+      const existingProfile = additionalData.userProfile || {};
+      
+      // 找出缺失的字段 (值为 null, undefined 或 空字符串)
+      const missingFields = requiredFields.filter(field => 
+          !existingProfile[field] || existingProfile[field].trim() === ''
+      );
+      
+      // 字段名称映射，用于生成自然的对话
+      const fieldMap = {
+          'age': '年龄段',
+          'sexual': '性别',
+          'edu': '教育背景',
+          'work': '职业类型',
+          'equip': '智能设备使用熟练度'
+      };
 
-        return `你是一个友好且聪明的辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的用户画像。
-        
-        **【重要指令】在用户回答了你提出的任何一个画像字段后，你必须立即使用 \`extractUserProfile\` 工具来提取该信息。**
-        
-        已知信息如下：
-        - 用户的设计目标 (Target-User): "${additionalData.targetUser}"
-        - 用户选择的画像卡片 (User): "${additionalData.user}"
-        - 当前已收集的画像信息: ${JSON.stringify(existingProfile)}
-        
-        你的回复必须遵循以下原则：
-        1. **如果用户提供了新的画像信息**：提取信息后，${nextQuestionInstruction}
-        2. **如果用户没有提供信息（例如首次加载或简单问候）**：你必须主动提出第一个缺失字段的问题。
-        3. **保持友好和引导的语气。**
-        4. **不要使用 Markdown 格式。**
-          ${nextQuestionInstruction}`; 
+      let instruction = '';
+      
+      if (missingFields.length > 0) {
+          // 取出第一个缺失的字段作为下一个问题的主题
+          const nextField = missingFields[0];
+          const nextFieldName = fieldMap[nextField];
+          
+          instruction = `
+          **【当前状态】**
+          用户画像尚未完成。
+          缺失的字段有：${missingFields.map(f => fieldMap[f]).join('、')}。
+          
+          **【你的任务】**
+          1. 你**必须**针对 **"${nextFieldName}"** 向用户提问。
+          2. 问题要自然、友好。例如，如果缺"年龄"，可以问："为了更好地定制方案，请问目标用户的年龄段大概是多少？"
+          3. **不要**一次性问所有问题，一次只问一个。
+          `;
+      } else {
+          // 所有字段都存在
+          instruction = `
+          **【当前状态】**
+          所有用户画像字段已收集完毕！
+          
+          **【你的任务】**
+          1. 不需要再提问。
+          2. 请直接回复结束语：“非常好，我们已经为用户建立了详细的画像！点击下一步继续我们的设计之旅吧。”
+          `;
+      }
+
+      return `你是一个友好且聪明的辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的用户画像。
+      
+      **【重要指令】**
+      在用户回答了你的问题后，你必须**立即**使用 \`extractUserProfile\` 工具来提取信息。
+      
+      已知信息：
+      - 目标用户: "${additionalData.targetUser}"
+      - 已收集画像: ${JSON.stringify(existingProfile)}
+      
+      ${instruction}
+      
+      **注意：**
+      - 保持语气专业且亲切。
+      - **不要**使用 Markdown 格式。
+      - 如果用户回答了当前问题，请务必调用工具提取。`;
+
       case 'buildScenarioDetails':
         return `你是一个辅助设计方案的陪伴者。你的任务是通过对话，帮助用户完善他们选择的场景细节。
         
@@ -732,25 +787,45 @@ app.post('/chat', async (req, res) => {
             // 关键修改：针对 buildUserProfile 任务的特殊处理
             // ----------------------------------------------------------------
             if (task === 'buildUserProfile') {
+              // 1. 获取已有的数据 (从前端传来的 additionalData)
               const existingProfile = additionalData.userProfile || {};
+              
+              // 2. 获取本次 AI 提取的新数据
               const newlyExtractedData = parsedResult.data;
+              
+              // 3. 【关键】合并数据：旧数据 + 新数据
               const mergedProfile = { ...existingProfile, ...newlyExtractedData };
 
+              // 4. 定义必须填写的字段
               const requiredFields = ['age', 'sexual', 'edu', 'work', 'equip'];
+              
+              // 5. 检查是否所有字段都有值
               const allFieldsCollected = requiredFields.every(field => {
                 const value = mergedProfile[field];
                 return typeof value === 'string' && value.trim() !== '';
               });
 
-              extractedData = taskConfig.transform(newlyExtractedData);
+              // 6. 更新 extractedData
+              // 注意：这里我们返回 mergedProfile，这样前端更新状态时就是完整的对象，而不是只有新字段
+              extractedData = { userProfile: mergedProfile };
+              
+              // 7. 设置任务完成状态
               isTaskComplete = allFieldsCollected;
 
+              // 8. 设置回复文本
               if (isTaskComplete) {
+                // 如果完成了，强制使用完成语 (前端收到 isTaskComplete=true 会显示下一步按钮)
                 finalResponseText = taskConfig.completionMessage;
               } else {
-                finalResponseText = '好的，我已记录您的信息。请继续补充下一项用户画像细节。';
+                // 如果没完成，这里其实不需要强制设置 finalResponseText
+                // 因为 AI 在上面的 Prompt 中已经被指示去问下一个问题了。
+                // 这里留空，让 AI 生成的 responseText (即下一个问题) 直接返回给用户。
+                // 只有当 AI 没说话时，才用兜底语。
+                if (!finalResponseText) {
+                   finalResponseText = '好的，已记录。让我们继续完善其他信息。';
+                }
               }
-          } 
+            } 
 
             else if (task === 'buildScenarioDetails') {
               const existingDetails = additionalData.scenarioDetails || {};
@@ -844,29 +919,94 @@ app.post('/chat', async (req, res) => {
         }
     }
           else if (task === 'buildMechanismDetails') {
-            // 1. 获取已有的扁平策略对象
-            const existingDetails = additionalData.mechanismDetails || {};
+            // 1. 获取当前卡片名称
+            const currentCardName = additionalData.currentCardName;
+            if (!currentCardName) {
+              console.warn('[BACKEND] buildMechanismDetails: currentCardName 缺失');
+              continue;
+            }
             
-            // 2. 获取 AI 新提取的策略数据
+            // 2. 获取所有选择的卡片和已有的详情（嵌套结构：{ [cardName]: { strategy1, strategy2, strategy3 } }）
+            const allMechanismCards = Array.isArray(additionalData.mechanismCards) ? additionalData.mechanismCards : [];
+            const allMechanismDetails = additionalData.mechanismDetails || {};
+            const currentCardDetails = allMechanismDetails[currentCardName] || {};
+            
+            // 3. 获取 AI 新提取的策略数据
             const newlyExtractedData = parsedResult.data; // e.g., { strategy1: "..." }
   
-            // 3. 直接将新旧策略合并成一个新的扁平对象
-            const mergedDetails = { ...existingDetails, ...newlyExtractedData };
+            // 4. 合并当前卡片的新旧策略数据
+            const mergedCardDetails = { ...currentCardDetails, ...newlyExtractedData };
   
-            // 4. 判断任务是否完成
+            // 5. 判断当前卡片的任务是否完成（3个strategy是否都填满）
             const requiredFields = ['strategy1', 'strategy2', 'strategy3'];
-            const allFieldsCollected = requiredFields.every(field => {
-              const value = mergedDetails[field];
+            const isCurrentCardComplete = requiredFields.every(field => {
+              const value = mergedCardDetails[field];
               return typeof value === 'string' && value.trim() !== '';
             });
   
-            // 5. 准备返回数据 (返回的是扁平对象)
-            extractedData = { mechanismDetails: mergedDetails };
-            isTaskComplete = allFieldsCollected;
+            // 6. 更新完整的 mechanismDetails 对象（包含当前卡片的更新）
+            const updatedAllMechanismDetails = {
+              ...allMechanismDetails,
+              [currentCardName]: mergedCardDetails
+            };
   
-            // 6. 构造回复
+            // 7. 【关键检测】检查所有选择的卡片是否都有记录，且每张卡片的3个strategy都完成
+            let allCardsHaveDetails = true;
+            let allCardsComplete = true;
+            
+            if (allMechanismCards.length > 0) {
+              // 检查每张卡片
+              for (const cardName of allMechanismCards) {
+                const cardDetails = updatedAllMechanismDetails[cardName];
+                
+                // 检查卡片是否有记录
+                if (!cardDetails) {
+                  allCardsHaveDetails = false;
+                  allCardsComplete = false;
+                  break;
+                }
+                
+                // 检查该卡片的3个strategy是否都完成
+                const cardComplete = requiredFields.every(field => {
+                  const value = cardDetails[field];
+                  return typeof value === 'string' && value.trim() !== '';
+                });
+                
+                if (!cardComplete) {
+                  allCardsComplete = false;
+                }
+              }
+            }
+  
+            // 8. 准备返回数据（以卡片名称为key的嵌套结构）
+            extractedData = { 
+              mechanismDetails: {
+                [currentCardName]: mergedCardDetails
+              }
+            };
+            
+            // 9. 任务完成判断：当前卡片完成 且 所有卡片都完成
+            isTaskComplete = isCurrentCardComplete && allCardsComplete && allCardsHaveDetails;
+  
+            // 10. 构造回复
             if (isTaskComplete) {
-              finalResponseText = taskConfig.completionMessage;
+              finalResponseText = taskConfig.completionMessage || '太棒了，所有卡片的策略都已完善！点击下一步继续吧。';
+            } else if (isCurrentCardComplete) {
+              // 当前卡片完成，但还有其他卡片未完成
+              const incompleteCards = allMechanismCards.filter(cardName => {
+                const cardDetails = updatedAllMechanismDetails[cardName];
+                if (!cardDetails) return true;
+                return !requiredFields.every(field => {
+                  const value = cardDetails[field];
+                  return typeof value === 'string' && value.trim() !== '';
+                });
+              });
+              
+              if (incompleteCards.length > 0) {
+                finalResponseText = `很好！当前卡片已完成。你还可以切换到其他卡片继续完善策略。`;
+              } else {
+                finalResponseText = `好的，已记录。我们还需要补充其他策略。`;
+              }
             } else {
               finalResponseText = `好的，已记录。我们还需要补充其他策略。`;
             }

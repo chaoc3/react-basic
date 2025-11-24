@@ -25,12 +25,28 @@ function ChatDialog({ initialBotMessage, getAiResponse, onDataExtracted, onTaskC
 
   useEffect(scrollToBottom, [messages]);
 
-  // 设置初始机器人消息 (无需修改)
+  // 设置初始机器人消息
+  // 支持两种情况：
+  // 1. 消息列表为空时，设置初始消息
+  // 2. 消息列表只有一条 bot 消息时，更新该消息（用于处理 initialBotMessage 的异步更新）
   useEffect(() => {
-    if (messages.length === 0 && initialBotMessage) {
-      setMessages([{ id: Date.now(), sender: 'bot', text: initialBotMessage }]);
+    if (initialBotMessage) {
+      setMessages(prevMessages => {
+        if (prevMessages.length === 0) {
+          // 情况1：消息列表为空，设置初始消息
+          return [{ id: Date.now(), sender: 'bot', text: initialBotMessage }];
+        } else if (prevMessages.length === 1 && prevMessages[0].sender === 'bot') {
+          // 情况2：只有一条 bot 消息，且 initialBotMessage 已更新，更新该消息
+          // 只有当消息内容不同时才更新，避免不必要的重渲染
+          if (prevMessages[0].text !== initialBotMessage) {
+            return [{ id: prevMessages[0].id, sender: 'bot', text: initialBotMessage }];
+          }
+        }
+        // 其他情况不更新
+        return prevMessages;
+      });
     }
-  }, [initialBotMessage, messages.length]);
+  }, [initialBotMessage]);
 
   // 处理用户提交的核心逻辑
   const handleSubmit = async (event) => {

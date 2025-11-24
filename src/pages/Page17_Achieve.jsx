@@ -59,6 +59,25 @@ const Page17_Achieve = () => {
     URL.revokeObjectURL(url);
   };
 
+  // --- NEW: Handler for exporting all collected design data ---
+  const handleExportData = () => {
+    // Format the design data as JSON with proper indentation
+    const jsonData = JSON.stringify(designData, null, 2);
+    // Create a blob with the JSON data
+    const blob = new Blob([jsonData], { type: 'application/json;charset=utf-8;' });
+    // Create a link element
+    const link = document.createElement("a");
+    // Create a URL for the blob
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "design_data.txt"); // Set the file name
+    // Append the link to the body, click it, and then remove it
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Auxiliary chat function (unchanged)
   const sideChatSendMessage = async (input) => {
     return { responseText: "这是辅助对话框的回复。您可以在这里查询设计理论或寻求建议。" };
@@ -79,7 +98,10 @@ const Page17_Achieve = () => {
               {isEditing ? '保存' : '编辑'}
             </button>
             <button onClick={handleExport} className={styles.actionButton}>
-              导出
+              导出报告
+            </button>
+            <button onClick={handleExportData} className={styles.actionButton}>
+              导出数据
             </button>
           </div>
 

@@ -189,14 +189,23 @@
 /* 3. 单个卡片的大小控制 */
 .summaryCard {
   /* ▼▼▼ 在这里调整卡片的大小 ▼▼▼ */
-  width: 160px; /* 例如，设置卡片宽度为 120px */
-  height: auto; /* 高度自适应 */
-  aspect-ratio: 2.6 / 4; /* 保持 3:4 的宽高比，可以根据你的卡片设计调整 */
+  /* OverlayCard 组件的默认尺寸是 320px x 500px，这里调整为适合摘要页面的尺寸 */
+  width: 160px; /* 缩小到原来的一半 */
+  height: 250px; /* 对应的高度 (500px * 0.5) */
   /* ▲▲▲ 调整结束 ▲▲▲ */
   
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* 让 OverlayCard 组件适应容器大小 - 使用 CSS 变量或直接缩放 */
+.summaryCard > div {
+  width: 320px !important; /* OverlayCard 的原始宽度 */
+  height: 500px !important; /* OverlayCard 的原始高度 */
+  transform: scale(0.5);
+  transform-origin: top left;
 }
 
 .summaryCard img {

@@ -22,12 +22,12 @@ import { getAiResponse } from '../services/aiService';
 
 const cards = [
   { id: 1, src: Mec1, name: '情景感知提醒' },
-  { id: 2, src: Mec2, name: '反馈与激励' },
-  { id: 3, src: Mec3, name: '决策简化' },
-  { id: 4, src: Mec4, name: '社会影响' },
-  { id: 5, src: Mec5, name: '认知重建与反思' },
-  { id: 6, src: Mec6, name: '目标设定' },
-  { id: 7, src: Mec7, name: '激发好奇心' },
+  { id: 2, src: Mec2, name: '共情反馈' },
+  { id: 3, src: Mec3, name: '决策引导' },
+  { id: 4, src: Mec4, name: '社会存在' },
+  { id: 5, src: Mec5, name: '反思促进' },
+  { id: 6, src: Mec6, name: '动态目标重建' },
+  { id: 7, src: Mec7, name: '叙事化探索' },
   { id: 8, src: Mec8, name: '诱饵效应' },
 ];
 
@@ -92,14 +92,26 @@ const Page10_1 = () => {
   const handleCardClick = (cardId) => {
     const isSelected = selectedCardIds.includes(cardId);
     let newIds;
+    const clickedCard = cards.find(c => c.id === cardId);
 
     if (isSelected) {
       // 取消选中
       newIds = selectedCardIds.filter(id => id !== cardId);
       
       // 2. 【关键修改】同步更新时间轴（取消选中）
-      // 假设 selectCard 是 toggle 逻辑，再次调用即为取消
-      selectCard(CURRENT_STAGE_ID, cardId); 
+      selectCard(CURRENT_STAGE_ID, cardId);
+
+      // 3. 【新增】清理该卡片对应的 mechanismDetails
+      // 注意：由于 updateDesignData 对 mechanismDetails 有特殊合并逻辑，
+      // 我们需要先获取完整对象，删除对应项，然后整体替换
+      if (clickedCard && designData.mechanismDetails?.[clickedCard.name]) {
+        const updatedDetails = { ...designData.mechanismDetails };
+        delete updatedDetails[clickedCard.name];
+        // 使用 setDesignData 的方式，但通过 updateDesignData 的机制
+        // 由于 updateDesignData 会合并，我们需要特殊处理
+        // 这里我们直接更新整个 mechanismDetails 对象
+        updateDesignData('mechanismDetails', updatedDetails);
+      }
 
     } else {
       // 新增选中
@@ -116,7 +128,7 @@ const Page10_1 = () => {
     // 更新本地 UI 状态
     setSelectedCardIds(newIds);
 
-    // 更新全局 Design Context
+    // 更新全局 Design Context - mechanismCards
     const selectedNames = cards
       .filter(c => newIds.includes(c.id))
       .map(c => c.name);

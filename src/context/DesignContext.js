@@ -38,7 +38,7 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 };
  */
 const mockDesignData = {
-/*   "targetUser":null ,
+  "targetUser":null ,
   "targetPainpoint": null,
   "targetStage":null ,
   "user": null,
@@ -56,73 +56,71 @@ const mockDesignData = {
     "who":null ,
     "situation": null
   },
-  "mechanismCards":[
-
-  ],
-  "mechanismDetails": {
-    "strategy1":null,
-    "strategy2":null,
-    "strategy3":null,
-  },
-
-  "modeCard": null,
-  "modeDetails": {
-    "strategy1": null,
-    "strategy2": null,
-    "strategy3": null
-  }  */
-  "targetUser": "年轻上班族",
-  "targetPainpoint": "工作压力大，缺乏时间进行健康管理",
-  "targetStage": "健康意识初步形成阶段",
-  "user": "张小明",
-  "userProfile": {
-    "age": "25",
-    "sexual": "男",
-    "edu": "本科",
-    "work": "互联网产品经理",
-    "equip": "智能手机、智能手表"
-  },
-  "scenarioCard": "工作日健康管理",
-  "scenarioDetails": {
-    "when": "工作日晚上8点后",
-    "where": "家中或健身房",
-    "who": "独自或与朋友一起",
-    "situation": "下班后疲惫，需要放松和锻炼"
-  },
   "mechanismCards": [
     // "共情反馈"
   ],
   "mechanismDetails": {
-    
-      /* "strategy1": "在每日总结中加入情感化语言，强调系统理解用户的疲惫和努力。",
-      "strategy2": "推送同龄人或同岗位用户的鼓励性反馈，营造“有人懂你”的氛围。",
-      "strategy3": "当用户连续完成任务时，提供个性化的语音/图文安慰与庆祝。"
-     */
+    // 动态结构：{ [cardName]: { strategy1, strategy2, strategy3 } }
+    // 例如：{ "共情反馈": { strategy1: "...", strategy2: "...", strategy3: "..." } }
   },
   "infoSourceCards": [
-
-  ],
-  "infoSourceDetails": {
-    "strategy1": null,
-    "strategy2": null,
-    "strategy3": null
-  },
-  
-/*   "infoSourceCards": [
 
   ],
   "infoSourceDetails": {
     "strategy1": "记录穿戴设备上传的睡眠时长、步数、心率",
     "strategy2": "邀请同事/朋友轻量化打分或留言，反馈用户状态",
     "strategy3": ""
+  },
+  
+  "modeCard": null,
+  "modeDetails": {
+    "strategy1": null,
+    "strategy2": null,
+    "strategy3": null
+  } 
+/*   "targetUser": "年轻上班族",
+  "targetPainpoint": "工作压力大，缺乏时间进行健康管理",
+  "targetStage": "健康意识初步形成阶段",
+  "user": "张小明", */
+/*   "userProfile": {
+    "age": "25",
+    "sexual": "男",
+    "edu": "本科",
+    "work": "互联网产品经理",
+    "equip": "智能手机、智能手表"
+  }, */
+ /*  "userProfile": {
+    "age":null ,
+    "sexual":null ,
+    "edu": null,
+    "work":null ,
+    "equip": null
+  },
+
+  "scenarioCard": "工作日健康管理",
+  "scenarioDetails": {
+    "when": "工作日晚上8点后",
+    "where": "家中或健身房",
+    "who": "独自或与朋友一起",
+    "situation": "下班后疲惫，需要放松和锻炼"
+  }, */
+
+/*   "infoSourceCards": [
+
+  ],
+  "infoSourceDetails": {
+    "strategy1": null,
+    "strategy2": null,
+    "strategy3": null
   }, */
   
-  "modeCard": "个性化推荐模式",
+
+/*   "modeCard": "个性化推荐模式",
   "modeDetails": {
     "strategy1": "协同过滤 + 时间分段推荐",
     "strategy2": "每日晚间推送简短提示卡片",
     "strategy3": "允许用户手动调整推荐强度"
-  },
+  }, */
   
 
 }
@@ -137,16 +135,35 @@ export const DesignProvider = ({ children }) => {
   // 关键修改：使用 mockDesignData 初始化 state
   const [designData, setDesignData] = useState(mockDesignData);
 
-  // updateDesignData 函数保持不变
+  // updateDesignData 函数
   const updateDesignData = useCallback((key, value) => {
     setDesignData(prevData => {
       if (key === 'mechanismDetails') {
-        return {
-          ...prevData,
-          [key]: { ...prevData[key], ...value }, 
-        };
+        // mechanismDetails 的特殊处理：
+        // - 如果 value 是一个嵌套对象（如 { [cardName]: {...} }），则合并到对应卡片
+        // - 如果 value 是一个完整的 mechanismDetails 对象（包含所有卡片），则完全替换
+        // 判断方式：检查 value 是否包含所有当前 mechanismCards 中的卡片
+        const currentCards = Array.isArray(prevData.mechanismCards) ? prevData.mechanismCards : [];
+        const valueKeys = Object.keys(value || {});
+        const isCompleteReplacement = currentCards.length > 0 && 
+          currentCards.every(cardName => valueKeys.includes(cardName)) &&
+          valueKeys.length === currentCards.length;
+        
+        if (isCompleteReplacement) {
+          // 完全替换
+          return {
+            ...prevData,
+            [key]: value,
+          };
+        } else {
+          // 合并更新（用于添加或更新单个卡片）
+          return {
+            ...prevData,
+            [key]: { ...prevData[key], ...value }, 
+          };
+        }
       }
-      if (key === 'userProfile' || key === 'scenarioDetails' || key === 'mechanismDetails' || key === 'infoSourceDetails' || key === 'modeDetails') {
+      if (key === 'userProfile' || key === 'scenarioDetails' || key === 'infoSourceDetails' || key === 'modeDetails') {
         return {
           ...prevData,
           [key]: { ...prevData[key], ...value },
