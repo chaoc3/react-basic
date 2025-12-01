@@ -20,7 +20,8 @@ const deepseek = createOpenAI({
 // 创建模型实例 - 确保 model 是字符串
 const model = deepseek('deepseek-chat'); // 使用正确的模型名称
 
-const toolSchemas = {
+// 将模块级对象封装到函数中，避免全局变量污染
+const createToolSchemas = () => ({
   extractUserInfo: z.object({
     targetUser: z.string().describe('一句话描述的用户群体，例如 "需要管理血糖的年轻糖尿病患者"。'),
   }),
@@ -65,10 +66,10 @@ extractRecommendedCards: z.object({
   recommendedCards: z.array(z.string()).describe('An array of exactly three recommended card names.'),
 }),
 
-};
+});
 
 
-const toolDefinitions = {
+const createToolDefinitions = () => ({
   extractUserInfo: {
     type: 'function',
     function: {
@@ -223,9 +224,9 @@ extractModeDetails: {
     },
   },
 
-};
+});
 
-const taskConfigs = {
+const createTaskConfigs = () => ({
   getTargetUser: {
     toolName: 'extractUserInfo',
     completionMessage: '太好了，我们已经确定了你的设计对象。接下来，我想更了解你的设计出发点。请点击右侧按钮进入下一步吧。',
@@ -294,7 +295,7 @@ recommendMode: {
   toolName: null, // 不需要工具，AI 直接生成推荐文本
 },
 
-};
+});
 
 // 定义不同任务的系统提示
 const getSystemPromptForTask = (task, additionalData = {}) => {
@@ -627,7 +628,7 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         ${context}
         你的回复应该是简短、友好且引导性的，鼓励用户从左边的卡片中选择。例如：“根据你的设计目标，我为你推荐了几个可能的用户画像。你可以看看左边的卡片，选择一个最符合你想法的。”
         **不要**详细分析每个卡片，你的任务只是引出选择。
-        保持友好和引导的语气。不要使用任何工具。不要使用 Markdown 格式。`;
+        保持友好和引导的语气。不要使用任何工具。不要使用 Markdown 格式`;
 
 
         case 'recommendScenario':
@@ -720,9 +721,13 @@ app.post('/chat', async (req, res) => {
       }
       console.log("[BACKEND] DEEPSEEK_API_KEY 已加载。");
   
-      const { messages, task,...additionalData } = req.body;
+      const { messages, task, ...additionalData } = req.body;
       console.log(`[BACKEND] 收到任务: ${task}`);
   
+      const toolSchemas = createToolSchemas();
+      const toolDefinitions = createToolDefinitions();
+      const taskConfigs = createTaskConfigs();
+
       const systemPrompt = getSystemPromptForTask(task, additionalData);
       
       // 准备请求数据
