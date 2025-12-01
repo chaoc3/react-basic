@@ -67,9 +67,9 @@ const mockDesignData = {
 
   ],
   "infoSourceDetails": {
-    "strategy1": "记录穿戴设备上传的睡眠时长、步数、心率",
-    "strategy2": "邀请同事/朋友轻量化打分或留言，反馈用户状态",
-    "strategy3": ""
+    "strategy1": null,
+    "strategy2": null,
+    "strategy3": null
   },
   
   "modeCard": null,
