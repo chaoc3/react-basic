@@ -730,6 +730,58 @@ app.post('/chat', async (req, res) => {
 
       const systemPrompt = getSystemPromptForTask(task, additionalData);
       
+      // 修改 /chat 路由逻辑，确保仅返回采集状态
+app.post('/chat', async (req, res) => {
+  console.log("\n--- [BACKEND] Express API /api/chat 被调用 ---");
+  try {
+    if (!process.env.DEEPSEEK_API_KEY) {
+      console.error("[BACKEND] 严重错误: DEEPSEEK_API_KEY 环境变量未设置!");
+      return res.status(500).json({ error: "Server configuration error: API key is missing." });
+    }
+
+    console.log("[BACKEND] DEEPSEEK_API_KEY 已加载。");
+
+    const { messages, task, ...additionalData } = req.body;
+    console.log(`[BACKEND] 收到任务: ${task}`);
+
+    // 检查用户输入是否符合任务要求
+    let isCollected = false;
+    let message = "信息未采集。";
+
+    if (task === 'getTargetUser') {
+      const userMessage = messages.find(msg => msg.role === 'user');
+      if (userMessage && userMessage.content.trim()) {
+        isCollected = true;
+        message = "目标用户信息已采集。";
+      }
+    } else if (task === 'getTargetPainpoint') {
+      const userMessage = messages.find(msg => msg.role === 'user');
+      if (userMessage && userMessage.content.trim()) {
+        isCollected = true;
+        message = "设计痛点信息已采集。";
+      }
+    } else if (task === 'getTargetStage') {
+      const userMessage = messages.find(msg => msg.role === 'user');
+      if (userMessage && userMessage.content.trim()) {
+        isCollected = true;
+        message = "行为改变阶段信息已采集。";
+      }
+    } else {
+      return res.status(400).json({ error: "未知任务类型。" });
+    }
+
+    console.log("[BACKEND] 返回采集状态:", { isCollected, message });
+    return res.json({ isCollected, message });
+
+  } catch (error) {
+    console.error("[BACKEND] 在 API 路由中捕获到严重错误:", error);
+    return res.status(500).json({ 
+      error: "An internal server error occurred.",
+      details: error.message,
+    });
+  }
+});
+  
       // 准备请求数据
       const requestData = {
         model: "deepseek-chat",
