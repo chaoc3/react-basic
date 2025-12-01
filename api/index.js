@@ -79,7 +79,7 @@ const toolDefinitions = {
         properties: {
           targetUser: {
             type: 'string',
-            description: '一句话描述的用户群体，例如 "需要管理血糖的年轻糖尿病患者"。',
+            description: '用户群体。',
           },
         },
         required: ['targetUser'],
@@ -96,7 +96,7 @@ const toolDefinitions = {
         properties: {
           targetPainpoint: {
             type: 'string',
-            description: '一句话描述的设计痛点，例如 "难以坚持每日测量血糖"。',
+            description: '设计痛点',
           },
         },
         required: ['targetPainpoint'],
@@ -302,7 +302,7 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
       case 'getTargetUser':
         return `你是一个友好且聪明的辅助设计方案的陪伴者。你的核心目标是与用户对话，并从他们的回答中识别出他们想要帮助的用户群体。
   
-  - 当用户的回答清晰地描述了一个用户群体时 (例如 "为老年糖尿病患者设计" 或 "我想帮助那些刚开始健身的年轻人")，你的任务是：
+  - 当用户的回答清晰地描述了一个用户群体时，你的任务是：
     1. 使用 \`extractUserInfo\` 工具来提取这个用户群体描述。
     2. 你的最终回复**必须**是：“太好了，我们已经确定了你的设计对象。接下来，我想更了解你的设计出发点。请点击右侧按钮进入下一步吧。”
   
