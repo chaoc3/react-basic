@@ -1,96 +1,65 @@
 // ChatDialog.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown'; // <--- 1. 引入库
 import './ChatDialog.css';
 
-/**
- * ChatDialog Component
- * @param {object} props
- * @param {string} props.initialBotMessage - The first message the bot displays.
- * @param {function} props.getAiResponse - An async function that takes (userInput, messageHistory) and returns a full API response object. // <--- 更改注释
- * @param {function} props.onDataExtracted - A callback for when the AI extracts data.
- * @param {function} props.onTaskComplete - A callback for when the AI signals the task is complete.
- */
-// 更改函数签名，将 onSendMessage 替换为 getAiResponse
 function ChatDialog({ initialBotMessage, getAiResponse, onDataExtracted, onTaskComplete }) {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // 自动滚动功能 (无需修改)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [messages]);
 
-  // 设置初始机器人消息
-  // 支持两种情况：
-  // 1. 消息列表为空时，设置初始消息
-  // 2. 消息列表只有一条 bot 消息时，更新该消息（用于处理 initialBotMessage 的异步更新）
   useEffect(() => {
     if (initialBotMessage) {
       setMessages(prevMessages => {
         if (prevMessages.length === 0) {
-          // 情况1：消息列表为空，设置初始消息
           return [{ id: Date.now(), sender: 'bot', text: initialBotMessage }];
         } else if (prevMessages.length === 1 && prevMessages[0].sender === 'bot') {
-          // 情况2：只有一条 bot 消息，且 initialBotMessage 已更新，更新该消息
-          // 只有当消息内容不同时才更新，避免不必要的重渲染
           if (prevMessages[0].text !== initialBotMessage) {
             return [{ id: prevMessages[0].id, sender: 'bot', text: initialBotMessage }];
           }
         }
-        // 其他情况不更新
         return prevMessages;
       });
     }
   }, [initialBotMessage]);
 
-  // 处理用户提交的核心逻辑
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!userInput.trim() || isLoading) return;
 
     const userMessage = { id: Date.now(), sender: 'user', text: userInput };
     
-    // 立即将用户消息显示在界面上
     const currentMessages = [...messages, userMessage];
     setMessages(currentMessages);
     setUserInput('');
     setIsLoading(true);
 
     try {
-      // --- ▼▼▼ 关键修改 1: 调用 getAiResponse ▼▼▼ ---
-      // 调用 getAiResponse，而不是 onSendMessage
       const apiResponse = await getAiResponse(userInput, currentMessages); 
-      // --- ▲▲▲ 修改结束 ▲▲▲ ---
 
-      // 确保我们收到了一个有效的响应
       if (!apiResponse || typeof apiResponse.responseText !== 'string') {
         throw new Error("Invalid API response structure");
       }
 
       const botMessage = { id: Date.now() + 1, sender: 'bot', text: apiResponse.responseText };
       
-      // 将机器人的回复添加到消息列表
       setMessages(prevMessages => [...prevMessages, botMessage]);
 
-      // --- ▼▼▼ 关键修改 2: 数据处理逻辑 ▼▼▼ ---
-      // 这个逻辑现在更加清晰，因为它直接处理从 onSendMessage 返回的完整对象。
-
-      // 1. 检查是否有提取出的数据，并调用 onDataExtracted
-      // 这个回调应该在每次AI返回数据时都检查，而不仅仅是在任务完成时
       if (apiResponse.extractedData && onDataExtracted) {
         onDataExtracted(apiResponse.extractedData);
       }
 
-      // 2. 检查任务是否完成，并调用 onTaskComplete
       if (apiResponse.isTaskComplete && onTaskComplete) {
-        onTaskComplete(apiResponse.extractedData); // 任务完成时，将提取的数据传回给父组件
+        onTaskComplete(apiResponse.extractedData); 
       }
-      // --- ▲▲▲ 修改结束 ▲▲▲ ---
 
     } catch (error) {
       console.error("API call failed in ChatDialog:", error);
@@ -105,7 +74,6 @@ function ChatDialog({ initialBotMessage, getAiResponse, onDataExtracted, onTaskC
     }
   };
 
-  // JSX 渲染部分 (无需修改)
   return (
     <div className="chat-dialog-container">
       <div className="messages-list">
@@ -114,7 +82,16 @@ function ChatDialog({ initialBotMessage, getAiResponse, onDataExtracted, onTaskC
             key={message.id} 
             className={`chat-message ${message.sender === 'user' ? 'user-message' : 'bot-message'}`}
           >
-            {message.text}
+            {/* --- ▼▼▼ 关键修改: 使用 ReactMarkdown 渲染文本 ▼▼▼ --- */}
+            {/* 只有机器人的消息使用 Markdown 渲染，用户消息保持纯文本以防样式混乱 */}
+            {message.sender === 'bot' ? (
+              <div className="markdown-content">
+                <ReactMarkdown>{message.text}</ReactMarkdown>
+              </div>
+            ) : (
+              message.text
+            )}
+            {/* --- ▲▲▲ 修改结束 ▲▲▲ --- */}
           </div>
         ))}
         {isLoading && (
