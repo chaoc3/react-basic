@@ -64,7 +64,7 @@ function ChatDialog({ initialBotMessage, getAiResponse, onDataExtracted, onTaskC
     try {
       // --- ▼▼▼ 关键修改 1: 调用 getAiResponse ▼▼▼ ---
       // 调用 getAiResponse，而不是 onSendMessage
-      const apiResponse = await getAiResponse(userInput, messages); 
+      const apiResponse = await getAiResponse(userInput, currentMessages); 
       // --- ▲▲▲ 修改结束 ▲▲▲ ---
 
       // 确保我们收到了一个有效的响应
