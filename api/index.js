@@ -495,77 +495,97 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         4. **完成对话**：当所有三个字段（when, where, who）都被提取后，你的最终回复**必须**是：“太棒了，我们已经确定了场景细节！点击下一步继续吧。”不要使用 Markdown 格式。`;
 
 
-        case 'buildInfoSourceDetails':
-          // 获取用户选择的那张唯一卡片的名字
-          const currentCard = additionalData.infoSourceCards && additionalData.infoSourceCards.length > 0 
-              ? additionalData.infoSourceCards[0] 
-              : '选定的信息源';
-  
-          return `你是一个辅助设计方案的陪伴者。
-          
-          **【任务目标】**
-          用户选择了信息源：“${currentCard}”。
-          你的任务是引导用户为这个信息源提供 **3个具体的、不同的可追踪数据点**。
-          
-          **【已知信息】**
-          - 当前信息源: ${currentCard}
-          - 当前已收集的数据点: ${JSON.stringify(additionalData.infoSourceDetails || {})}
-          
-          **【对话策略】**
-          1. **逐一询问**：不要一次性问三个问题。
-             - 如果是一个空对象，请问第一个核心数据点。
-             - 如果已有 strategy1，请问第二个补充数据点。
-             - 如果已有 strategy1 和 strategy2，请问最后一个数据点。
-          2. **提取规则**：
-             - 用户的第1个回答 -> 提取为 \`strategy1\`
-             - 用户的第2个回答 -> 提取为 \`strategy2\`
-             - 用户的第3个回答 -> 提取为 \`strategy3\`
-          3. **完成条件**：只有当 strategy1, strategy2, strategy3 全都不为空时，你的最终回复才是：“太棒了，我们已经确定了所有信息依据！点击下一步继续吧。”
-          
-          请保持专业且引导性强的语气。`;
+      case 'buildInfoSourceDetails':
+        // 获取用户选择的那张唯一卡片的名字
+        const currentCard = additionalData.infoSourceCards && additionalData.infoSourceCards.length > 0 
+            ? additionalData.infoSourceCards[0] 
+            : '选定的信息源';
+
+        return `你是一个辅助设计方案的陪伴者。
+        
+        **【任务目标】**
+        用户选择了信息源：“${currentCard}”。
+        你的任务是引导用户为这个信息源提供 **3个具体的、不同的可追踪数据点**。
+        
+        **【已知信息】**
+        - 当前信息源: ${currentCard}
+        - 当前已收集的数据点: ${JSON.stringify(additionalData.infoSourceDetails || {})}
+        
+        **【对话策略】**
+        1. **逐一询问**：不要一次性问三个问题。
+            - 如果是一个空对象，请问第一个核心数据点。
+            - 如果已有 strategy1，请问第二个补充数据点。
+            - 如果已有 strategy1 和 strategy2，请问最后一个数据点。
+        2. **提取规则**：
+            - 用户的第1个回答 -> 提取为 \`strategy1\`
+            - 用户的第2个回答 -> 提取为 \`strategy2\`
+            - 用户的第3个回答 -> 提取为 \`strategy3\`
+        3. **完成条件**：只有当 strategy1, strategy2, strategy3 全都不为空时，你的最终回复才是：“太棒了，我们已经确定了所有信息依据！点击下一步继续吧。”
+        
+        请保持专业且引导性强的语气。`;
 
         case 'buildModeDetails':
-        const currentMode = additionalData.modeCard || '选定的交互方式';
-        const existingModeDetails = additionalData.modeDetails || {};
-        
-        // 1. 动态判断当前缺少哪个策略 (逻辑前置，减轻 AI 负担)
-        let nextFieldToFill = 'strategy1';
-        let nextFieldDescription = '第一个核心策略（具体实现方式）';
-        
-        if (existingModeDetails.strategy1) {
-            nextFieldToFill = 'strategy2';
-            nextFieldDescription = '第二个策略（如频率、触发时机或其他补充）';
-        }
-        if (existingModeDetails.strategy2) {
-            nextFieldToFill = 'strategy3';
-            nextFieldDescription = '第三个策略（如反馈机制或更多细节）';
-        }
-        
-        // 如果全满了
-        if (existingModeDetails.strategy1 && existingModeDetails.strategy2 && existingModeDetails.strategy3) {
-             return `你是一个专家。所有策略都已收集完毕。
-             请直接回复：“太棒了，我们已经完善了交互方式！点击下一步进入总览吧。”
-             不要调用任何工具。`;
-        }
-
-        return `你是一个严谨的数据提取助手。
-        
-        **【当前状态】**
-        - 交互模态: "${currentMode}"
-        - 已收集策略: ${JSON.stringify(existingModeDetails)}
-        - **当前目标**: 必须提取用户的输入作为 **\`${nextFieldToFill}\`**。
-        
-        **【你的行动准则】**
-        1. 用户刚才的回答 **就是** \`${nextFieldToFill}\` 的内容。
-        2. **必须立即** 使用工具 \`extractModeDetails\`，并将内容赋值给 \`${nextFieldToFill}\` 参数。
-        3. **严禁** 仅在回复中说“已记录”，而不调用工具。没有工具调用 = 任务失败。
-        
-        **【回复示例】**
-        (假设用户说“每天晚上8点推送”)
-        工具调用: extractModeDetails({ ${nextFieldToFill}: "每天晚上8点推送" })
-        回复文本: "好的，已记录为${nextFieldDescription}。接下来..."
-        
-        现在，请处理用户的输入，并提取为 \`${nextFieldToFill}\`。`;
+          const currentMode = additionalData.modeCard || '选定的交互方式';
+          const existingModeDetails = additionalData.modeDetails || {};
+          
+          // 构建丰富的上下文，帮助 AI 生成精准的预填方案
+          const contextInfo = `
+          - 设计对象: ${additionalData.targetUser || '用户'}
+          - 核心痛点: ${additionalData.targetPainpoint || '健康问题'}
+          - 核心场景: ${additionalData.scenarioCard || '生活场景'} (${JSON.stringify(additionalData.scenarioDetails || {})})
+          - 选定交互模态: ${currentMode}
+          `;
+    
+          // 检查当前是否为空状态（即刚进入页面，还没有任何策略）
+          const isEmptyState = !existingModeDetails.strategy1 && !existingModeDetails.strategy2 && !existingModeDetails.strategy3;
+    
+          if (isEmptyState) {
+            return `你是一个专业且贴心的医疗助推设计陪伴者。
+            
+            **【当前任务】**
+            用户选择了 **"${currentMode}"** 作为交互模态。
+            你需要基于用户的设计背景，**主动为用户构思并预填写** 3个具体的交互策略，然后询问用户是否满意或需要修改。
+    
+            **【设计背景】**
+            ${contextInfo}
+    
+            **【你的行动步骤】**
+            1. **分析与构思**：基于设计背景，思考3个符合 "${currentMode}" 特点的具体策略：
+               - 策略1 (Mod-Strategy1)：核心交互形式（具体怎么做？）。
+               - 策略2 (Mod-Strategy2)：触发时机或频率（什么时候做？）。
+               - 策略3 (Mod-Strategy3)：反馈机制或呈现细节（给用户什么感觉？）。
+            
+            2. **生成回复**：
+               - 用亲切、专业的语气告诉用户：“基于你的设计目标，我为你草拟了以下3个交互方案：”
+               - 清晰列出你构思的3个策略。
+               - 最后询问：“你觉得这套方案可行吗？我们可以直接采用，或者你告诉我哪里需要调整。”
+    
+            3. **重要**：在此阶段**不要**调用工具。先展示方案，等待用户确认或修改。`;
+          }
+    
+          // 如果不是空状态（用户已经开始修改，或者已经确认了）
+          return `你是一个专业且贴心的医疗助推设计陪伴者。
+    
+          **【当前任务】**
+          用户正在与你探讨或修改 **"${currentMode}"** 的交互策略。
+    
+          **【当前已知策略状态】**
+          - Mod-Strategy1: ${existingModeDetails.strategy1 || '待确认'}
+          - Mod-Strategy2: ${existingModeDetails.strategy2 || '待确认'}
+          - Mod-Strategy3: ${existingModeDetails.strategy3 || '待确认'}
+    
+          **【你的行动准则】**
+          1. **倾听与修改**：
+             - 如果用户说“可以”、“没问题”、“就这样”，说明用户接受了方案。
+             - 如果用户提出了修改意见（例如“把频率改成每天一次”），请理解用户的意图。
+    
+          2. **提取数据 (关键)**：
+             - 一旦用户确认方案或提出了具体的修改内容，你必须**立即**使用工具 \`extractModeDetails\`。
+             - 将最终确定的内容分别填入 \`strategy1\` (对应 Mod-Strategy1), \`strategy2\` (对应 Mod-Strategy2), \`strategy3\` (对应 Mod-Strategy3)。
+             - **注意**：必须一次性提取所有3个策略（如果是确认原有方案，就提取原有方案的内容；如果是修改，就提取修改后的内容）。
+    
+          3. **回复用户**：
+             - 调用工具后，回复：“太好了，我们已经确定了交互细节！点击下一步进入总览吧。”`;
       case 'generateFinalReport':
         // 格式化所有收集到的数据
         const collectedData = {

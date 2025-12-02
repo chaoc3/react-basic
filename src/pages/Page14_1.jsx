@@ -1,6 +1,6 @@
 // src/pages/Page14_Mod_1.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext'; 
@@ -14,6 +14,7 @@ import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 import { getAiResponse } from '../services/aiService';
+
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
@@ -34,15 +35,22 @@ const Page14_User_1 = () => {
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState(null);
-  // --- 2. 新增状态来存储 AI 推荐的卡片 ---
   const [recommendedCardName, setRecommendedCardName] = useState('');
   const [initialBotMessage, setInitialBotMessage] = useState("正在为你推荐交互模态..."); 
+
+  // 【修复1】引入 useRef 锁，防止重复请求
+  const hasInitialized = useRef(false);
 
   // --- 3. 使用 useEffect 调用 AI ---
   useEffect(() => {
     setActiveStageId(6);
     
     const fetchRecommendation = async () => {
+      // 【修复1】检查锁
+      if (hasInitialized.current) return;
+      hasInitialized.current = true;
+
+      // 检查前置数据是否存在
       if (designData.infoSourceCards && designData.infoSourceCards.length > 0) {
         try {
           const aiResult = await getAiResponse(
@@ -66,8 +74,11 @@ const Page14_User_1 = () => {
         setInitialBotMessage("请先完成前面的步骤，然后选择交互模态。");
       }
     };
+
     fetchRecommendation();
-  }, [setActiveStageId, designData]);
+    // 【修复3】依赖数组中移除 designData，只保留 setActiveStageId
+    // 因为我们只希望在页面挂载时执行一次，不希望 designData 变化时重新触发
+  }, [setActiveStageId]);
 
   const handleCardClick = (cardId) => {
     setSelectedCardId(cardId);
@@ -80,7 +91,8 @@ const Page14_User_1 = () => {
       if (selectedCardName) {
         updateDesignData('modeCard', selectedCardName);
       }
-      completeStage(6);
+      // 注意：通常 completeStage 会在 Page 15 完成，但如果你希望在这里标记也可以
+      // completeStage(6); 
       navigate('/page15');
     }
   };
@@ -88,13 +100,13 @@ const Page14_User_1 = () => {
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
   
-  // --- 4. 更新 getCardClass 以高亮推荐和选中的卡片 ---
   const getCardClass = (index) => {
     const card = cards[index];
     const classes = [styles.card];
-    // ... (轮播逻辑不变)
+    
     const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
     const nextIndex = currentIndex === cards.length - 1 ? 0 : currentIndex + 1;
+    
     if (index === currentIndex) classes.push(styles.active);
     else if (index === prevIndex) classes.push(styles.prev);
     else if (index === nextIndex) classes.push(styles.next);
@@ -109,7 +121,10 @@ const Page14_User_1 = () => {
     return classes.join(' ');
   };
 
-  const dummyGetAiResponse = async (input) => ({ responseText: "请在左侧选择卡片后点击下方的按钮继续。" });
+  // 更新参数签名以匹配 ChatDialog
+  const dummyGetAiResponse = async (userInput, currentMessages) => ({ 
+    responseText: "请在左侧选择卡片后点击下方的按钮继续。" 
+  });
 
   return (
     <div className={styles.container}>
@@ -142,8 +157,8 @@ const Page14_User_1 = () => {
         </button>
       </div>
       <div className={styles.rightPanel}>
+        {/* 【修复2】移除了 key={initialBotMessage} */}
         <ChatDialog
-          key={initialBotMessage}
           initialBotMessage={initialBotMessage}
           getAiResponse={dummyGetAiResponse}
         />
