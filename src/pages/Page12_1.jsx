@@ -9,6 +9,7 @@ import { useDesign } from '../context/DesignContext';
 import CardInfS1 from '../assets/卡片/正面/InfS-1-1.png';
 import CardInfS2 from '../assets/卡片/正面/InfS-2-1.png';
 import CardInfS3 from '../assets/卡片/正面/InfS-3-1.png';
+import CardInfS4 from '../assets/卡片/正面/InfS-4-1.png';
 import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
@@ -24,6 +25,7 @@ const cards = [
   { id: 1, src: CardInfS1, name: '自我数据' },
   { id: 2, src: CardInfS2, name: '他人影响' },
   { id: 3, src: CardInfS3, name: '专家干预' },
+  { id: 4, src: CardInfS4, name: '复合信息源' },
 ];
 
 const Page12_1 = () => {

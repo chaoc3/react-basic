@@ -30,7 +30,7 @@ import CardMec8 from '../assets/卡片背面/Mec-8-2.png';
 import CardInfS1 from '../assets/卡片背面/InfS-1-2.png';
 import CardInfS2 from '../assets/卡片背面/InfS-2-2.png';
 import CardInfS3 from '../assets/卡片背面/InfS-3-2.png';
-
+import CardInfS4 from '../assets/卡片背面/InfS-4-2.png';
 // --- Stage 6: Mode Cards ---
 import CardMod1 from '../assets/卡片背面/Mod-1-2.png';
 import CardMod2 from '../assets/卡片背面/Mod-2-2.png';
@@ -71,6 +71,7 @@ export const cardAssets = {
     1: CardInfS1,
     2: CardInfS2,
     3: CardInfS3,
+    4: CardInfS4,
   },
   // Stage ID 6 对应 "Mode"
   6: {

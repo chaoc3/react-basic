@@ -10,6 +10,7 @@ import { getAiResponse } from '../services/aiService';
 import CardInfS1 from '../assets/卡片背面/InfS-1-2.png';
 import CardInfS2 from '../assets/卡片背面/InfS-2-2.png';
 import CardInfS3 from '../assets/卡片背面/InfS-3-2.png';
+import CardInfS4 from '../assets/卡片背面/InfS-4-2.png';
 import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg'; 
 
 // Component Imports
@@ -23,6 +24,7 @@ const cards = [
   { name: '自我数据', image: CardInfS1, key: 'strategy1' },
   { name: '他人影响', image: CardInfS2, key: 'strategy2' },
   { name: '专家干预', image: CardInfS3, key: 'strategy3' },
+  { name: '复合信息源', image: CardInfS4, key: 'strategy4' },
 ];
 
 const Page13_2 = () => {
