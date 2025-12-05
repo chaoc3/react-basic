@@ -67,7 +67,7 @@ import timelineIcon38 from '../assets/时间轴图片/时间轴icon3-8.png';
 import timelineIcon41 from '../assets/时间轴图片/时间轴icon4-1.png';
 import timelineIcon42 from '../assets/时间轴图片/时间轴icon4-2.png';
 import timelineIcon43 from '../assets/时间轴图片/时间轴icon4-3.png';
-import timelineIcon44 from '../assets/时间轴图片/时间轴icon4-3.png';
+import timelineIcon44 from '../assets/时间轴图片/info4时间轴1204.png';
 import timelineIcon51 from '../assets/时间轴图片/时间轴icon5-1.png';
 import timelineIcon52 from '../assets/时间轴图片/时间轴icon5-2.png';
 import timelineIcon53 from '../assets/时间轴图片/时间轴icon5-3.png';
