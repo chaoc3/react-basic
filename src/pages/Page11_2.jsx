@@ -18,6 +18,7 @@ import Mec5 from '../assets/卡片背面/Mec-5-2.png';
 import Mec6 from '../assets/卡片背面/Mec-6-2.png';
 import Mec7 from '../assets/卡片背面/Mec-7-2.png';
 import Mec8 from '../assets/卡片背面/Mec-8-2.png';
+import Mec9 from '../assets/卡片背面/Mec-9-2.png';
 import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import NextButtonSVG from '../assets/页面剩余素材/Next按钮.svg';
@@ -28,13 +29,14 @@ const CURRENT_STAGE_ID = 4;
 
 const allCards = [
   { id: 1, image: Mec1, name: '情景感知提醒' },
-  { id: 2, image: Mec2, name: '共情反馈' },
-  { id: 3, image: Mec3, name: '决策引导' },
-  { id: 4, image: Mec4, name: '社会存在' },
-  { id: 5, image: Mec5, name: '反思促进' },
-  { id: 6, image: Mec6, name: '动态目标重建' },
-  { id: 7, image: Mec7, name: '叙事化探索' },
-  { id: 8, image: Mec8, name: '诱饵效应' },
+  { id: 2, image: Mec2, name: '情感激励' },
+  { id: 3, image: Mec3, name: '指导性反馈' },
+  { id: 4, image: Mec4, name: '决策引导' },
+  { id: 5, image: Mec5, name: '社会存在' },
+  { id: 6, image: Mec6, name: '反思促进' },
+  { id: 7, image: Mec7, name: '动态目标重建' },
+  { id: 8, image: Mec8, name: '叙事化探索' },
+  { id: 9, image: Mec9, name: '诱饵效应' },
 ];
 
 const Page11_2 = () => {

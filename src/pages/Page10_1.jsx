@@ -8,6 +8,7 @@ import Mec5 from '../assets/卡片/正面/Mec-5-1.png';
 import Mec6 from '../assets/卡片/正面/Mec-6-1.png';
 import Mec7 from '../assets/卡片/正面/Mec-7-1.png';
 import Mec8 from '../assets/卡片/正面/Mec-8-1.png';
+import Mec9 from '../assets/卡片/正面/Mec-9-1.png';
 import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
@@ -19,16 +20,20 @@ import styles from './styles/Page10_Mec_1.module.css';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext';
 import { getAiResponse } from '../services/aiService';
+import InfoIcon from '../assets/网页素材/设计策略按钮.png'; // 左上角那个灯泡/SYNC图标
+import StrategyLongImage from '../assets/页面剩余素材/助推机制设计策略.png'; // 弹窗里的那张长图
+import CloseIcon from '../assets/页面剩余素材/总结页面关闭按钮.png';
 
 const cards = [
   { id: 1, src: Mec1, name: '情景感知提醒' },
-  { id: 2, src: Mec2, name: '共情反馈' },
-  { id: 3, src: Mec3, name: '决策引导' },
-  { id: 4, src: Mec4, name: '社会存在' },
-  { id: 5, src: Mec5, name: '反思促进' },
-  { id: 6, src: Mec6, name: '动态目标重建' },
-  { id: 7, src: Mec7, name: '叙事化探索' },
-  { id: 8, src: Mec8, name: '诱饵效应' },
+  { id: 2, src: Mec2, name: '情感激励' },
+  { id: 3, src: Mec3, name: '指导性反馈' },
+  { id: 4, src: Mec4, name: '决策引导' },
+  { id: 5, src: Mec5, name: '社会存在' },
+  { id: 6, src: Mec6, name: '反思促进' },
+  { id: 7, src: Mec7, name: '动态目标重建' },
+  { id: 8, src: Mec8, name: '叙事化探索' },
+  { id: 9, src: Mec9, name: '诱饵效应' },
 ];
 
 const CURRENT_STAGE_ID = 4; // 对应 BranchSelector 中的紫色节点 (Stage 4)
@@ -169,6 +174,14 @@ const Page10_1 = () => {
         <BranchSelector />
       </div>
       <div className={styles.mainContent}>
+        <button 
+          className={styles.infoButton} 
+          onClick={() => setIsModalOpen(true)}
+        >
+          {/* 这里放置你的图标，根据截图可能是一个灯泡或SYNC文字 */}
+          <img src={InfoIcon} alt="SYNC" />
+          <span>SYNC</span> 
+        </button>
         <div className={styles.cardCarousel}>
           <button onClick={handlePrev} className={styles.arrowButton}>
             <img src={ArrowLeft} alt="上一张" />
