@@ -21,7 +21,7 @@ import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext';
 import { getAiResponse } from '../services/aiService';
 import InfoIcon from '../assets/网页素材/设计策略按钮.png'; // 左上角那个灯泡/SYNC图标
-import StrategyLongImage from '../assets/页面剩余素材/助推机制设计策略.png'; // 弹窗里的那张长图
+import StrategyLongImage from '../assets/网页素材/助推机制设计策略.png'; // 弹窗里的那张长图
 import CloseIcon from '../assets/页面剩余素材/总结页面关闭按钮.png';
 
 const cards = [
@@ -49,7 +49,7 @@ const Page10_1 = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardIds, setSelectedCardIds] = useState([]);
   const [initialBotMessage, setInitialBotMessage] = useState("正在思考如何为你推荐...");
-
+  const [isModalOpen, setIsModalOpen] = useState(false);  
   useEffect(() => {
     setActiveStageId(CURRENT_STAGE_ID);
   }, [setActiveStageId]);
