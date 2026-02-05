@@ -20,7 +20,9 @@ import Page14_User_1 from './pages/Page14_1';
 import Page15_2 from './pages/Page15_2';
 import Page16_Sum from './pages/Page16_Sum';
 import Page17_Achieve from './pages/Page17_Achieve';
-
+import Page1617_add from './pages/Page1617_add';
+import Page_look from './pages/Page_look';
+import Page_character from './pages/Page_character';
 function AppContent() {
   // 1. 从全局 Context 获取总结页面的状态和关闭函数
   const { isSummaryOpen, closeSummary } = useTimeline();
@@ -39,7 +41,7 @@ function AppContent() {
     <>
       {/* 2. 路由部分，负责渲染背景里的主页面 */}
       <Routes>
-              <Route path="/" element={<Page1Intro/>} />
+              <Route path="/" element={<Page_look/>} />
               
               <Route path="/intro-2" element={<Page2Intro />} />
               <Route path="/target-user" element={<Page3_TargetUser />} />
@@ -56,6 +58,9 @@ function AppContent() {
               <Route path="/page14" element={<Page14_User_1 />} />
               <Route path="/page15" element={<Page15_2 />} />
               <Route path="/summary" element={<Page16_Sum />} />
+              <Route path='/page1617_add' element={<Page1617_add />} />
+              <Route path='/page_look' element={<Page_look />} />
+              <Route path='/page_character' element={<Page_character />} />
               <Route path="/achieve" element={<Page17_Achieve />} />
             </Routes>
 

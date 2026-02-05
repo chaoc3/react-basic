@@ -15,6 +15,10 @@ import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 import { getAiResponse } from '../services/aiService';
 
+import InfoButtonIcon  from '../assets/网页素材/设计策略按钮.png'; // 1. 打开弹窗的按钮图
+import InfoContentImg  from '../assets/网页素材/交互模态.png'; // 2. 弹窗里显示的长图
+import CloseIcon  from '../assets/页面剩余素材/总结页面关闭按钮.png'; // 3. 关闭按钮图
+
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
@@ -37,7 +41,7 @@ const Page14_User_1 = () => {
   const [selectedCardId, setSelectedCardId] = useState(null);
   const [recommendedCardName, setRecommendedCardName] = useState('');
   const [initialBotMessage, setInitialBotMessage] = useState("正在为你推荐交互模态..."); 
-
+  const [showInfoModal, setShowInfoModal] = useState(false);
   // 【修复1】引入 useRef 锁，防止重复请求
   const hasInitialized = useRef(false);
 
@@ -132,6 +136,12 @@ const Page14_User_1 = () => {
         <BranchSelector />
       </div>
       <div className={styles.mainContent}>
+        <button 
+          className={styles.infoTriggerButton} 
+          onClick={() => setShowInfoModal(true)}
+        >
+          <img src={InfoButtonIcon} alt="查看详情" />
+        </button>
         <div className={styles.cardCarousel}>
           <button onClick={handlePrev} className={styles.arrowButton}>
             <img src={ArrowLeft} alt="上一张" />
@@ -163,6 +173,25 @@ const Page14_User_1 = () => {
           getAiResponse={dummyGetAiResponse}
         />
       </div>
+
+      {showInfoModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContentWrapper}>
+            {/* 关闭按钮 */}
+            <button 
+              className={styles.closeModalButton} 
+              onClick={() => setShowInfoModal(false)}
+            >
+              <img src={CloseIcon} alt="关闭" />
+            </button>
+            
+            {/* 可滚动的图片容器 */}
+            <div className={styles.scrollableContent}>
+              <img src={InfoContentImg} alt="详细信息" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

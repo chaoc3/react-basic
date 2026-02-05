@@ -1,147 +1,56 @@
-.container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* src/pages/styles/Page3_Target-User.module.css */
+
+.pageContainer {
+  /* 尺寸和布局 */
   width: 100vw;
   height: 100vh;
-  padding: 2rem;
+  padding: 50px;
   box-sizing: border-box;
-  background-color: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   overflow: hidden;
-  background-image: url('../../assets/背景带文字/Page14-Mod-1.svg');
+
+  /* 背景图片通用设置 */
   background-size: cover;
-  background-position: center center;
+  background-position: center;
   background-repeat: no-repeat;
 }
 
-.leftPanel{
-  width: 15%;
-  height: 90%;
-}
-.rightPanel {
-  width: 32%;
-  height: 92%;
-}
-
+/* 
+  主要内容区，这是一个不可见的容器
+  它的作用是作为一个坐标系，让聊天框可以相对于它进行精确定位
+*/
 .mainContent {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 20%;
+  position: relative;
+  /* 保持原有的尺寸定位 */
+  width: 91vw;
+  height: 80vh;
+  left: 8vw;
   position: relative; 
 }
 
-.cardCarousel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 125%;
-}
+/* --- 删除 .titleBubble 相关的样式 --- */
 
-.cardContainer {
-  position: relative;
-  width: 100%;
-  height: 600px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  bottom: -15%;
-}
-
-.card {
+/* 
+  聊天框容器样式
+  保持不变：高度80%，宽度95%，固定在底部
+*/
+.chatWrapper {
   position: absolute;
-  cursor: pointer;
-  transition: transform 0.5s ease, opacity 0.4s ease, box-shadow 0.3s ease;
+  bottom: 0vh; /* 保持底部对齐 */
+  left: 39%;
+  transform: translateX(-50%);
+  width: 95%; 
+  height: 80%; /* 保持高度不变 */
 }
 
-.card svg,
-.card img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.active {
-  transform: translateX(0) scale(1) rotate(0deg);
-  opacity: 1;
-  z-index: 10;
-}
-
-.prev {
-  transform: translateX(-50%) scale(0.85) rotate(-10deg);
-  opacity: 1;
-  z-index: 5;
-}
-
-.next {
-  transform: translateX(50%) scale(0.85) rotate(10deg);
-  opacity: 1;
-  z-index: 5;
-}
-
-.card.selected {
-  box-shadow: 0 0 0 4px rgba(128, 128, 128, 0.5);
-}
-
-.card.selected.active {
-  transform: scale(1.03);
-}
-
-.hidden {
-  transform: scale(0.5);
-  opacity: 0;
-  z-index: 1;
-}
-
-.prev::after,
-.next::after {
-  content: '';
+/* 确保 ArrowButton 不受影响 */
+.pageContainer > :global(.arrow-button-class) {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-  z-index: 1;
-  pointer-events: none;
+  right: 50px;
+  bottom: 40vh;
 }
-
-.arrowButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 1rem;
-  z-index: 20;
-  width: 120%;
-  height: 90%;
-}
-
-.selectButton {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  margin-top: 2rem;
-  transition: transform 0.2s ease-in-out, opacity 0.3s ease;
-}
-
-.selectButton:hover {
-  transform: scale(1.05);
-}
-
-.selectButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: scale(1);
-}
-
-.selectButton svg {
-  display: block;
-}
-
 .infoTriggerButton {
   position: absolute;
   /* 定位：左边，与组件上沿对齐 */
@@ -240,7 +149,7 @@
   /* 定位：左边，与组件上沿对齐 */
   /* 根据实际卡片容器的高度，你可能需要微调 top 的值 */
   top: -95%; 
-  left: -10%; /* 负值将其移出 mainContent 的左侧边界 */
+  left: -5%; /* 负值将其移出 mainContent 的左侧边界 */
   background: none;
   border: none;
   cursor: pointer;
@@ -300,7 +209,7 @@
 }
 
 .closeModalButton img {
-  width: 40px; /* 根据实际图片调整 */
+  width:  50px; /* 根据实际图片调整 */
   height: auto;
 }
 
@@ -327,4 +236,4 @@
   width: 100%;
   height: auto;
   display: block;
-} 
+}

@@ -30,6 +30,7 @@
   align-items: center;
   justify-content: center;
   height: 20%;
+  position: relative; 
 }
 
 .cardCarousel {
@@ -151,3 +152,189 @@
   display: block;
 }
 
+.infoTriggerButton {
+  position: absolute;
+  /* 定位：左边，与组件上沿对齐 */
+  /* 根据实际卡片容器的高度，你可能需要微调 top 的值 */
+  top: -95%; 
+  left: -5%; /* 负值将其移出 mainContent 的左侧边界 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 50; /* 确保在卡片之上 */
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.infoTriggerButton:hover {
+  transform: scale(1.05);
+}
+
+.infoTriggerButton img {
+  /* 根据你的PNG大小调整，或者直接用 auto */
+  width: 60px; 
+  height: auto;
+  display: block;
+}
+
+/* 2. 弹窗遮罩层 (灰色背景) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6); /* 半透明黑色，实现左右变灰效果 */
+  z-index: 1000; /* 最顶层 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* backdrop-filter: blur(2px); 可选：背景模糊效果 */
+}
+
+/* 3. 弹窗内容包装器 */
+.modalContentWrapper {
+  position: relative;
+  width: 70%; /* 占据中心位置，宽度可调 */
+  /* max-width: 800px; */
+  height: 90vh; /* 高度限制，确保可以滚动 */
+  background-color: transparent; /* 容器本身透明 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 4. 关闭按钮 */
+.closeModalButton {
+  position: absolute;
+  top: -50px; /* 放在图片上方 */
+  right: -50px;   /* 右对齐 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 10px;
+}
+
+.closeModalButton img {
+  width: 50px; /* 根据实际图片调整 */
+  height: auto;
+}
+
+/* 5. 可滚动的图片区域 */
+.scrollableContent {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* 允许垂直滑动 */
+  overflow-x: hidden;
+  background-color: #fff; /* 图片背景色，防止透明PNG透出灰色 */
+  border-radius: 12px; /* 可选：圆角 */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  
+  /* 隐藏滚动条但保留功能 (Chrome/Safari) */
+  /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+.scrollableContent::-webkit-scrollbar { 
+  display: none; /* Chrome/Safari */
+}
+
+.scrollableContent img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.infoTriggerButton {
+  position: absolute;
+  /* 定位：左边，与组件上沿对齐 */
+  /* 根据实际卡片容器的高度，你可能需要微调 top 的值 */
+  top: -95%; 
+  left: -5%; /* 负值将其移出 mainContent 的左侧边界 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 50; /* 确保在卡片之上 */
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.infoTriggerButton:hover {
+  transform: scale(1.05);
+}
+
+.infoTriggerButton img {
+  /* 根据你的PNG大小调整，或者直接用 auto */
+  width: 60px; 
+  height: auto;
+  display: block;
+}
+
+/* 2. 弹窗遮罩层 (灰色背景) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6); /* 半透明黑色，实现左右变灰效果 */
+  z-index: 1000; /* 最顶层 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+/* 3. 弹窗内容包装器 */
+.modalContentWrapper {
+  position: relative;
+  width: 50%; /* 占据中心位置，宽度可调 */
+  max-width: 800px;
+  height: 80vh; /* 高度限制，确保可以滚动 */
+  background-color: transparent; /* 容器本身透明 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 4. 关闭按钮 */
+.closeModalButton {
+  position: absolute;
+  top: -70px; /* 放在图片上方 */
+  right: -50px;   /* 右对齐 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 10px;
+}
+
+.closeModalButton img {
+  width:  50px; /* 根据实际图片调整 */
+  height: auto;
+}
+
+/* 5. 可滚动的图片区域 */
+.scrollableContent {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* 允许垂直滑动 */
+  overflow-x: hidden;
+  background-color: #fff; /* 图片背景色，防止透明PNG透出灰色 */
+  border-radius: 12px; /* 可选：圆角 */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  
+  /* 隐藏滚动条但保留功能 (Chrome/Safari) */
+  
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+.scrollableContent::-webkit-scrollbar { 
+  display: none; /* Chrome/Safari */
+}
+
+.scrollableContent img {
+  width: 100%;
+  height: auto;
+  display: block;
+}

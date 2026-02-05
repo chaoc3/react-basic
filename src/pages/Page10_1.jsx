@@ -20,9 +20,9 @@ import styles from './styles/Page10_Mec_1.module.css';
 import { useTimeline } from '../context/TimelineContext';
 import { useDesign } from '../context/DesignContext';
 import { getAiResponse } from '../services/aiService';
-import InfoIcon from '../assets/网页素材/设计策略按钮.png'; // 左上角那个灯泡/SYNC图标
-import StrategyLongImage from '../assets/网页素材/助推机制设计策略.png'; // 弹窗里的那张长图
-import CloseIcon from '../assets/页面剩余素材/总结页面关闭按钮.png';
+import InfoButtonIcon  from '../assets/网页素材/设计策略按钮.png'; // 1. 打开弹窗的按钮图
+import InfoContentImg  from '../assets/网页素材/助推机制.png'; // 2. 弹窗里显示的长图
+import CloseIcon  from '../assets/页面剩余素材/总结页面关闭按钮.png'; // 3. 关闭按钮图
 
 const cards = [
   { id: 1, src: Mec1, name: '情景感知提醒' },
@@ -49,7 +49,7 @@ const Page10_1 = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCardIds, setSelectedCardIds] = useState([]);
   const [initialBotMessage, setInitialBotMessage] = useState("正在思考如何为你推荐...");
-  const [isModalOpen, setIsModalOpen] = useState(false);  
+  const [showInfoModal, setShowInfoModal] = useState(false);
   useEffect(() => {
     setActiveStageId(CURRENT_STAGE_ID);
   }, [setActiveStageId]);
@@ -175,12 +175,10 @@ const Page10_1 = () => {
       </div>
       <div className={styles.mainContent}>
         <button 
-          className={styles.infoButton} 
-          onClick={() => setIsModalOpen(true)}
+          className={styles.infoTriggerButton} 
+          onClick={() => setShowInfoModal(true)}
         >
-          {/* 这里放置你的图标，根据截图可能是一个灯泡或SYNC文字 */}
-          <img src={InfoIcon} alt="SYNC" />
-          <span>SYNC</span> 
+          <img src={InfoButtonIcon} alt="查看详情" />
         </button>
         <div className={styles.cardCarousel}>
           <button onClick={handlePrev} className={styles.arrowButton}>
@@ -220,6 +218,24 @@ const Page10_1 = () => {
           getAiResponse={dummyGetAiResponse} 
         />
       </div>
+      {showInfoModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContentWrapper}>
+            {/* 关闭按钮 */}
+            <button 
+              className={styles.closeModalButton} 
+              onClick={() => setShowInfoModal(false)}
+            >
+              <img src={CloseIcon} alt="关闭" />
+            </button>
+            
+            {/* 可滚动的图片容器 */}
+            <div className={styles.scrollableContent}>
+              <img src={InfoContentImg} alt="详细信息" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

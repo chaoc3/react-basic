@@ -14,6 +14,11 @@ import ArrowLeft from '../assets/网页素材/向左.svg';
 import ArrowRight from '../assets/网页素材/向右.svg';
 import SelectButtonSVG from '../assets/页面剩余素材/Page68101214按钮.svg';
 
+import InfoButtonIcon  from '../assets/网页素材/设计策略按钮.png'; // 1. 打开弹窗的按钮图
+import InfoContentImg  from '../assets/网页素材/信息源.png'; // 2. 弹窗里显示的长图
+import CloseIcon  from '../assets/页面剩余素材/总结页面关闭按钮.png'; // 3. 关闭按钮图
+
+
 // Component Imports
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
@@ -43,6 +48,9 @@ const Page12_1 = () => {
   const [recommendedCardNames, setRecommendedCardNames] = useState([]);
   const [initialBotMessage, setInitialBotMessage] = useState("正在为你推荐信息源..."); 
   
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
   // 设置当前 Stage
   useEffect(() => {
     setActiveStageId(5);
@@ -148,7 +156,16 @@ const Page12_1 = () => {
       <div className={styles.leftPanel}>
         <BranchSelector />
       </div>
+      
+
+
       <div className={styles.mainContent}>
+        <button 
+          className={styles.infoTriggerButton} 
+          onClick={() => setShowInfoModal(true)}
+        >
+          <img src={InfoButtonIcon} alt="查看详情" />
+        </button>
         <div className={styles.cardCarousel}>
           <button onClick={handlePrev} className={styles.arrowButton}>
             <img src={ArrowLeft} alt="上一张" />
@@ -168,7 +185,8 @@ const Page12_1 = () => {
             <img src={ArrowRight} alt="下一张" />
           </button>
         </div>
-        {/* 按钮状态控制 */}
+
+
         <button 
           className={styles.selectButton} 
           onClick={handleNextPage}
@@ -177,6 +195,8 @@ const Page12_1 = () => {
           <img src={SelectButtonSVG} alt="下一步" />
         </button>
       </div>
+
+      
       <div className={styles.rightPanel}>
         <ChatDialog
           key={initialBotMessage}
@@ -184,6 +204,25 @@ const Page12_1 = () => {
           getAiResponse={dummyGetAiResponse}
         />
       </div>
+
+      {showInfoModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContentWrapper}>
+            {/* 关闭按钮 */}
+            <button 
+              className={styles.closeModalButton} 
+              onClick={() => setShowInfoModal(false)}
+            >
+              <img src={CloseIcon} alt="关闭" />
+            </button>
+            
+            {/* 可滚动的图片容器 */}
+            <div className={styles.scrollableContent}>
+              <img src={InfoContentImg} alt="详细信息" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

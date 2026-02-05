@@ -38,7 +38,35 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 };
  */
 const mockDesignData = {
-  "targetUser":null ,
+  "targetUser": "年轻上班族",
+  "targetPainpoint": "工作压力大，缺乏时间进行健康管理",
+  "targetStage": "健康意识初步形成阶段",
+  "user": "张小明", 
+   "userProfile": {
+    "age": "25",
+    "sexual": "男",
+    "edu": "本科",
+    "work": "互联网产品经理",
+    "equip": "智能手机、智能手表"
+  }, 
+  "userProfile": {
+    "age": "25",
+    "sexual": "男",
+    "edu": "本科",
+    "work": "互联网产品经理",
+    "equip": "智能手机、智能手表"
+  },
+
+  "scenarioCard": "工作日健康管理",
+  "scenarioDetails": {
+    "when": "工作日晚上8点后",
+    "where": "家中或健身房",
+    "who": "独自或与朋友一起",
+    "situation": "下班后疲惫，需要放松和锻炼"
+  }, 
+
+  
+/*   "targetUser":null ,
   "targetPainpoint": null,
   "targetStage":null ,
   "user": null,
@@ -55,7 +83,7 @@ const mockDesignData = {
     "where": null,
     "who":null ,
     "situation": null
-  },
+  }, */
   "mechanismCards": [
     // "共情反馈"
   ],
