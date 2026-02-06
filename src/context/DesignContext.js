@@ -105,7 +105,22 @@ const mockDesignData = {
     "strategy1": null,
     "strategy2": null,
     "strategy3": null
-  } 
+  },
+  "characterProfile": {
+    "role": null,              // 角色定位
+    "tone": null,              // 语气基调
+    "boundaries": null,        // 边界原则
+    "emotionalResponse": null  // 情绪响应偏好
+  },
+
+  // --- 新增：形象共创数据 (Page_Look) ---
+  "lookProfile": {
+    "imageStyle": null,        // 形象路线 (A/B/C)
+    "anthropomorphism": null,  // 拟人化程度
+    "creationMethod": null,    // 形象共建方式
+    "consistency": null,       // 呈现载体一致性
+    "expression": null         // 交互形象表达
+  }
 /*   "targetUser": "年轻上班族",
   "targetPainpoint": "工作压力大，缺乏时间进行健康管理",
   "targetStage": "健康意识初步形成阶段",
@@ -191,7 +206,7 @@ export const DesignProvider = ({ children }) => {
           };
         }
       }
-      if (key === 'userProfile' || key === 'scenarioDetails' || key === 'infoSourceDetails' || key === 'modeDetails') {
+      if (['userProfile', 'scenarioDetails', 'infoSourceDetails', 'modeDetails', 'characterProfile', 'lookProfile'].includes(key))  {
         return {
           ...prevData,
           [key]: { ...prevData[key], ...value },

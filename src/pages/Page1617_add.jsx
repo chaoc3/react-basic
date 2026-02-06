@@ -1,4 +1,4 @@
-// src/pages/Page5_TargetStage.jsx
+// src/pages/Page1617_add.jsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,9 +9,9 @@ import ArrowButton from '../components/ArrowButton';
 import backgroundForPage from '../assets/背景带文字/增加页面-剩余3个阶段方案.png';
 import { useDesign } from '../context/DesignContext'; 
 
-// 为 Page5 创建一个专门的 API 调用函数
-const getAiResponseForStage = async (userInput, currentMessages) => {
-  console.log("1. [FRONTEND-P5] 开始调用 getAiResponseForStage 函数...");
+// --- 修改 1: 接收 designData 参数 ---
+const getAiResponseForRemainingStages = async (userInput, currentMessages, designData) => {
+  console.log("1. [FRONTEND-Add] 开始调用 API...");
 
   const messagesForApi = currentMessages.map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'assistant',
@@ -20,10 +20,22 @@ const getAiResponseForStage = async (userInput, currentMessages) => {
 
   const requestBody = {
     messages: messagesForApi,
-    task: 'getTargetStage' 
+    task: 'completeRemainingStages', // --- 修改 2: 更新任务名称 ---
+    
+    // --- 修改 3: 传递所有必要的数据给后端 ---
+    targetStage: designData.targetStage,
+    // 传递用于生成摘要的数据
+    scenarioCard: designData.scenarioCard,
+    scenarioDetails: designData.scenarioDetails,
+    mechanismCards: designData.mechanismCards,
+    mechanismDetails: designData.mechanismDetails,
+    infoSourceCards: designData.infoSourceCards,
+    modeCard: designData.modeCard,
+    // 传递当前已补全的进度 (用于轮询)
+    fullStagePlans: designData.fullStagePlans 
   };
 
-  console.log("2. [FRONTEND-P5] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
+  console.log("2. [FRONTEND-Add] 请求体:", JSON.stringify(requestBody, null, 2));
 
   try {
     const response = await fetch('/chat', {
@@ -32,56 +44,55 @@ const getAiResponseForStage = async (userInput, currentMessages) => {
       body: JSON.stringify(requestBody),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
     const data = await response.json();
-    console.log("4. [FRONTEND-P5] 成功解析 JSON:", data);
-    
     return data;
 
   } catch (error) {
-    console.error("5. [FRONTEND-P5] 捕获到严重错误:", error);
+    console.error("API Error:", error);
     return { 
-      responseText: "抱歉，网络连接或服务器似乎出了点问题，请稍后再试。", 
+      responseText: "网络连接异常，请稍后再试。", 
       extractedData: null,
       isTaskComplete: false,
     };
   }
 };
 
-
 const Page1617_add = () => {
   const navigate = useNavigate();
-  const { updateDesignData } = useDesign(); 
+  const { designData, updateDesignData } = useDesign(); // 获取 designData
   const [isTaskComplete, setIsTaskComplete] = useState(false); 
 
+  // --- 修改 4: 包装 API 调用 ---
+  const fetchAi = (input, msgs) => getAiResponseForRemainingStages(input, msgs, designData);
+
   const handleTaskComplete = (data) => {
-    console.log("P5 任务完成，准备跳转。提取到的数据:", data);
+    console.log("任务完成，收到数据:", data);
     
-    if (data && data.targetStage) {
-      updateDesignData('targetStage', data.targetStage);
-      setIsTaskComplete(true); 
+    // --- 修改 5: 保存补全后的方案数据 ---
+    if (data && data.fullStagePlans) {
+      updateDesignData('fullStagePlans', data.fullStagePlans);
     }
 
-    setTimeout(() => {
-      navigate('/page6'); 
-    }, 1500); 
+    // 检查是否全部完成
+    if (data && data.isTaskComplete) {
+      setIsTaskComplete(true); 
+      setTimeout(() => {
+        navigate('/page17'); // 跳转到下一页
+      }, 1500); 
+    }
   };
   
   const handleNext = () => {
-    navigate('/user-select-1'); 
+    navigate('/Page1617_add'); 
   };
 
-  // 初始消息保持不变，因为它已经包含了足够的上下文
-  const initialBotMessage = `让我们一起确定你的设计阶段吧！
-  接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。
-  我这里有四个阶段供你参考：目标设定阶段、策略规划阶段、执行检测阶段和自我反思阶段。
-  你想主要细化哪一阶段的策略呢？可以和我聊聊你的想法。`;
-
+  // --- 修改 6: 更新初始提示词 ---
+  // 这里不需要太长，因为 Prompt 会根据 designData 生成第一句引导
+  // 但为了用户体验，我们可以给一个通用的开场
+  const initialBotMessage = `太棒了，我们已经完成了“${designData.targetStage || '当前阶段'}”的详细设计。
+为了让整个方案更完整，接下来我将协助你快速补全其余三个阶段的方案。
+我们会保持逻辑的连贯性。准备好了吗？我们先从下一个阶段开始。`;
 
   return (
     <div className={styles.pageContainer}
@@ -89,12 +100,9 @@ const Page1617_add = () => {
       <BranchSelector />
 
       <div className={styles.mainContent}>
-
-        {/* 已删除 titleBubble */}
-
         <div className={styles.chatWrapper}>
           <ChatDialog 
-            getAiResponse={getAiResponseForStage}
+            getAiResponse={fetchAi} // 使用新的 fetchAi
             onTaskComplete={handleTaskComplete}
             initialBotMessage={initialBotMessage}
           />

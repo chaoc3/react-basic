@@ -2,28 +2,33 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './styles/Page3_Target-User.module.css';
+import styles from './styles/Page_look.module.css';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
-import backgroundForPage from '../assets/背景带文字/增加页面-剩余3个阶段方案.png';
+import backgroundForPage from '../assets/背景带文字/角色页面.png';
 import { useDesign } from '../context/DesignContext'; 
-
+import InfoButtonIcon  from '../assets/网页素材/设计策略按钮.png'; // 1. 打开弹窗的按钮图
+import InfoContentImg  from '../assets/网页素材/角色.png'; // 2. 弹窗里显示的长图
+import CloseIcon  from '../assets/页面剩余素材/总结页面关闭按钮.png'; // 3. 关闭按钮图
 // 为 Page5 创建一个专门的 API 调用函数
-const getAiResponseForStage = async (userInput, currentMessages) => {
-  console.log("1. [FRONTEND-P5] 开始调用 getAiResponseForStage 函数...");
+const getAiResponseForCharacter = async (userInput, currentMessages, designData) => {
+  console.log("1. [FRONTEND-Character] 开始调用 getAiResponseForCharacter 函数...");
 
   const messagesForApi = currentMessages.map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'assistant',
     content: msg.text,
   }));
 
+  // 构建请求体
   const requestBody = {
     messages: messagesForApi,
-    task: 'getTargetStage' 
+    task: 'buildCharacterProfile', // 任务名称对应后端配置
+    // 关键：将当前的角色数据传给后端，以便后端判断还需要问什么（轮询逻辑）
+    characterProfile: designData.characterProfile 
   };
 
-  console.log("2. [FRONTEND-P5] 准备发送到 /api/chat 的请求体:", JSON.stringify(requestBody, null, 2));
+  console.log("2. [FRONTEND-Character] 准备发送请求:", JSON.stringify(requestBody, null, 2));
 
   try {
     const response = await fetch('/chat', {
@@ -33,18 +38,16 @@ const getAiResponseForStage = async (userInput, currentMessages) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API 请求失败，状态码: ${response.status}, 响应内容: ${errorText}`);
       throw new Error(`API request failed with status ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("4. [FRONTEND-P5] 成功解析 JSON:", data);
+    console.log("4. [FRONTEND-Character] 成功解析 JSON:", data);
     
     return data;
 
   } catch (error) {
-    console.error("5. [FRONTEND-P5] 捕获到严重错误:", error);
+    console.error("5. [FRONTEND-Character] 错误:", error);
     return { 
       responseText: "抱歉，网络连接或服务器似乎出了点问题，请稍后再试。", 
       extractedData: null,
@@ -54,34 +57,50 @@ const getAiResponseForStage = async (userInput, currentMessages) => {
 };
 
 
-const Page_character = () => {
+const Page_Character = () => {
   const navigate = useNavigate();
-  const { updateDesignData } = useDesign(); 
+  // --- 修改 2: 获取 designData ---
+  const { designData, updateDesignData } = useDesign(); 
   const [isTaskComplete, setIsTaskComplete] = useState(false); 
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
+  // --- 修改 3: 包装 API 调用以传递 designData ---
+  const fetchAi = (input, msgs) => getAiResponseForCharacter(input, msgs, designData);
 
   const handleTaskComplete = (data) => {
-    console.log("P5 任务完成，准备跳转。提取到的数据:", data);
+    console.log("Character 收到数据:", data);
     
-    if (data && data.targetStage) {
-      updateDesignData('targetStage', data.targetStage);
-      setIsTaskComplete(true); 
+    // 1. 保存数据 (无论是否完成，都先保存已有的进度)
+    if (data && data.characterProfile) {
+      updateDesignData('characterProfile', data.characterProfile);
     }
 
-    setTimeout(() => {
-      navigate('/page6'); 
-    }, 1500); 
+    // 2. 关键修改：判断后端返回的 isTaskComplete 标志
+    // 后端只有在 role, tone, boundaries, emotionalResponse 都有值时，才会返回 true
+    if (data && data.isTaskComplete) {
+      console.log("任务状态：已完成，准备跳转");
+      setIsTaskComplete(true); 
+      setTimeout(() => {
+        navigate('/page_look'); 
+      }, 1500); 
+    } else {
+      console.log("任务状态：未完成，继续对话");
+      // 任务没完成，什么都不做，让用户继续回答下一个问题
+    }
   };
   
   const handleNext = () => {
-    navigate('/user-select-1'); 
+    navigate('/page_look'); 
   };
 
-  // 初始消息保持不变，因为它已经包含了足够的上下文
-  const initialBotMessage = `让我们一起确定你的设计阶段吧！
-  接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。
-  我这里有四个阶段供你参考：目标设定阶段、策略规划阶段、执行检测阶段和自我反思阶段。
-  你想主要细化哪一阶段的策略呢？可以和我聊聊你的想法。`;
-
+  // --- 修改 5: 设置角色共创的初始开场白 ---
+  const initialBotMessage = `我是你的“智能代理角色共创助手”。
+为了打造最适合你的智能代理，我们先来确定它的角色定位。
+你希望它更像：
+1. **专业顾问**（理性、权威）
+2. **伙伴陪伴**（亲和、平等）
+3. **教练督促**（严格、目标导向）
+也允许“混合比例”（例如 70%伙伴 + 30%顾问）。请告诉我你的想法。`;
 
   return (
     <div className={styles.pageContainer}
@@ -89,21 +108,43 @@ const Page_character = () => {
       <BranchSelector />
 
       <div className={styles.mainContent}>
-
-        {/* 已删除 titleBubble */}
+        <button 
+          className={styles.infoTriggerButton} 
+          onClick={() => setShowInfoModal(true)}
+        >
+          <img src={InfoButtonIcon} alt="查看详情" />
+        </button>
 
         <div className={styles.chatWrapper}>
           <ChatDialog 
-            getAiResponse={getAiResponseForStage}
+            getAiResponse={fetchAi} // 使用包装后的函数
             onTaskComplete={handleTaskComplete}
             initialBotMessage={initialBotMessage}
           />
         </div>
       </div>
       
+      {/* 只有任务完成后才建议允许点击下一步，或者保持一直可点 */}
       <ArrowButton onClick={handleNext} disabled={!isTaskComplete} />
+      
+      {showInfoModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContentWrapper}>
+            <button 
+              className={styles.closeModalButton} 
+              onClick={() => setShowInfoModal(false)}
+            >
+              <img src={CloseIcon} alt="关闭" />
+            </button>
+            
+            <div className={styles.scrollableContent}>
+              <img src={InfoContentImg} alt="详细信息" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Page_character;
+export default Page_Character;

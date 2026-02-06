@@ -168,7 +168,7 @@ const Page11_2 = () => {
   const handleNextPage = () => {
     if (isGlobalComplete) {
       completeStage(CURRENT_STAGE_ID);
-      navigate('/page12');
+      navigate('/page_character');
     }
   };
 

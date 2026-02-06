@@ -27,7 +27,7 @@
   width: 91vw;
   height: 80vh;
   left: 8vw;
-  position: relative; 
+  
 }
 
 /* --- 删除 .titleBubble 相关的样式 --- */
@@ -41,7 +41,7 @@
   bottom: 0vh; /* 保持底部对齐 */
   left: 39%;
   transform: translateX(-50%);
-  width: 95%; 
+  width: 80%; 
   height: 80%; /* 保持高度不变 */
 }
 
@@ -53,107 +53,28 @@
 }
 .infoTriggerButton {
   position: absolute;
-  /* 定位：左边，与组件上沿对齐 */
-  /* 根据实际卡片容器的高度，你可能需要微调 top 的值 */
-  top: -95%; 
-  left: -5%; /* 负值将其移出 mainContent 的左侧边界 */
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 50; /* 确保在卡片之上 */
-  padding: 0;
-  transition: transform 0.2s ease;
-}
-
-.infoTriggerButton:hover {
-  transform: scale(1.05);
-}
-
-.infoTriggerButton img {
-  /* 根据你的PNG大小调整，或者直接用 auto */
-  width: 60px; 
-  height: auto;
-  display: block;
-}
-
-/* 2. 弹窗遮罩层 (灰色背景) */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6); /* 半透明黑色，实现左右变灰效果 */
-  z-index: 1000; /* 最顶层 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* backdrop-filter: blur(2px); 可选：背景模糊效果 */
-}
-
-/* 3. 弹窗内容包装器 */
-.modalContentWrapper {
-  position: relative;
-  width: 70%; /* 占据中心位置，宽度可调 */
-  /* max-width: 800px; */
-  height: 90vh; /* 高度限制，确保可以滚动 */
-  background-color: transparent; /* 容器本身透明 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* 4. 关闭按钮 */
-.closeModalButton {
-  position: absolute;
-  top: -50px; /* 放在图片上方 */
-  right: -50px;   /* 右对齐 */
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-  padding: 10px;
-}
-
-.closeModalButton img {
-  width: 50px; /* 根据实际图片调整 */
-  height: auto;
-}
-
-/* 5. 可滚动的图片区域 */
-.scrollableContent {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto; /* 允许垂直滑动 */
-  overflow-x: hidden;
-  background-color: #fff; /* 图片背景色，防止透明PNG透出灰色 */
-  border-radius: 12px; /* 可选：圆角 */
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  /* 
+     定位逻辑：
+     ChatWrapper 高度是 80%，且 bottom: 0。
+     所以 ChatWrapper 的顶部距离 mainContent 顶部是 20%。
+     我们将按钮的 top 设为 20%，即可与组件上沿对齐。
+  */
+  top: 20%; 
   
-  /* 隐藏滚动条但保留功能 (Chrome/Safari) */
-  /* Firefox */
-  -ms-overflow-style: none;  /* IE 10+ */
-}
+  /* 
+     水平定位：
+     ChatWrapper 的中心在 39%，宽度是 95% (相对于 mainContent)。
+     这使得 ChatWrapper 的左边缘大约在 mainContent 的 -8.5% 左右 (39 - 47.5)。
+     为了放在它的左边，我们需要设置一个合适的位置。
+     这里设置为 5% 或 10% 左右，或者根据你的视觉需求调整。
+     如果觉得离得太远，可以调大数值；如果重叠了，调小数值。
+  */
+  left: -8%; 
 
-.scrollableContent::-webkit-scrollbar { 
-  display: none; /* Chrome/Safari */
-}
-
-.scrollableContent img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.infoTriggerButton {
-  position: absolute;
-  /* 定位：左边，与组件上沿对齐 */
-  /* 根据实际卡片容器的高度，你可能需要微调 top 的值 */
-  top: -95%; 
-  left: -5%; /* 负值将其移出 mainContent 的左侧边界 */
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 50; /* 确保在卡片之上 */
+  z-index: 50; 
   padding: 0;
   transition: transform 0.2s ease;
 }
@@ -163,8 +84,7 @@
 }
 
 .infoTriggerButton img {
-  /* 根据你的PNG大小调整，或者直接用 auto */
-  width: 60px; 
+  width: 60px; /* 根据实际图片大小调整 */
   height: auto;
   display: block;
 }
@@ -190,7 +110,7 @@
   width: 50%; /* 占据中心位置，宽度可调 */
   max-width: 800px;
   height: 80vh; /* 高度限制，确保可以滚动 */
-  background-color: transparent; /* 容器本身透明 */
+  background-color: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -199,8 +119,8 @@
 /* 4. 关闭按钮 */
 .closeModalButton {
   position: absolute;
-  top: -70px; /* 放在图片上方 */
-  right: -50px;   /* 右对齐 */
+  top: -50px; /* 放在图片上方 */
+  right: 0;   /* 右对齐 */
   background: none;
   border: none;
   cursor: pointer;
@@ -209,7 +129,7 @@
 }
 
 .closeModalButton img {
-  width:  50px; /* 根据实际图片调整 */
+  width: 40px; 
   height: auto;
 }
 
@@ -219,17 +139,17 @@
   height: 100%;
   overflow-y: auto; /* 允许垂直滑动 */
   overflow-x: hidden;
-  background-color: #fff; /* 图片背景色，防止透明PNG透出灰色 */
-  border-radius: 12px; /* 可选：圆角 */
+  background-color: #fff; 
+  border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   
-  /* 隐藏滚动条但保留功能 (Chrome/Safari) */
+  /* 隐藏滚动条 */
   
-  -ms-overflow-style: none;  /* IE 10+ */
+  -ms-overflow-style: none;
 }
 
 .scrollableContent::-webkit-scrollbar { 
-  display: none; /* Chrome/Safari */
+  display: none; 
 }
 
 .scrollableContent img {

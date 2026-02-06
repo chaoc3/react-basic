@@ -20,6 +20,13 @@ const deepseek = createOpenAI({
 // 创建模型实例 - 确保 model 是字符串
 const model = deepseek('deepseek-chat'); // 使用正确的模型名称
 
+const stageDetailSchema = z.object({
+  scenario: z.string().nullable().optional().describe('使用场景'),
+  mechanism: z.string().nullable().optional().describe('助推机制（1-2个主机制+1个辅助机制，说明作用点）'),
+  infoSource: z.string().nullable().optional().describe('信息源'),
+  mode: z.string().nullable().optional().describe('交互模态'),
+}).nullable().optional();
+
 const toolSchemas = {
   extractUserInfo: z.object({
     targetUser: z.string().describe('一句话描述的用户群体，例如 "需要管理血糖的年轻糖尿病患者"。'),
@@ -28,7 +35,7 @@ const toolSchemas = {
     targetPainpoint: z.string().describe('一句话描述的设计痛点，例如 "难以坚持每日测量血糖"。'),
   }),
   extractBehaviorStage: z.object({
-    targetStage: z.string().describe('用户希望聚焦的行为改变阶段，例如 "意识提升阶段"、"行为促进阶段" 或 "行为增强阶段"。'),
+    targetStage: z.string().describe('用户希望聚焦的行为改变阶段，必须是以下四个之一："目标设定阶段"、"策略规划阶段"、"执行检测阶段" 或 "自我反思阶段"。'),
   }),
   extractUserChoice: z.object({
     user: z.string().describe('用户选择的用户画像卡片名称，例如 "慢病患者"。'),
@@ -64,7 +71,49 @@ extractMechanismDetails: z.object({
 extractRecommendedCards: z.object({
   recommendedCards: z.array(z.string()).describe('An array of exactly three recommended card names.'),
 }),
+extractCharacterProfile: z.object({
+  role: z.string().nullable().optional().describe('角色定位...'),
+  tone: z.string().nullable().optional().describe('语气基调...'),
+  boundaries: z.string().nullable().optional().describe('边界原则...'),
+  emotionalResponse: z.string().nullable().optional().describe('情绪响应偏好...'),
+}),
 
+// --- 修改 2: 形象页也做同样的预防处理 ---
+extractLookProfile: z.object({
+  imageStyle: z.string().nullable().optional().describe('形象路线...'),
+  anthropomorphism: z.string().nullable().optional().describe('拟人化程度...'),
+  creationMethod: z.string().nullable().optional().describe('形象共建方式...'),
+  consistency: z.string().nullable().optional().describe('一致性要求...'),
+  expression: z.string().nullable().optional().describe('交互形象表达...'),
+}),
+
+extractRemainingStages: z.object({
+  // 我们定义所有4个阶段，但允许为空，AI 只会填充当前正在讨论的阶段
+  "目标设定阶段": z.object({
+    scenario: z.string().describe('使用场景'),
+    mechanisms: z.string().describe('助推机制（1-2主+1辅，说明作用点）'),
+    infoSource: z.string().describe('信息源'),
+    mode: z.string().describe('交互模态'),
+  }).nullable().optional(),
+  "策略规划阶段": z.object({
+    scenario: z.string(),
+    mechanisms: z.string(),
+    infoSource: z.string(),
+    mode: z.string(),
+  }).nullable().optional(),
+  "执行检测阶段": z.object({
+    scenario: z.string(),
+    mechanisms: z.string(),
+    infoSource: z.string(),
+    mode: z.string(),
+  }).nullable().optional(),
+  "自我反思阶段": z.object({
+    scenario: z.string(),
+    mechanisms: z.string(),
+    infoSource: z.string(),
+    mode: z.string(),
+  }).nullable().optional(),
+}),
 };
 
 
@@ -222,6 +271,48 @@ extractModeDetails: {
       },
     },
   },
+  extractCharacterProfile: {
+    type: 'function',
+    function: {
+      name: 'extractCharacterProfile',
+      description: '提取智能代理的角色设定信息。',
+      parameters: {
+        type: 'object',
+        properties: {
+          role: { type: 'string', description: '角色定位' },
+          tone: { type: 'string', description: '语气基调' },
+          boundaries: { type: 'string', description: '边界原则' },
+          emotionalResponse: { type: 'string', description: '情绪响应偏好' },
+        },
+      },
+    },
+  },
+
+  extractLookProfile: {
+    type: 'function',
+    function: {
+      name: 'extractLookProfile',
+      description: '提取智能代理的形象设定信息。',
+      parameters: {
+        type: 'object',
+        properties: {
+          imageStyle: { type: 'string', description: '形象路线' },
+          anthropomorphism: { type: 'string', description: '拟人化程度' },
+          creationMethod: { type: 'string', description: '形象共建方式' },
+          consistency: { type: 'string', description: '一致性要求' },
+          expression: { type: 'string', description: '交互表达方式' },
+        },
+      },
+    },
+  },
+  extractRemainingStages: {
+    type: 'function',
+    function: {
+      name: 'extractRemainingStages',
+      description: '提取剩余阶段的完整设计方案（场景、机制、信息源、模态）。',
+      parameters: toolSchemas.extractRemainingStages, // 直接引用上面的 schema
+    },
+  },
 
 };
 
@@ -279,6 +370,16 @@ const taskConfigs = {
     completionMessage: '当前卡片的策略已完善。', 
     transform: (data) => ({ mechanismDetails: data }), // 返回扁平数据，前端负责挂载到对应卡片下
   },
+  buildCharacterProfile: {
+    toolName: 'extractCharacterProfile',
+    completionMessage: '太棒了！我们已经完成了角色的核心设定。点击下一步去设计它的形象吧。',
+    transform: (data) => ({ characterProfile: data }),
+  },
+  buildLookProfile: {
+    toolName: 'extractLookProfile',
+    completionMessage: '设计完成！我们已经勾勒出了智能代理的完整形象。点击下一步查看最终方案吧。',
+    transform: (data) => ({ lookProfile: data }),
+  },
 recommendScenario: { // For Page 8
   toolName: null, // No tool needed, just text
 },
@@ -293,7 +394,11 @@ recommendInfoSources: {
 recommendMode: {
   toolName: null, // 不需要工具，AI 直接生成推荐文本
 },
-
+completeRemainingStages: {
+    toolName: 'extractRemainingStages',
+    completionMessage: '太棒了！我们已经补全了所有四个阶段的助推方案，设计逻辑非常连贯。点击下一步查看完整方案吧。',
+    transform: (data) => ({ remainingStagesData: data }),
+  },
 };
 
 // 定义不同任务的系统提示
@@ -318,15 +423,21 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         在用户回答后，分析他们的回答。如果回答清晰地描述了一个设计痛点，就使用 extractPainPoint 工具来提取这个信息。
         成功提取后，你的最终回答必须是：“明白了，我已经了解你想聚焦的问题，这个方向很有意义。接下来，我们来看看你的设计希望在行为改变的哪个阶段发挥作用吧。点击右侧按钮进入下一步吧。”不要使用 Markdown 格式`;
   
-      case 'getTargetStage':
-        // (这里的逻辑暂时不变)
-        return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定他们希望干预的行为阶段。
-        首先，向用户介绍三个阶段：“  一、准备阶段：帮助用户意识到健康问题的重要性，并提供实际行动的准备支持；
-  二、行动阶段：推动用户从意识到实际行动，帮助他们采取具体的健康行为，并提供行动所需的资源与支持；
-  三、维持阶段：帮助用户保持并巩固健康行为，强化其长期坚持的动力和能力”。
-        然后，问用户：“你觉得你的设计想聚焦在哪个阶段呢？可以和我聊聊你的想法。”
-        在用户回答后，分析他们的回答并判断属于哪个阶段，然后使用 extractBehaviorStage 工具来提取这个信息。
-        成功提取后，你的最终回答必须是：“很好，这样我们就更清楚你的设计目标了。接下来，让我们点击右侧按钮进入下一步吧。”`;
+        case 'getTargetStage':
+          return `你是一个辅助设计方案的陪伴者。你的任务是引导用户确定他们希望干预的行为阶段。
+          
+          你需要向用户介绍四个阶段：
+          1. **目标设定阶段**：帮助用户确立清晰、可衡量的健康目标。
+          2. **策略规划阶段**：制定具体的行动计划和应对障碍的策略。
+          3. **执行检测阶段**：在行动过程中监控行为，提供实时反馈。
+          4. **自我反思阶段**：回顾行动结果，总结经验并调整后续计划。
+    
+          你的任务是：
+          1. 分析用户的回答。
+          2. 如果用户明确选择了其中一个阶段（或描述了相关意图），**必须立即**使用 \`extractBehaviorStage\` 工具提取该阶段名称（例如 "目标设定阶段"）。
+          3. 成功提取后，你的最终回答必须是：“很好，这样我们就更清楚你的设计目标了。接下来，让我们点击右侧按钮进入下一步吧。”
+          
+          如果用户回答模糊，请引导他们从这四个阶段中选择一个。`;
         
       case 'recommendUserGroup': // Page 6 的任务
         return `你是一个辅助设计方案的陪伴者。你的任务是基于用户之前确定的设计目标，向他们推荐一个合适的用户群体。
@@ -591,26 +702,40 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
       case 'generateFinalReport':
         // 格式化所有收集到的数据
         const collectedData = {
-            '设计目标': {
-                '用户群体': additionalData.targetUser,
-                '核心痛点': additionalData.targetPainpoint,
-                '切入阶段': additionalData.targetStage,
-            },
-            '用户与场景': {
-                '用户画像': additionalData.user,
-                '画像细节': additionalData.userProfile,
-                '核心场景': additionalData.scenarioCard,
-                '场景细节': additionalData.scenarioDetails,
-            },
-            '助推策略': {
-                '核心机制': additionalData.mechanismCards,
-                '机制策略': additionalData.mechanismDetails,
-                '信息依据': additionalData.infoSourceCards,
-                '信息策略': additionalData.infoSourceDetails,
-                '交互方式': additionalData.modeCard,
-                '交互策略': additionalData.modeDetails,
-            }
-        };
+          '设计目标': {
+              '用户群体': additionalData.targetUser,
+              '核心痛点': additionalData.targetPainpoint,
+              '切入阶段': additionalData.targetStage,
+          },
+          '用户与场景': {
+              '用户画像': additionalData.user,
+              '画像细节': additionalData.userProfile,
+              '核心场景': additionalData.scenarioCard,
+              '场景细节': additionalData.scenarioDetails,
+          },
+          '助推策略': {
+              '核心机制': additionalData.mechanismCards,
+              '机制策略': additionalData.mechanismDetails,
+              '信息依据': additionalData.infoSourceCards,
+              '信息策略': additionalData.infoSourceDetails,
+              '交互方式': additionalData.modeCard,
+              '交互策略': additionalData.modeDetails,
+          },
+          // --- 新增模块 ---
+          '助推人格': {
+              '角色定位': additionalData.characterProfile.role,
+              '语气基调': additionalData.characterProfile.tone,
+              '边界原则': additionalData.characterProfile.boundaries,
+              '情绪响应': additionalData.characterProfile.emotionalResponse,
+          },
+          '助推形象': {
+              '形象路线': additionalData.lookProfile.imageStyle,
+              '拟人化程度': additionalData.lookProfile.anthropomorphism,
+              '形象共建': additionalData.lookProfile.creationMethod,
+              '呈现一致性': additionalData.lookProfile.consistency,
+              '交互表达': additionalData.lookProfile.expression,
+          }
+      };
     
         return `你是一个智能代理设计助手，你的任务是根据用户提供的所有设计决策，生成一份结构完整、逻辑清晰的“智能代理助推设计方案”报告。
         
@@ -720,9 +845,191 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         **不要**使用任何工具。`;
 
 
+      case 'buildCharacterProfile':
+        const charProfile = additionalData.characterProfile || {};
+        const charMissing = [];
+        if (!charProfile.role) charMissing.push('role');
+        if (!charProfile.tone) charMissing.push('tone');
+        if (!charProfile.boundaries) charMissing.push('boundaries');
+        if (!charProfile.emotionalResponse) charMissing.push('emotionalResponse');
 
+        // 字段映射，用于生成自然的问题
+        const charFieldMap = {
+          role: '角色定位',
+          tone: '语气基调',
+          boundaries: '边界原则',
+          emotionalResponse: '情绪响应偏好'
+        };
 
+        if (charMissing.length === 0) {
+          return `你是一个智能代理角色共创助手。
+          **状态**：所有角色设定已完成。
+          **任务**：直接回复结束语：“太棒了！我们已经完成了角色的核心设定。点击下一步去设计它的形象吧。”
+          **不要**再调用工具。`;
+        }
 
+        const nextCharTarget = charMissing[0]; // 获取第一个缺失的字段
+        let charQuestion = '';
+
+        // 根据缺失字段定制问题
+        if (nextCharTarget === 'role') {
+          // 注意：虽然前端 InitialMessage 可能会问这个问题，但如果用户回答偏了，AI 需要重新引导
+          charQuestion = `首先，我们来确定它的**角色定位**。你希望它更像：
+          1. **专业顾问**（理性、权威）
+          2. **伙伴陪伴**（亲和、平等）
+          3. **教练督促**（严格、目标导向）
+          或者你希望是某种混合比例？请告诉我你的想法。`;
+        } else if (nextCharTarget === 'tone') {
+          charQuestion = `明白了。接下来是**语气基调**。
+          你希望它说话的风格是怎样的？例如：克制冷静、直接高效、温暖鼓励、还是带点幽默感？`;
+        } else if (nextCharTarget === 'boundaries') {
+          charQuestion = `好的。关于**边界原则**，我们需要设定一些底线。
+          例如：它应该避免过度亲密？还是在你不行动时不要施加太大压力？或者绝不替你做决定？`;
+        } else if (nextCharTarget === 'emotionalResponse') {
+          charQuestion = `最后，关于**情绪响应**。
+          当你感到低落、焦虑或兴奋时，你更希望它怎么做？是优先**安抚**你的情绪、理性**分析**原因、**提醒**你回归目标，还是直接**鼓励**你？`;
+        }
+
+        return `你是一个“智能代理角色共创助手”。你的目标是引导用户完成角色设定。
+        
+        **【当前状态】**
+        已收集信息: ${JSON.stringify(charProfile)}
+        缺失字段: ${charMissing.join(', ')}
+        
+        **【你的任务】**
+        1. 你必须聚焦于缺失字段 **"${charFieldMap[nextCharTarget]}"** 进行提问。
+        2. 我建议你这样问用户：
+          "${charQuestion}"
+        3. 用户回答后，**必须立即**使用 \`extractCharacterProfile\` 工具提取信息。
+        
+        保持专业且引导性强的语气。不要一次性问所有问题。`;
+
+    case 'buildLookProfile':
+      const lookProfile = additionalData.lookProfile || {};
+      const lookMissing = [];
+      if (!lookProfile.imageStyle) lookMissing.push('imageStyle');
+      if (!lookProfile.anthropomorphism) lookMissing.push('anthropomorphism');
+      if (!lookProfile.creationMethod) lookMissing.push('creationMethod');
+      if (!lookProfile.consistency) lookMissing.push('consistency');
+      if (!lookProfile.expression) lookMissing.push('expression');
+
+      const lookFieldMap = {
+        imageStyle: '形象路线',
+        anthropomorphism: '拟人化程度',
+        creationMethod: '形象共建方式',
+        consistency: '呈现载体一致性',
+        expression: '交互形象表达'
+      };
+
+      if (lookMissing.length === 0) {
+        return `你是一个智能代理形象共创助手。
+        **状态**：所有形象设定已完成。
+        **任务**：直接回复结束语：“设计完成！我们已经勾勒出了智能代理的完整形象。点击下一步查看最终方案吧。”
+        **不要**再调用工具。`;
+      }
+
+      const nextLookTarget = lookMissing[0];
+      let lookQuestion = '';
+
+      if (nextLookTarget === 'imageStyle') {
+        lookQuestion = `首先，请选择一个**形象路线**：
+        A. **轻形象**（名字 + 抽象符号/简单头像）
+        B. **具体形象**（具体的角色头像/虚拟人形象）
+        C. **无固定形象**（以语音人格为主，视觉弱化）
+        你倾向于哪一种？`;
+      } else if (nextLookTarget === 'anthropomorphism') {
+        lookQuestion = `收到。接下来谈谈**拟人化程度**。
+        你希望它的拟人程度是高还是低？你会担心“恐怖谷”效应（太像人反而可怕）或者反感过度拟人吗？`;
+      } else if (nextLookTarget === 'creationMethod') {
+        lookQuestion = `关于**形象共建方式**，你希望拥有多少控制权？
+        1. **仅选择**（从多套备选方案中选）
+        2. **可定制**（可以捏脸、上传图片生成等）
+        3. **完全不需要**（由系统自动匹配）`;
+      } else if (nextLookTarget === 'consistency') {
+        lookQuestion = `考虑到多设备使用，关于**呈现载体一致性**：
+        在手机、手表或其他智能设备上，你希望它保持完全一致的视觉符号和声音特征吗？还是根据设备特性有所变化？`;
+      } else if (nextLookTarget === 'expression') {
+        lookQuestion = `最后是**交互形象表达**。
+        你希望它如何表达状态（如提醒、鼓励、警示）？
+        例如：通过动效变化、微表情、灯光闪烁，还是特定的提示音？`;
+      }
+
+      return `你是一个“智能代理形象共创助手”。你的目标是引导用户完成形象设定。
+      
+      **【当前状态】**
+      已收集信息: ${JSON.stringify(lookProfile)}
+      缺失字段: ${lookMissing.join(', ')}
+      
+      **【你的任务】**
+      1. 你必须聚焦于缺失字段 **"${lookFieldMap[nextLookTarget]}"** 进行提问。
+      2. 我建议你这样问用户：
+         "${lookQuestion}"
+      3. 用户回答后，**必须立即**使用 \`extractLookProfile\` 工具提取信息。
+      
+      保持专业且引导性强的语气。不要一次性问所有问题。`;
+
+      case 'completeRemainingStages':
+      // 1. 获取用户已完成的阶段 (targetStage)
+      const finishedStage = additionalData.targetStage || "未定义阶段";
+      
+      // 2. 生成已完成阶段的摘要 (selected_stage_plan)
+      // 从 additionalData (即前端传来的 designData) 中读取
+      const summary = `
+      - 核心场景: ${additionalData.scenarioCard || '未定'} (${JSON.stringify(additionalData.scenarioDetails || {})})
+      - 助推机制: ${additionalData.mechanismCards ? additionalData.mechanismCards.join('+') : '未定'} (${JSON.stringify(additionalData.mechanismDetails || {})})
+      - 信息源: ${additionalData.infoSourceCards ? additionalData.infoSourceCards.join('+') : '未定'}
+      - 交互模态: ${additionalData.modeCard || '未定'}
+      `;
+
+      // 3. 定义所有阶段和剩余阶段
+      const allStages = ["目标设定阶段", "策略规划阶段", "执行检测阶段", "自我反思阶段"];
+      const remainingStagesList = allStages.filter(s => s !== finishedStage);
+      
+      // 4. 获取当前对话中已经补全的阶段 (从 additionalData.fullStagePlans 中读取)
+      const currentPlans = additionalData.fullStagePlans || {};
+      const completedInChat = Object.keys(currentPlans).filter(k => currentPlans[k] && currentPlans[k].scenario);
+      
+      // 5. 找出下一个需要讨论的阶段
+      const nextStageToDiscuss = remainingStagesList.find(s => !completedInChat.includes(s));
+
+      // 如果所有阶段都完成了
+      if (!nextStageToDiscuss) {
+        return `你是一个“助推策略方案补全助手”。
+        **状态**：所有四个阶段的方案都已设计完成。
+        **任务**：简短总结一下整体方案的连贯性，然后告诉用户：“太棒了！我们已经完成了所有四个阶段的方案设计，逻辑非常连贯。点击下一步查看完整方案吧。”
+        **不要**再调用工具。`;
+      }
+
+      // 6. 生成 Prompt
+      return `你是“助推策略方案补全助手”。用户已完成四阶段中的一个阶段细化。
+      你的任务是：通过简短对话，帮助用户快速补全其余三个阶段的完整设计方案，并保持四阶段逻辑连贯。
+
+      **【已知输入】**
+      - **用户已细化的阶段 (targetStage)**：${finishedStage}
+      - **该阶段要点摘要 (selected_stage_plan)**：${summary}
+      - **需要补全的阶段 (remaining_stages)**：${remainingStagesList.join('、')}
+      - **当前进度**：已补全 [${completedInChat.join('、')}]，正在进行 [${nextStageToDiscuss}]。
+
+      **【当前任务】**
+      请针对 **"${nextStageToDiscuss}"** 引导用户进行设计。
+      
+      **【对话目标】**
+      补全 "${nextStageToDiscuss}" 的方案，必须包含以下4项：
+      1. 使用场景
+      2. 助推机制（选择1–2个主机制 + 1个辅助机制；说明作用点）
+      3. 信息源
+      4. 交互模态
+
+      **【对话风格】**
+      - 邀请式、非命令、不过度亲密。
+      - 每轮最多问2个问题。
+      - **不确定时给2–3个选项让用户选**（基于已有的 ${finishedStage} 风格进行推荐，保持连贯）。
+      - 用户回答后，先用1句总结确认，再继续询问该阶段缺少的项。
+      
+      **【重要指令】**
+      一旦用户提供了关于 "${nextStageToDiscuss}" 的信息（哪怕只是部分），请**立即**使用 \`extractRemainingStages\` 工具提取。
+      将提取的内容填入 \`${nextStageToDiscuss}\` 字段中。
+      `;
 
 
 
@@ -1033,6 +1340,135 @@ app.post('/chat', async (req, res) => {
               finalResponseText = `好的，已记录。我们还需要补充其他策略。`;
             }
           }
+          else if (task === 'buildCharacterProfile') {
+            const existingProfile = additionalData.characterProfile || {};
+            const newlyExtractedData = parsedResult.data;
+            const mergedProfile = { ...existingProfile, ...newlyExtractedData };
+          
+            const requiredFields = ['role', 'tone', 'boundaries', 'emotionalResponse'];
+            
+            // 检查是否全部完成
+            const allFieldsCollected = requiredFields.every(field => 
+              mergedProfile[field]!== null && mergedProfile[field].trim() !== ''
+            );
+          
+            extractedData = { characterProfile: mergedProfile };
+            isTaskComplete = allFieldsCollected;
+          
+            if (isTaskComplete) {
+              finalResponseText = taskConfig.completionMessage;
+            } else {
+              // --- 新增核心逻辑：如果没有完成，主动生成下一个问题 ---
+              
+              // 1. 找到第一个缺失的字段
+              const nextMissingField = requiredFields.find(field => !mergedProfile[field] || mergedProfile[field].trim() === '');
+          
+              // 2. 根据缺失字段设置回复 (这里复用 Prompt 中的提问逻辑)
+              if (nextMissingField === 'tone') {
+                finalResponseText = `明白了。接下来是**语气基调**。\n你希望它说话的风格是怎样的？例如：克制冷静、直接高效、温暖鼓励、还是带点幽默感？`;
+              } else if (nextMissingField === 'boundaries') {
+                finalResponseText = `好的。关于**边界原则**，我们需要设定一些底线。\n例如：它应该避免过度亲密？还是在你不行动时不要施加太大压力？或者绝不替你做决定？`;
+              } else if (nextMissingField === 'emotionalResponse') {
+                finalResponseText = `最后，关于**情绪响应**。\n当你感到低落、焦虑或兴奋时，你更希望它怎么做？是优先**安抚**你的情绪、理性**分析**原因、**提醒**你回归目标，还是直接**鼓励**你？`;
+              } else {
+                // 兜底（理论上不会走到这里，除非 requiredFields 定义不一致）
+                finalResponseText = "好的，已记录。请继续补充剩余的角色信息。";
+              }
+            }
+          }
+          
+          else if (task === 'buildLookProfile') {
+            const existingProfile = additionalData.lookProfile || {};
+            const newlyExtractedData = parsedResult.data;
+            
+            // 1. 定义 mergedProfile
+            const mergedProfile = { ...existingProfile, ...newlyExtractedData };
+          
+            const requiredFields = ['imageStyle', 'anthropomorphism', 'creationMethod', 'consistency', 'expression'];
+            
+            // 2. 【修正】确保这里用的是 mergedProfile
+            const allFieldsCollected = requiredFields.every(field => 
+              mergedProfile[field]!==null && mergedProfile[field].trim() !== ''
+            );
+          
+            extractedData = { lookProfile: mergedProfile };
+            isTaskComplete = allFieldsCollected;
+          
+            if (isTaskComplete) {
+              finalResponseText = taskConfig.completionMessage;
+            } else {
+              // 3. 【修正】确保这里用的是 mergedProfile
+              const nextMissingField = requiredFields.find(field => !mergedProfile[field] || mergedProfile[field].trim() === '');
+          
+              if (nextMissingField === 'anthropomorphism') {
+                finalResponseText = `收到。接下来谈谈**拟人化程度**。\n你希望它的拟人程度是高还是低？你会担心“恐怖谷”效应（太像人反而可怕）或者反感过度拟人吗？`;
+              } else if (nextMissingField === 'creationMethod') {
+                finalResponseText = `关于**形象共建方式**，你希望拥有多少控制权？\n1. **仅选择**（从多套备选方案中选）\n2. **可定制**（可以捏脸、上传图片生成等）\n3. **完全不需要**（由系统自动匹配）`;
+              } else if (nextMissingField === 'consistency') {
+                finalResponseText = `考虑到多设备使用，关于**呈现载体一致性**：\n在手机、手表或其他智能设备上，你希望它保持完全一致的视觉符号和声音特征吗？还是根据设备特性有所变化？`;
+              } else if (nextMissingField === 'expression') {
+                finalResponseText = `最后是**交互形象表达**。\n你希望它如何表达状态（如提醒、鼓励、警示）？\n例如：通过动效变化、微表情、灯光闪烁，还是特定的提示音？`;
+              } else {
+                finalResponseText = "好的，已记录。请继续补充剩余的形象信息。";
+              }
+            }
+          }
+          else if (task === 'completeRemainingStages') {
+            const existingPlans = additionalData.fullStagePlans || {};
+            const newlyExtractedData = parsedResult.data;
+            
+            // 1. 合并数据 (注意：这里是深层合并，因为 key 是阶段名)
+            // 使用简单的展开运算符可能不够，因为 newlyExtractedData 可能包含 null
+            // 我们只合并非 null 的阶段
+            const mergedPlans = { ...existingPlans };
+            Object.keys(newlyExtractedData).forEach(key => {
+              if (newlyExtractedData[key]) {
+                // 如果新数据里有这个阶段的详情，覆盖或合并
+                mergedPlans[key] = { ...(mergedPlans[key] || {}), ...newlyExtractedData[key] };
+              }
+            });
+          
+            // 2. 计算剩余阶段
+            const finishedStage = additionalData.targetStage;
+            const allStages = ["目标设定阶段", "策略规划阶段", "执行检测阶段", "自我反思阶段"];
+            const remainingStagesList = allStages.filter(s => s !== finishedStage);
+          
+            // 3. 检查是否所有剩余阶段都已填满
+            // 填满的标准：该阶段在 mergedPlans 中存在，且 4 个字段都有值
+            const requiredSubFields = ['scenario', 'mechanisms', 'infoSource', 'mode'];
+            
+            const isAllComplete = remainingStagesList.every(stageName => {
+              const plan = mergedPlans[stageName];
+              if (!plan) return false;
+              return requiredSubFields.every(f => plan[f] && plan[f].trim() !== '');
+            });
+          
+            extractedData = { fullStagePlans: mergedPlans };
+            isTaskComplete = isAllComplete;
+          
+            if (isTaskComplete) {
+              finalResponseText = taskConfig.completionMessage;
+            } else {
+              // 如果未完成，强制生成下一个问题的引导语 (防止 AI 自言自语)
+              // 找到第一个未完成的阶段
+              const nextIncompleteStage = remainingStagesList.find(stageName => {
+                const plan = mergedPlans[stageName];
+                if (!plan) return true;
+                return !requiredSubFields.every(f => plan[f] && plan[f].trim() !== '');
+              });
+          
+              if (nextIncompleteStage) {
+                // 简单的兜底，具体的选项推荐由 Prompt 生成，这里只做简单引导
+                // 注意：通常 Prompt 会生成很好的问题，只有当 AI 提取数据后没说话时，这里才生效
+                // 为了让 Prompt 发挥作用，这里可以留空，或者给一个通用提示
+                if (!finalResponseText) {
+                   finalResponseText = `好的，已记录。接下来我们继续完善 **${nextIncompleteStage}** 的方案。你觉得在这个阶段，最适合的场景是什么？`;
+                }
+              }
+            }
+          }
+
+
             else {
                 // 其他任务（如 getTargetUser, getTargetPainpoint）保持原有的简单逻辑
                 extractedData = taskConfig.transform(parsedResult.data);
