@@ -68,25 +68,22 @@ const Page_Character = () => {
   const fetchAi = (input, msgs) => getAiResponseForCharacter(input, msgs, designData);
 
   const handleTaskComplete = (data) => {
-    console.log("Character 收到数据:", data);
-    
-    // 1. 保存数据 (无论是否完成，都先保存已有的进度)
+     console.log("Character 页面收到 TaskComplete 回调, 数据内容:", data);
+  
+  // 1. 保存已有的进度
     if (data && data.characterProfile) {
       updateDesignData('characterProfile', data.characterProfile);
     }
 
-    // 2. 关键修改：判断后端返回的 isTaskComplete 标志
-    // 后端只有在 role, tone, boundaries, emotionalResponse 都有值时，才会返回 true
-    if (data && data.isTaskComplete) {
-      console.log("任务状态：已完成，准备跳转");
-      setIsTaskComplete(true); 
-      setTimeout(() => {
-        navigate('/page_look'); 
-      }, 1500); 
-    } else {
-      console.log("任务状态：未完成，继续对话");
-      // 任务没完成，什么都不做，让用户继续回答下一个问题
-    }
+    // 2. 核心修复：既然 ChatDialog 已经判断过 isTaskComplete 才调用的此函数，
+    // 我们直接设置状态为 true，不再检查 data.isTaskComplete
+    console.log("确认任务完成，激活下一步按钮并准备跳转...");
+    setIsTaskComplete(true); 
+
+    // 3. 自动跳转逻辑
+    setTimeout(() => {
+      navigate('/page_look'); 
+    }, 2000); 
   };
   
   const handleNext = () => {

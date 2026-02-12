@@ -80,18 +80,15 @@ const Page_look = () => {
     // 步骤 B: 检查后端返回的完成标志 (isTaskComplete)
     // 只有当 imageStyle, anthropomorphism, creationMethod, consistency, expression 全都有值时
     // 后端才会返回 true
-    if (data && data.isTaskComplete) {
+    
       console.log("任务状态：已完成，准备自动跳转");
       setIsTaskComplete(true); 
       
       // 延迟自动跳转 (提升体验)
       setTimeout(() => {
-        navigate('/page-final-report'); // 跳转到下一页 (请修改为你实际的下一页路径)
+        navigate('/page12'); // 跳转到下一页 (请修改为你实际的下一页路径)
       }, 1500);
-    } else {
-      console.log("任务状态：未完成，继续对话");
-      // 什么都不做，让 ChatDialog 显示 AI 的下一个问题
-    }
+
   };
   
   // --- 4. 手动点击下一步按钮的处理 ---

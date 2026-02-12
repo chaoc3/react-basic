@@ -901,7 +901,7 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
         2. 我建议你这样问用户：
           "${charQuestion}"
         3. 用户回答后，**必须立即**使用 \`extractCharacterProfile\` 工具提取信息。
-        
+        4.**严禁在工具参数中填入 "null"、"未知" 或 "未提及" 等占位符。** 如果用户尚未提供某个字段的信息，请在该字段中保持空字符串 "" 或不填。
         保持专业且引导性强的语气。不要一次性问所有问题。`;
 
     case 'buildLookProfile':
@@ -965,7 +965,7 @@ const getSystemPromptForTask = (task, additionalData = {}) => {
       2. 我建议你这样问用户：
          "${lookQuestion}"
       3. 用户回答后，**必须立即**使用 \`extractLookProfile\` 工具提取信息。
-      
+      4. **严禁在工具参数中填入 "null"、"未知" 或 "未提及" 等占位符。** 如果用户尚未提供某个字段的信息，请在该字段中保持空字符串 "" 或不填。
       保持专业且引导性强的语气。不要一次性问所有问题。`;
 
       case 'completeRemainingStages':
@@ -1348,9 +1348,16 @@ app.post('/chat', async (req, res) => {
             const requiredFields = ['role', 'tone', 'boundaries', 'emotionalResponse'];
             
             // 检查是否全部完成
-            const allFieldsCollected = requiredFields.every(field => 
-              mergedProfile[field]!== null && mergedProfile[field].trim() !== ''
-            );
+            const allFieldsCollected = requiredFields.every(field => {
+              const val = mergedProfile[field];
+              return (
+                val !== null && 
+                val !== undefined && 
+                val.trim() !== '' && 
+                val.toLowerCase() !== 'null' &&  // 过滤字符串 "null"
+                val.toLowerCase() !== 'undefined' // 过滤字符串 "undefined"
+              );
+            });
           
             extractedData = { characterProfile: mergedProfile };
             isTaskComplete = allFieldsCollected;
@@ -1387,9 +1394,16 @@ app.post('/chat', async (req, res) => {
             const requiredFields = ['imageStyle', 'anthropomorphism', 'creationMethod', 'consistency', 'expression'];
             
             // 2. 【修正】确保这里用的是 mergedProfile
-            const allFieldsCollected = requiredFields.every(field => 
-              mergedProfile[field]!==null && mergedProfile[field].trim() !== ''
-            );
+            const allFieldsCollected = requiredFields.every(field => {
+              const val = mergedProfile[field];
+              return (
+                val !== null && 
+                val !== undefined && 
+                val.trim() !== '' && 
+                val.toLowerCase() !== 'null' && 
+                val.toLowerCase() !== 'undefined'
+              );
+            });
           
             extractedData = { lookProfile: mergedProfile };
             isTaskComplete = allFieldsCollected;
