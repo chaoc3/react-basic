@@ -6,7 +6,7 @@ import styles from './styles/Page_look.module.css';
 import BranchSelector from '../components/BranchSelector';
 import ChatDialog from '../components/ChatDialog';
 import ArrowButton from '../components/ArrowButton';
-import backgroundForPage from '../assets/背景带文字/角色页面.png';
+import backgroundForPage from '../assets/背景带文字/形象页面.png';
 import { useDesign } from '../context/DesignContext'; 
 import InfoButtonIcon  from '../assets/网页素材/设计策略按钮.png'; // 1. 打开弹窗的按钮图
 import InfoContentImg  from '../assets/网页素材/角色.png'; // 2. 弹窗里显示的长图
